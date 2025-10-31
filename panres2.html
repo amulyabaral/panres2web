@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PanRes 2.0 Database</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#1b7f58',
+                        'accent-1': '#e6aeb9',
+                        'accent-2': '#f2b4c0',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .loading { display: none; }
+        .loading.active { display: block; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading active container mx-auto px-6 py-12 text-center">
+        <div class="text-xl text-gray-600">Loading database...</div>
+        <div class="mt-4 text-sm text-gray-500">Please wait...</div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="hidden container mx-auto px-6 py-8">
+        <!-- Home View -->
+        <div id="homeView">
+            <section class="mb-8 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-3">PanRes 2.0</h2>
+                <p class="text-gray-600 text-sm mb-4">
+                    PanRes (Pan Resistance) is a curated collection of genes conferring resistance to antibiotics,
+                    heavy metals, and biocides from multiple databases.
+                </p>
+
+                <!-- Statistics Charts -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                        <canvas id="mechanismsChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                        <canvas id="databasesChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                        <canvas id="phenotypesChart" width="200" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="mb-6">
+                    <input type="search" id="searchInput"
+                           placeholder="Search genes, classes, phenotypes..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                    <div id="searchResults" class="mt-2 max-h-60 overflow-y-auto"></div>
+                </div>
+
+                <!-- Category Buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="showCategory('PanGene')"
+                            class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
+                        PanRes Genes (<span id="countPanGene">0</span>)
+                    </button>
+                    <button onclick="showCategory('AntibioticClass')"
+                            class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
+                        Antibiotic Classes (<span id="countClass">0</span>)
+                    </button>
+                    <button onclick="showCategory('Phenotype')"
+                            class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
+                        Predicted Phenotypes (<span id="countPhenotype">0</span>)
+                    </button>
+                    <button onclick="showCategory('Mechanism')"
+                            class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
+                        Resistance Mechanisms (<span id="countMechanism">0</span>)
+                    </button>
+                    <button onclick="showCategory('Database')"
+                            class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
+                        Source Databases (<span id="countDatabase">0</span>)
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- List View -->
+        <div id="listView" class="hidden">
+            <div class="mb-4">
+                <button onclick="showHome()"
+                        class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
+                    ← Back to Home
+                </button>
+            </div>
+            <h2 id="listTitle" class="text-2xl font-semibold text-gray-800 mb-4"></h2>
+            <div id="listContent" class="bg-white p-6 rounded-lg shadow-md border border-gray-200"></div>
+        </div>
+
+        <!-- Details View -->
+        <div id="detailsView" class="hidden">
+            <div class="mb-4">
+                <button onclick="showHome()"
+                        class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium mr-2">
+                    ← Back to Home
+                </button>
+                <button onclick="history.back()"
+                        class="bg-accent-1 hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
+                    ← Back
+                </button>
+            </div>
+            <div id="detailsContent"></div>
+        </div>
+    </main>
+
+    <script>
+        // Global data store
+        let panresData = null;
+
+        // Predicate display names
+        const PREDICATE_NAMES = {
+            'rdf:type': 'Type',
+            'rdfs:label': 'Label',
+            'rdfs:comment': 'Comment',
+            'has_length': 'Length',
+            'same_as': 'Same As',
+            'card_link': 'CARD Link',
+            'accession': 'Accession',
+            'is_from_database': 'Source Database',
+            'has_resistance_class': 'Resistance Class',
+            'has_predicted_phenotype': 'Predicted Phenotype',
+            'has_mechanism_of_resistance': 'Resistance Mechanism',
+            'translates_to': 'Translates To',
+            'member_of': 'Member Of'
+        };
+
+        // Load JSON data
+        async function loadData() {
+            try {
+                const response = await fetch('panres2.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                panresData = await response.json();
+
+                initializeUI();
+
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('mainContent').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').innerHTML =
+                    '<div class="text-red-600">Error loading database. Please ensure panres_data.json is in the same directory.</div>';
+            }
+        }
+
+        function initializeUI() {
+            // Update counts
+            document.getElementById('countPanGene').textContent = panresData.categories.PanGene.length;
+            document.getElementById('countClass').textContent = panresData.categories.AntibioticClass.length;
+            document.getElementById('countPhenotype').textContent = panresData.categories.Phenotype.length;
+            document.getElementById('countMechanism').textContent = panresData.categories.Mechanism.length;
+            document.getElementById('countDatabase').textContent = panresData.categories.Database.length;
+
+            // Create charts
+            createCharts();
+        }
+
+        function createCharts() {
+            // Chart colors
+            const primaryColor = '#1b7f58';
+            const accentColors = ['#e6aeb9', '#f2b4c0', '#9ed4c5', '#f0c987', '#b8a9d4', '#f7a8a4', '#a8d8ea', '#ffd79d'];
+
+            // Mechanisms Chart - count genes per resistance mechanism
+            const mechanismCounts = {};
+            panresData.categories.Mechanism.forEach(mechId => {
+                const relatedGenes = findRelatedGenes(mechId);
+                const mechSubject = getSubject(mechId);
+                mechanismCounts[mechSubject ? mechSubject.label : mechId] = relatedGenes.length;
+            });
+
+            new Chart(document.getElementById('mechanismsChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(mechanismCounts),
+                    datasets: [{
+                        data: Object.values(mechanismCounts),
+                        backgroundColor: accentColors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 10, font: { size: 10 } }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Genes by Resistance Mechanism',
+                            font: { size: 14, weight: 'bold' },
+                            color: '#1f2937'
+                        }
+                    }
+                }
+            });
+
+            // Databases Chart - count genes per database
+            const databaseCounts = {};
+            panresData.categories.Database.forEach(dbId => {
+                const relatedGenes = findRelatedGenes(dbId);
+                const dbSubject = getSubject(dbId);
+                databaseCounts[dbSubject ? dbSubject.label : dbId] = relatedGenes.length;
+            });
+
+            new Chart(document.getElementById('databasesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(databaseCounts),
+                    datasets: [{
+                        data: Object.values(databaseCounts),
+                        backgroundColor: accentColors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 10, font: { size: 10 } }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Genes by Database',
+                            font: { size: 14, weight: 'bold' },
+                            color: '#1f2937'
+                        }
+                    }
+                }
+            });
+
+            // Phenotypes Chart - show top resistance classes
+            const classCounts = {};
+            panresData.categories.AntibioticClass.forEach(classId => {
+                const relatedGenes = findRelatedGenes(classId);
+                const classSubject = getSubject(classId);
+                classCounts[classSubject ? classSubject.label : classId] = relatedGenes.length;
+            });
+
+            // Sort and get top 8
+            const sortedClasses = Object.entries(classCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8);
+
+            new Chart(document.getElementById('phenotypesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: sortedClasses.map(c => c[0]),
+                    datasets: [{
+                        data: sortedClasses.map(c => c[1]),
+                        backgroundColor: accentColors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 10, font: { size: 10 } }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Top Resistance Classes',
+                            font: { size: 14, weight: 'bold' },
+                            color: '#1f2937'
+                        }
+                    }
+                }
+            });
+        }
+
+        function getSubject(id) {
+            return panresData.subjects[id];
+        }
+
+        function getPredicate(pred) {
+            return PREDICATE_NAMES[pred] || pred;
+        }
+
+        // View functions
+        function showHome() {
+            document.getElementById('homeView').classList.remove('hidden');
+            document.getElementById('listView').classList.add('hidden');
+            document.getElementById('detailsView').classList.add('hidden');
+        }
+
+        function showCategory(category) {
+            const titles = {
+                PanGene: 'PanRes Genes',
+                AntibioticClass: 'Antibiotic Classes',
+                Phenotype: 'Predicted Phenotypes',
+                Mechanism: 'Resistance Mechanisms',
+                Database: 'Source Databases'
+            };
+
+            const itemIds = panresData.categories[category];
+
+            document.getElementById('listTitle').textContent =
+                `${titles[category]} (${itemIds.length} items)`;
+
+            const items = itemIds
+                .map(id => getSubject(id))
+                .filter(item => item && item.label !== '+')  // Filter out the "+" phenotype marker
+                .sort((a, b) => a.label.localeCompare(b.label));
+
+            const listHtml = items
+                .map(item => `
+                    <li class="py-2">
+                        <a href="#" onclick="showDetails('${item.id}'); return false;"
+                           class="text-primary hover:underline">
+                            ${item.label}
+                        </a>
+                    </li>
+                `).join('');
+
+            document.getElementById('listContent').innerHTML =
+                `<ul class="list-disc list-inside">${listHtml}</ul>`;
+
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('listView').classList.remove('hidden');
+            document.getElementById('detailsView').classList.add('hidden');
+        }
+
+        function showDetails(id) {
+            const subject = getSubject(id);
+            if (!subject) {
+                alert('Item not found');
+                return;
+            }
+
+            // Determine entity type for display
+            let entityType = '';
+            if (panresData.categories.PanGene.includes(id)) entityType = 'PanRes Gene';
+            else if (panresData.categories.AntibioticClass.includes(id)) entityType = 'Antibiotic Class';
+            else if (panresData.categories.Phenotype.includes(id)) entityType = 'Phenotype';
+            else if (panresData.categories.Mechanism.includes(id)) entityType = 'Resistance Mechanism';
+            else if (panresData.categories.Database.includes(id)) entityType = 'Database';
+
+            // Check if this is a drug combination
+            const isDrugCombination = subject.properties['is_drug_combination'] &&
+                                     subject.properties['is_drug_combination'][0].value === 'true';
+
+            let html = `
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <div class="mb-6">
+                        ${entityType ? `<div class="text-sm font-medium text-primary mb-2">${entityType}${isDrugCombination ? ' (Drug Combination)' : ''}</div>` : ''}
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-2">${subject.label}</h2>
+                        <p class="text-xs text-gray-400"><code>${subject.id}</code></p>
+                    </div>
+            `;
+
+            // For drug combinations, show component drugs
+            if (isDrugCombination && subject.properties['rdfs:subClassOf']) {
+                const components = subject.properties['rdfs:subClassOf']
+                    .filter(val => !val.is_literal && val.value !== 'AntibioticResistancePhenotype')
+                    .map(val => {
+                        const comp = getSubject(val.value);
+                        return comp ? comp.label : val.value;
+                    });
+
+                if (components.length > 0) {
+                    html += `
+                        <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-2">Combination Components:</h3>
+                            <div class="flex flex-wrap gap-2">
+                                ${components.map(comp => `<span class="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 border border-blue-300">${comp}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            html += ``;
+
+            // For genes, show key information first
+            const isGene = panresData.categories.PanGene.includes(id);
+
+            if (isGene) {
+                html += '<div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">';
+
+                // Key attributes in cards (excluding is_from_database for now)
+                const keyProps = ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance'];
+                for (const prop of keyProps) {
+                    if (subject.properties[prop]) {
+                        const predDisplay = getPredicate(prop);
+                        html += `
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <div class="text-xs font-semibold text-gray-500 uppercase mb-2">${predDisplay}</div>
+                                <div class="space-y-1">
+                        `;
+                        for (const val of subject.properties[prop]) {
+                            if (!val.is_literal) {
+                                const linkedSubject = getSubject(val.value);
+                                const displayName = linkedSubject ? linkedSubject.label : val.value;
+
+                                // Skip the standalone "+" phenotype marker
+                                if (displayName === '+') continue;
+
+                                html += `
+                                    <div>
+                                        <a href="#" onclick="showDetails('${val.value}'); return false;"
+                                           class="text-primary hover:underline font-medium">
+                                            ${displayName}
+                                        </a>
+                                    </div>
+                                `;
+                            } else {
+                                html += `<div class="font-medium">${val.value}</div>`;
+                            }
+                        }
+                        html += `</div></div>`;
+                    }
+                }
+
+                html += '</div>';
+
+                // Show database names mapping
+                if (subject.properties['same_as']) {
+                    html += `
+                        <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">Names in Source Databases</h3>
+                            <div class="space-y-2">
+                    `;
+
+                    for (const val of subject.properties['same_as']) {
+                        if (!val.is_literal) {
+                            const originalGene = getSubject(val.value);
+                            if (originalGene && originalGene.properties['is_from_database']) {
+                                const databases = originalGene.properties['is_from_database']
+                                    .map(db => {
+                                        const dbSubject = getSubject(db.value);
+                                        return dbSubject ? dbSubject.label : db.value;
+                                    })
+                                    .join(', ');
+
+                                html += `
+                                    <div class="flex items-start gap-2 text-sm">
+                                        <div class="font-medium text-gray-700 min-w-[150px]">${databases}:</div>
+                                        <div>
+                                            <a href="#" onclick="showDetails('${val.value}'); return false;"
+                                               class="text-primary hover:underline">
+                                                ${originalGene.label}
+                                            </a>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Show related genes if this is an antibiotic class, phenotype, mechanism, or database
+            const relatedGenes = findRelatedGenes(id);
+            if (relatedGenes.length > 0) {
+                html += `
+                    <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                            Related Genes (${relatedGenes.length})
+                            <button onclick="showRelatedGenes('${id}')"
+                                    class="ml-2 text-sm bg-primary hover:bg-opacity-80 text-white px-3 py-1 rounded">
+                                Browse All
+                            </button>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            ${relatedGenes.slice(0, 9).map(geneId => {
+                                const gene = getSubject(geneId);
+                                return `
+                                    <a href="#" onclick="showDetails('${geneId}'); return false;"
+                                       class="text-primary hover:underline text-sm">
+                                        ${gene.label}
+                                    </a>
+                                `;
+                            }).join('')}
+                            ${relatedGenes.length > 9 ? `<div class="text-sm text-gray-500">...and ${relatedGenes.length - 9} more</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Other properties section
+            html += '<h3 class="text-xl font-semibold text-gray-800 mb-3">Additional Information</h3>';
+            html += '<dl class="divide-y divide-gray-200">';
+
+            // Skip certain properties that we've already shown or don't want to display
+            const skipProps = ['rdfs:label', 'rdf:type', 'rdfs:subClassOf', 'is_drug_combination'];
+            const alreadyShown = isGene ? ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance', 'is_from_database', 'same_as'] : [];
+
+            for (const [pred, values] of Object.entries(subject.properties)) {
+                // Filter out owl: and rdfs: prefixed properties, and skip already shown
+                if (skipProps.includes(pred) || alreadyShown.includes(pred)) continue;
+                if (pred.startsWith('owl:') || pred.startsWith('rdfs:')) continue;
+
+                const predDisplay = getPredicate(pred);
+
+                html += `
+                    <div class="py-3">
+                        <dt class="text-sm font-medium text-gray-600 mb-1">${predDisplay}</dt>
+                        <dd class="text-sm text-gray-800">
+                `;
+
+                for (const val of values) {
+                    if (val.is_literal) {
+                        // Check if it's a URL
+                        if (val.value.startsWith('http://') || val.value.startsWith('https://')) {
+                            html += `<div><a href="${val.value}" target="_blank" class="text-primary hover:underline break-all">${val.value}</a></div>`;
+                        } else {
+                            html += `<div class="bg-gray-100 px-2 py-1 rounded text-sm inline-block mb-1">${val.value}</div>`;
+                        }
+                    } else {
+                        const linkedSubject = getSubject(val.value);
+                        const displayName = linkedSubject ? linkedSubject.label : val.value;
+                        html += `
+                            <div>
+                                <a href="#" onclick="showDetails('${val.value}'); return false;"
+                                   class="text-primary hover:underline">
+                                    ${displayName}
+                                </a>
+                            </div>
+                        `;
+                    }
+                }
+
+                html += `
+                        </dd>
+                    </div>
+                `;
+            }
+
+            html += `
+                    </dl>
+                </div>
+            `;
+
+            document.getElementById('detailsContent').innerHTML = html;
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('listView').classList.add('hidden');
+            document.getElementById('detailsView').classList.remove('hidden');
+        }
+
+        function findRelatedGenes(entityId) {
+            const relatedGenes = [];
+
+            // Check all genes to see if they reference this entity
+            for (const geneId of panresData.categories.PanGene) {
+                const gene = getSubject(geneId);
+                if (!gene) continue;
+
+                // Check if gene references this entity in any property
+                for (const values of Object.values(gene.properties)) {
+                    for (const val of values) {
+                        if (!val.is_literal && val.value === entityId) {
+                            relatedGenes.push(geneId);
+                            break;
+                        }
+                    }
+                    if (relatedGenes.includes(geneId)) break;
+                }
+            }
+
+            return relatedGenes;
+        }
+
+        function showRelatedGenes(entityId) {
+            const entity = getSubject(entityId);
+            const relatedGenes = findRelatedGenes(entityId);
+
+            document.getElementById('listTitle').textContent =
+                `Genes related to "${entity.label}" (${relatedGenes.length} items)`;
+
+            const items = relatedGenes
+                .map(id => getSubject(id))
+                .filter(item => item)
+                .sort((a, b) => a.label.localeCompare(b.label));
+
+            const listHtml = items
+                .map(item => `
+                    <li class="py-2">
+                        <a href="#" onclick="showDetails('${item.id}'); return false;"
+                           class="text-primary hover:underline">
+                            ${item.label}
+                        </a>
+                    </li>
+                `).join('');
+
+            document.getElementById('listContent').innerHTML =
+                `<ul class="list-disc list-inside">${listHtml}</ul>`;
+
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('listView').classList.remove('hidden');
+            document.getElementById('detailsView').classList.add('hidden');
+        }
+
+        // Search functionality
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.toLowerCase().trim();
+
+            if (query.length < 2) {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                const results = [];
+
+                for (const [id, subject] of Object.entries(panresData.subjects)) {
+                    if (subject.label.toLowerCase().includes(query) ||
+                        subject.id.toLowerCase().includes(query)) {
+                        results.push(subject);
+                    }
+
+                    if (results.length >= 20) break;
+                }
+
+                const resultsHtml = results
+                    .map(item => {
+                        // Determine type
+                        let typeLabel = 'Other';
+                        if (panresData.categories.PanGene.includes(item.id)) typeLabel = 'PanGene';
+                        else if (panresData.categories.AntibioticClass.includes(item.id)) typeLabel = 'Resistance Class';
+                        else if (panresData.categories.Phenotype.includes(item.id)) typeLabel = 'Phenotype';
+                        else if (panresData.categories.Mechanism.includes(item.id)) typeLabel = 'Mechanism';
+                        else if (panresData.categories.Database.includes(item.id)) typeLabel = 'Database';
+
+                        return `
+                            <div class="py-2 px-3 hover:bg-accent-2 hover:bg-opacity-20 cursor-pointer border-b border-gray-200"
+                                 onclick="showDetails('${item.id}')">
+                                <div class="font-medium text-primary">${item.label}</div>
+                                <div class="text-xs text-gray-500">${item.id} • ${typeLabel}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                document.getElementById('searchResults').innerHTML = resultsHtml
+                    ? `<div class="border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">${resultsHtml}</div>`
+                    : '<div class="text-sm text-gray-500 p-2">No results found</div>';
+            }, 300);
+        });
+
+        // Initialize on load
+        loadData();
+    </script>
+</body>
+</html>
