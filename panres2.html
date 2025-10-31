@@ -23,13 +23,212 @@
         .loading { display: none; }
         .loading.active { display: block; }
         .hidden { display: none; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Filter pill animations */
+        .filter-pill {
+            transition: all 0.2s ease;
+        }
+        .filter-pill:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Table styling */
+        .gene-table { border-collapse: collapse; }
+        .gene-table thead { position: sticky; top: 0; background: white; z-index: 10; }
+        .gene-table th { cursor: pointer; user-select: none; }
+        .gene-table th:hover { background: #f9fafb; }
+        .gene-table tbody tr:hover { background: #f9fafb; }
+
+        /* Quirky Loading Animation */
+        .dna-helix {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .dna-strand {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .dna-ball {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1b7f58, #2ea574);
+            box-shadow: 0 0 20px rgba(27, 127, 88, 0.5);
+        }
+
+        .dna-ball:nth-child(1) { left: 0; top: 10%; animation: pulse 1s ease-in-out infinite; }
+        .dna-ball:nth-child(2) { right: 0; top: 30%; animation: pulse 1s ease-in-out 0.2s infinite; }
+        .dna-ball:nth-child(3) { left: 0; top: 50%; animation: pulse 1s ease-in-out 0.4s infinite; }
+        .dna-ball:nth-child(4) { right: 0; top: 70%; animation: pulse 1s ease-in-out 0.6s infinite; }
+        .dna-ball:nth-child(5) { left: 0; top: 90%; animation: pulse 1s ease-in-out 0.8s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+        }
+
+        .bacteria {
+            font-size: 60px;
+            display: inline-block;
+            animation: wiggle 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .loading-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1b7f58;
+            margin-top: 30px;
+            animation: colorCycle 3s ease-in-out infinite;
+        }
+
+        @keyframes colorCycle {
+            0%, 100% { color: #1b7f58; }
+            33% { color: #e6aeb9; }
+            66% { color: #f2b4c0; }
+        }
+
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots span {
+            animation: blink 1.4s infinite;
+            opacity: 0;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .petri-dish {
+            width: 300px;
+            height: 300px;
+            border: 4px solid #1b7f58;
+            border-radius: 50%;
+            margin: 20px auto;
+            position: relative;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), transparent);
+            box-shadow: inset 0 0 50px rgba(27, 127, 88, 0.1), 0 0 20px rgba(27, 127, 88, 0.2);
+        }
+
+        .microbe {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        .microbe1 {
+            width: 30px;
+            height: 30px;
+            background: #e6aeb9;
+            top: 20%;
+            left: 30%;
+            animation: float1 4s ease-in-out infinite;
+        }
+
+        .microbe2 {
+            width: 25px;
+            height: 25px;
+            background: #f2b4c0;
+            top: 60%;
+            right: 25%;
+            animation: float2 5s ease-in-out infinite;
+        }
+
+        .microbe3 {
+            width: 35px;
+            height: 35px;
+            background: #9ed4c5;
+            bottom: 30%;
+            left: 20%;
+            animation: float3 3.5s ease-in-out infinite;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, -10px) rotate(90deg); }
+            50% { transform: translate(10px, 20px) rotate(180deg); }
+            75% { transform: translate(-10px, 10px) rotate(270deg); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-30px, 20px) scale(1.2); }
+        }
+
+        @keyframes float3 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            33% { transform: translate(15px, -15px) rotate(120deg) scale(1.1); }
+            66% { transform: translate(-15px, 15px) rotate(240deg) scale(0.9); }
+        }
+
+        .fun-message {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+            font-style: italic;
+            transition: opacity 0.3s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Loading Indicator -->
     <div id="loading" class="loading active container mx-auto px-6 py-12 text-center">
-        <div class="text-xl text-gray-600">Loading database...</div>
-        <div class="mt-4 text-sm text-gray-500">Please wait...</div>
+        <div class="bacteria">🦠</div>
+
+        <div class="petri-dish">
+            <div class="microbe microbe1"></div>
+            <div class="microbe microbe2"></div>
+            <div class="microbe microbe3"></div>
+
+            <div class="dna-helix">
+                <div class="dna-strand">
+                    <div class="dna-ball"></div>
+                    <div class="dna-ball"></div>
+                    <div class="dna-ball"></div>
+                    <div class="dna-ball"></div>
+                    <div class="dna-ball"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading-text">
+            Loading the database<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -92,14 +291,109 @@
 
         <!-- List View -->
         <div id="listView" class="hidden">
-            <div class="mb-4">
+            <div class="mb-4 flex items-center justify-between flex-wrap gap-4">
                 <button onclick="showHome()"
                         class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
                     ← Back to Home
                 </button>
+                <div class="flex gap-2">
+                    <button onclick="toggleViewMode('table')" id="btnTableView"
+                            class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium">
+                        Table View
+                    </button>
+                    <button onclick="toggleViewMode('list')" id="btnListView"
+                            class="bg-primary text-white px-4 py-2 rounded text-sm font-medium">
+                        List View
+                    </button>
+                </div>
             </div>
+
             <h2 id="listTitle" class="text-2xl font-semibold text-gray-800 mb-4"></h2>
+
+            <!-- Advanced Filters (for PanGene view) -->
+            <div id="advancedFilters" class="hidden mb-6 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">🔍 Filter & Group Genes</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <!-- Database Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Source Database</label>
+                        <select id="filterDatabase" onchange="applyFilters()"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
+                            <option value="">All Databases</option>
+                        </select>
+                    </div>
+
+                    <!-- Phenotype Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Phenotype</label>
+                        <select id="filterPhenotype" onchange="applyFilters()"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
+                            <option value="">All Phenotypes</option>
+                        </select>
+                    </div>
+
+                    <!-- Resistance Class Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Resistance Class</label>
+                        <select id="filterClass" onchange="applyFilters()"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
+                            <option value="">All Classes</option>
+                        </select>
+                    </div>
+
+                    <!-- Mechanism Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Mechanism</label>
+                        <select id="filterMechanism" onchange="applyFilters()"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
+                            <option value="">All Mechanisms</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Search within results -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Search in Results</label>
+                    <input type="text" id="filterSearch" onkeyup="applyFilters()"
+                           placeholder="Search gene names..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
+                </div>
+
+                <!-- Active Filters Display -->
+                <div id="activeFilters" class="mb-4 flex flex-wrap gap-2 hidden"></div>
+
+                <!-- Group By -->
+                <div class="flex items-center gap-4">
+                    <label class="text-sm font-medium text-gray-700">Group By:</label>
+                    <select id="groupBy" onchange="applyGrouping()"
+                            class="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
+                        <option value="">No Grouping</option>
+                        <option value="database">Database</option>
+                        <option value="phenotype">Phenotype</option>
+                        <option value="class">Resistance Class</option>
+                        <option value="mechanism">Mechanism</option>
+                    </select>
+
+                    <button onclick="clearFilters()"
+                            class="ml-auto bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded text-sm font-medium">
+                        Clear All Filters
+                    </button>
+                </div>
+
+                <!-- Results Count -->
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <div class="text-sm text-gray-600">
+                        Showing <span id="filteredCount" class="font-bold text-primary">0</span> of
+                        <span id="totalCount" class="font-bold">0</span> genes
+                    </div>
+                </div>
+            </div>
+
             <div id="listContent" class="bg-white p-6 rounded-lg shadow-md border border-gray-200"></div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="hidden mt-6 flex items-center justify-center gap-2"></div>
         </div>
 
         <!-- Details View -->
@@ -121,6 +415,21 @@
     <script>
         // Global data store
         let panresData = null;
+        let currentCategory = null;
+        let currentItems = [];
+        let filteredItems = [];
+        let currentPage = 1;
+        let itemsPerPage = 100;
+        let currentViewMode = 'list';
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc';
+        let activeFilters = {
+            database: '',
+            phenotype: '',
+            class: '',
+            mechanism: '',
+            search: ''
+        };
 
         // Predicate display names
         const PREDICATE_NAMES = {
@@ -139,8 +448,44 @@
             'member_of': 'Member Of'
         };
 
+        // Quirky loading messages
+        const loadingMessages = [
+            "Waking up the bacteria...",
+            "Teaching genes to resist...",
+            "Consulting with the microbes...",
+            "Brewing antibiotic soup...",
+            "Counting tiny rebellious genes...",
+            "Asking bacteria nicely to cooperate...",
+            "Sequencing DNA like a boss...",
+            "Playing hide and seek with phenotypes...",
+            "Herding antimicrobial cats...",
+            "Convincing genes to share their secrets...",
+            "Downloading genetic resistance from the cloud...",
+            "Negotiating with stubborn plasmids..."
+        ];
+
+        let messageIndex = 0;
+        let messageInterval;
+
+        // Rotate funny messages
+        function startLoadingMessages() {
+            messageInterval = setInterval(() => {
+                messageIndex = (messageIndex + 1) % loadingMessages.length;
+                const msgElement = document.getElementById('funMessage');
+                if (msgElement) {
+                    msgElement.style.opacity = '0';
+                    setTimeout(() => {
+                        msgElement.textContent = loadingMessages[messageIndex];
+                        msgElement.style.opacity = '1';
+                    }, 200);
+                }
+            }, 2000);
+        }
+
         // Load JSON data
         async function loadData() {
+            startLoadingMessages();
+
             try {
                 const response = await fetch('panres2.json');
                 if (!response.ok) {
@@ -150,12 +495,14 @@
 
                 initializeUI();
 
+                clearInterval(messageInterval);
                 document.getElementById('loading').classList.remove('active');
                 document.getElementById('mainContent').classList.remove('hidden');
             } catch (error) {
                 console.error('Error loading data:', error);
+                clearInterval(messageInterval);
                 document.getElementById('loading').innerHTML =
-                    '<div class="text-red-600">Error loading database. Please ensure panres_data.json is in the same directory.</div>';
+                    '<div class="text-red-600 text-xl">⚠️ Error loading database</div><div class="mt-4 text-gray-600">Please ensure panres2.json is in the same directory.</div>';
             }
         }
 
@@ -309,6 +656,10 @@
         }
 
         function showCategory(category) {
+            currentCategory = category;
+            currentPage = 1;
+            currentViewMode = 'list';
+
             const titles = {
                 PanGene: 'PanRes Genes',
                 AntibioticClass: 'Antibiotic Classes',
@@ -322,12 +673,373 @@
             document.getElementById('listTitle').textContent =
                 `${titles[category]} (${itemIds.length} items)`;
 
-            const items = itemIds
+            currentItems = itemIds
                 .map(id => getSubject(id))
                 .filter(item => item && item.label !== '+')  // Filter out the "+" phenotype marker
                 .sort((a, b) => a.label.localeCompare(b.label));
 
-            const listHtml = items
+            // Show advanced filters only for PanGene category
+            if (category === 'PanGene') {
+                document.getElementById('advancedFilters').classList.remove('hidden');
+                populateFilterDropdowns();
+                clearFilters();
+            } else {
+                document.getElementById('advancedFilters').classList.add('hidden');
+                filteredItems = currentItems;
+                renderList();
+            }
+
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('listView').classList.remove('hidden');
+            document.getElementById('detailsView').classList.add('hidden');
+        }
+
+        function populateFilterDropdowns() {
+            // Populate database filter
+            const databases = new Set();
+            currentItems.forEach(gene => {
+                if (gene.properties['same_as']) {
+                    gene.properties['same_as'].forEach(val => {
+                        if (!val.is_literal) {
+                            const originalGene = getSubject(val.value);
+                            if (originalGene && originalGene.properties['is_from_database']) {
+                                originalGene.properties['is_from_database'].forEach(db => {
+                                    const dbSubject = getSubject(db.value);
+                                    if (dbSubject) databases.add(JSON.stringify({id: db.value, label: dbSubject.label}));
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+
+            const dbSelect = document.getElementById('filterDatabase');
+            dbSelect.innerHTML = '<option value="">All Databases</option>';
+            Array.from(databases).map(JSON.parse).sort((a, b) => a.label.localeCompare(b.label)).forEach(db => {
+                dbSelect.innerHTML += `<option value="${db.id}">${db.label}</option>`;
+            });
+
+            // Populate phenotype filter
+            const phenotypes = new Set();
+            currentItems.forEach(gene => {
+                if (gene.properties['has_predicted_phenotype']) {
+                    gene.properties['has_predicted_phenotype'].forEach(val => {
+                        if (!val.is_literal) {
+                            const phenotype = getSubject(val.value);
+                            if (phenotype && phenotype.label !== '+') {
+                                phenotypes.add(JSON.stringify({id: val.value, label: phenotype.label}));
+                            }
+                        }
+                    });
+                }
+            });
+
+            const phenoSelect = document.getElementById('filterPhenotype');
+            phenoSelect.innerHTML = '<option value="">All Phenotypes</option>';
+            Array.from(phenotypes).map(JSON.parse).sort((a, b) => a.label.localeCompare(b.label)).forEach(p => {
+                phenoSelect.innerHTML += `<option value="${p.id}">${p.label}</option>`;
+            });
+
+            // Populate resistance class filter
+            const classes = new Set();
+            currentItems.forEach(gene => {
+                if (gene.properties['has_resistance_class']) {
+                    gene.properties['has_resistance_class'].forEach(val => {
+                        if (!val.is_literal) {
+                            const cls = getSubject(val.value);
+                            if (cls) classes.add(JSON.stringify({id: val.value, label: cls.label}));
+                        }
+                    });
+                }
+            });
+
+            const classSelect = document.getElementById('filterClass');
+            classSelect.innerHTML = '<option value="">All Classes</option>';
+            Array.from(classes).map(JSON.parse).sort((a, b) => a.label.localeCompare(b.label)).forEach(c => {
+                classSelect.innerHTML += `<option value="${c.id}">${c.label}</option>`;
+            });
+
+            // Populate mechanism filter
+            const mechanisms = new Set();
+            currentItems.forEach(gene => {
+                if (gene.properties['has_mechanism_of_resistance']) {
+                    gene.properties['has_mechanism_of_resistance'].forEach(val => {
+                        if (!val.is_literal) {
+                            const mech = getSubject(val.value);
+                            if (mech) mechanisms.add(JSON.stringify({id: val.value, label: mech.label}));
+                        }
+                    });
+                }
+            });
+
+            const mechSelect = document.getElementById('filterMechanism');
+            mechSelect.innerHTML = '<option value="">All Mechanisms</option>';
+            Array.from(mechanisms).map(JSON.parse).sort((a, b) => a.label.localeCompare(b.label)).forEach(m => {
+                mechSelect.innerHTML += `<option value="${m.id}">${m.label}</option>`;
+            });
+        }
+
+        function applyFilters() {
+            activeFilters.database = document.getElementById('filterDatabase')?.value || '';
+            activeFilters.phenotype = document.getElementById('filterPhenotype')?.value || '';
+            activeFilters.class = document.getElementById('filterClass')?.value || '';
+            activeFilters.mechanism = document.getElementById('filterMechanism')?.value || '';
+            activeFilters.search = document.getElementById('filterSearch')?.value.toLowerCase() || '';
+
+            filteredItems = currentItems.filter(gene => {
+                // Database filter
+                if (activeFilters.database) {
+                    let hasDatabase = false;
+                    if (gene.properties['same_as']) {
+                        gene.properties['same_as'].forEach(val => {
+                            if (!val.is_literal) {
+                                const originalGene = getSubject(val.value);
+                                if (originalGene && originalGene.properties['is_from_database']) {
+                                    originalGene.properties['is_from_database'].forEach(db => {
+                                        if (db.value === activeFilters.database) hasDatabase = true;
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    if (!hasDatabase) return false;
+                }
+
+                // Phenotype filter
+                if (activeFilters.phenotype) {
+                    if (!gene.properties['has_predicted_phenotype'] ||
+                        !gene.properties['has_predicted_phenotype'].some(v => v.value === activeFilters.phenotype)) {
+                        return false;
+                    }
+                }
+
+                // Class filter
+                if (activeFilters.class) {
+                    if (!gene.properties['has_resistance_class'] ||
+                        !gene.properties['has_resistance_class'].some(v => v.value === activeFilters.class)) {
+                        return false;
+                    }
+                }
+
+                // Mechanism filter
+                if (activeFilters.mechanism) {
+                    if (!gene.properties['has_mechanism_of_resistance'] ||
+                        !gene.properties['has_mechanism_of_resistance'].some(v => v.value === activeFilters.mechanism)) {
+                        return false;
+                    }
+                }
+
+                // Search filter
+                if (activeFilters.search) {
+                    if (!gene.label.toLowerCase().includes(activeFilters.search)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            updateActiveFiltersDisplay();
+            currentPage = 1;
+            applyGrouping();
+        }
+
+        function updateActiveFiltersDisplay() {
+            const container = document.getElementById('activeFilters');
+            const filterPills = [];
+
+            if (activeFilters.database) {
+                const db = getSubject(activeFilters.database);
+                filterPills.push({type: 'database', label: `Database: ${db?.label || activeFilters.database}`});
+            }
+            if (activeFilters.phenotype) {
+                const ph = getSubject(activeFilters.phenotype);
+                filterPills.push({type: 'phenotype', label: `Phenotype: ${ph?.label || activeFilters.phenotype}`});
+            }
+            if (activeFilters.class) {
+                const cl = getSubject(activeFilters.class);
+                filterPills.push({type: 'class', label: `Class: ${cl?.label || activeFilters.class}`});
+            }
+            if (activeFilters.mechanism) {
+                const mech = getSubject(activeFilters.mechanism);
+                filterPills.push({type: 'mechanism', label: `Mechanism: ${mech?.label || activeFilters.mechanism}`});
+            }
+            if (activeFilters.search) {
+                filterPills.push({type: 'search', label: `Search: "${activeFilters.search}"`});
+            }
+
+            if (filterPills.length > 0) {
+                container.classList.remove('hidden');
+                container.innerHTML = filterPills.map(pill => `
+                    <span class="filter-pill bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                        ${pill.label}
+                        <button onclick="removeFilter('${pill.type}')" class="hover:bg-white hover:bg-opacity-20 rounded-full px-1">✕</button>
+                    </span>
+                `).join('');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function removeFilter(type) {
+            if (type === 'database') document.getElementById('filterDatabase').value = '';
+            if (type === 'phenotype') document.getElementById('filterPhenotype').value = '';
+            if (type === 'class') document.getElementById('filterClass').value = '';
+            if (type === 'mechanism') document.getElementById('filterMechanism').value = '';
+            if (type === 'search') document.getElementById('filterSearch').value = '';
+            applyFilters();
+        }
+
+        function clearFilters() {
+            document.getElementById('filterDatabase').value = '';
+            document.getElementById('filterPhenotype').value = '';
+            document.getElementById('filterClass').value = '';
+            document.getElementById('filterMechanism').value = '';
+            document.getElementById('filterSearch').value = '';
+            document.getElementById('groupBy').value = '';
+            activeFilters = {database: '', phenotype: '', class: '', mechanism: '', search: ''};
+            filteredItems = currentItems;
+            updateActiveFiltersDisplay();
+            currentPage = 1;
+            renderList();
+        }
+
+        function applyGrouping() {
+            const groupBy = document.getElementById('groupBy')?.value;
+
+            if (!groupBy) {
+                renderList();
+                return;
+            }
+
+            const grouped = {};
+            filteredItems.forEach(gene => {
+                let groupKeys = [];
+
+                if (groupBy === 'database') {
+                    if (gene.properties['same_as']) {
+                        gene.properties['same_as'].forEach(val => {
+                            if (!val.is_literal) {
+                                const originalGene = getSubject(val.value);
+                                if (originalGene && originalGene.properties['is_from_database']) {
+                                    originalGene.properties['is_from_database'].forEach(db => {
+                                        const dbSubject = getSubject(db.value);
+                                        if (dbSubject) groupKeys.push(dbSubject.label);
+                                    });
+                                }
+                            }
+                        });
+                    }
+                } else if (groupBy === 'phenotype') {
+                    if (gene.properties['has_predicted_phenotype']) {
+                        gene.properties['has_predicted_phenotype'].forEach(val => {
+                            if (!val.is_literal) {
+                                const phenotype = getSubject(val.value);
+                                if (phenotype && phenotype.label !== '+') groupKeys.push(phenotype.label);
+                            }
+                        });
+                    }
+                } else if (groupBy === 'class') {
+                    if (gene.properties['has_resistance_class']) {
+                        gene.properties['has_resistance_class'].forEach(val => {
+                            if (!val.is_literal) {
+                                const cls = getSubject(val.value);
+                                if (cls) groupKeys.push(cls.label);
+                            }
+                        });
+                    }
+                } else if (groupBy === 'mechanism') {
+                    if (gene.properties['has_mechanism_of_resistance']) {
+                        gene.properties['has_mechanism_of_resistance'].forEach(val => {
+                            if (!val.is_literal) {
+                                const mech = getSubject(val.value);
+                                if (mech) groupKeys.push(mech.label);
+                            }
+                        });
+                    }
+                }
+
+                if (groupKeys.length === 0) groupKeys = ['Uncategorized'];
+
+                groupKeys.forEach(key => {
+                    if (!grouped[key]) grouped[key] = [];
+                    if (!grouped[key].find(g => g.id === gene.id)) {
+                        grouped[key].push(gene);
+                    }
+                });
+            });
+
+            renderGroupedList(grouped);
+        }
+
+        function renderGroupedList(grouped) {
+            const sortedGroups = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
+
+            let html = '';
+            sortedGroups.forEach(groupName => {
+                const items = grouped[groupName].sort((a, b) => a.label.localeCompare(b.label));
+                html += `
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b-2 border-primary">
+                            ${groupName} <span class="text-sm text-gray-500">(${items.length})</span>
+                        </h3>
+                        <ul class="list-disc list-inside grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            ${items.map(item => `
+                                <li class="py-1">
+                                    <a href="#" onclick="showDetails('${item.id}'); return false;"
+                                       class="text-primary hover:underline">
+                                        ${item.label}
+                                    </a>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+
+            document.getElementById('listContent').innerHTML = html;
+            document.getElementById('pagination').classList.add('hidden');
+            updateCounts();
+        }
+
+        function toggleViewMode(mode) {
+            currentViewMode = mode;
+            currentPage = 1;
+
+            // Update button styles
+            if (mode === 'table') {
+                document.getElementById('btnTableView').className = 'bg-primary text-white px-4 py-2 rounded text-sm font-medium';
+                document.getElementById('btnListView').className = 'bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium';
+            } else {
+                document.getElementById('btnListView').className = 'bg-primary text-white px-4 py-2 rounded text-sm font-medium';
+                document.getElementById('btnTableView').className = 'bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium';
+            }
+
+            renderList();
+        }
+
+        function renderList() {
+            const groupBy = document.getElementById('groupBy')?.value;
+            if (groupBy && currentCategory === 'PanGene') {
+                applyGrouping();
+                return;
+            }
+
+            updateCounts();
+
+            if (currentViewMode === 'table' && currentCategory === 'PanGene') {
+                renderTableView();
+            } else {
+                renderSimpleList();
+            }
+        }
+
+        function renderSimpleList() {
+            const startIdx = (currentPage - 1) * itemsPerPage;
+            const endIdx = startIdx + itemsPerPage;
+            const pageItems = filteredItems.slice(startIdx, endIdx);
+
+            const listHtml = pageItems
                 .map(item => `
                     <li class="py-2">
                         <a href="#" onclick="showDetails('${item.id}'); return false;"
@@ -338,11 +1050,273 @@
                 `).join('');
 
             document.getElementById('listContent').innerHTML =
-                `<ul class="list-disc list-inside">${listHtml}</ul>`;
+                `<ul class="list-disc list-inside grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">${listHtml}</ul>`;
 
-            document.getElementById('homeView').classList.add('hidden');
-            document.getElementById('listView').classList.remove('hidden');
-            document.getElementById('detailsView').classList.add('hidden');
+            renderPagination();
+        }
+
+        function renderTableView() {
+            const startIdx = (currentPage - 1) * itemsPerPage;
+            const endIdx = startIdx + itemsPerPage;
+            const pageItems = filteredItems.slice(startIdx, endIdx);
+
+            let html = `
+                <div class="overflow-x-auto">
+                    <table class="gene-table w-full text-sm">
+                        <thead class="bg-gray-100 border-b-2 border-gray-300">
+                            <tr>
+                                <th class="text-left p-3 font-semibold" onclick="sortTable('label')">
+                                    Gene Name ${currentSortColumn === 'label' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                </th>
+                                <th class="text-left p-3 font-semibold" onclick="sortTable('database')">
+                                    Database ${currentSortColumn === 'database' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                </th>
+                                <th class="text-left p-3 font-semibold" onclick="sortTable('class')">
+                                    Resistance Class ${currentSortColumn === 'class' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                </th>
+                                <th class="text-left p-3 font-semibold" onclick="sortTable('phenotype')">
+                                    Phenotype ${currentSortColumn === 'phenotype' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                </th>
+                                <th class="text-left p-3 font-semibold" onclick="sortTable('mechanism')">
+                                    Mechanism ${currentSortColumn === 'mechanism' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            pageItems.forEach(gene => {
+                // Extract data
+                const databases = [];
+                if (gene.properties['same_as']) {
+                    gene.properties['same_as'].forEach(val => {
+                        if (!val.is_literal) {
+                            const originalGene = getSubject(val.value);
+                            if (originalGene && originalGene.properties['is_from_database']) {
+                                originalGene.properties['is_from_database'].forEach(db => {
+                                    const dbSubject = getSubject(db.value);
+                                    if (dbSubject && !databases.includes(dbSubject.label)) {
+                                        databases.push(dbSubject.label);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+
+                const classes = [];
+                if (gene.properties['has_resistance_class']) {
+                    gene.properties['has_resistance_class'].forEach(val => {
+                        if (!val.is_literal) {
+                            const cls = getSubject(val.value);
+                            if (cls) classes.push(cls.label);
+                        }
+                    });
+                }
+
+                const phenotypes = [];
+                if (gene.properties['has_predicted_phenotype']) {
+                    gene.properties['has_predicted_phenotype'].forEach(val => {
+                        if (!val.is_literal) {
+                            const phenotype = getSubject(val.value);
+                            if (phenotype && phenotype.label !== '+') phenotypes.push(phenotype.label);
+                        }
+                    });
+                }
+
+                const mechanisms = [];
+                if (gene.properties['has_mechanism_of_resistance']) {
+                    gene.properties['has_mechanism_of_resistance'].forEach(val => {
+                        if (!val.is_literal) {
+                            const mech = getSubject(val.value);
+                            if (mech) mechanisms.push(mech.label);
+                        }
+                    });
+                }
+
+                html += `
+                    <tr class="border-b border-gray-200">
+                        <td class="p-3">
+                            <a href="#" onclick="showDetails('${gene.id}'); return false;"
+                               class="text-primary hover:underline font-medium">
+                                ${gene.label}
+                            </a>
+                        </td>
+                        <td class="p-3 text-gray-700">${databases.slice(0, 2).join(', ')}${databases.length > 2 ? ` +${databases.length - 2}` : ''}</td>
+                        <td class="p-3 text-gray-700">${classes.slice(0, 2).join(', ')}${classes.length > 2 ? ` +${classes.length - 2}` : ''}</td>
+                        <td class="p-3 text-gray-700">${phenotypes.slice(0, 2).join(', ')}${phenotypes.length > 2 ? ` +${phenotypes.length - 2}` : ''}</td>
+                        <td class="p-3 text-gray-700">${mechanisms.slice(0, 2).join(', ')}${mechanisms.length > 2 ? ` +${mechanisms.length - 2}` : ''}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('listContent').innerHTML = html;
+            renderPagination();
+        }
+
+        function sortTable(column) {
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+
+            filteredItems.sort((a, b) => {
+                let aVal = '';
+                let bVal = '';
+
+                if (column === 'label') {
+                    aVal = a.label;
+                    bVal = b.label;
+                } else if (column === 'database') {
+                    // Get first database
+                    if (a.properties['same_as']) {
+                        a.properties['same_as'].forEach(val => {
+                            if (!val.is_literal && !aVal) {
+                                const originalGene = getSubject(val.value);
+                                if (originalGene && originalGene.properties['is_from_database']) {
+                                    const db = getSubject(originalGene.properties['is_from_database'][0].value);
+                                    if (db) aVal = db.label;
+                                }
+                            }
+                        });
+                    }
+                    if (b.properties['same_as']) {
+                        b.properties['same_as'].forEach(val => {
+                            if (!val.is_literal && !bVal) {
+                                const originalGene = getSubject(val.value);
+                                if (originalGene && originalGene.properties['is_from_database']) {
+                                    const db = getSubject(originalGene.properties['is_from_database'][0].value);
+                                    if (db) bVal = db.label;
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    const propMap = {
+                        'class': 'has_resistance_class',
+                        'phenotype': 'has_predicted_phenotype',
+                        'mechanism': 'has_mechanism_of_resistance'
+                    };
+                    const prop = propMap[column];
+                    if (a.properties[prop] && a.properties[prop][0]) {
+                        const subject = getSubject(a.properties[prop][0].value);
+                        if (subject) aVal = subject.label;
+                    }
+                    if (b.properties[prop] && b.properties[prop][0]) {
+                        const subject = getSubject(b.properties[prop][0].value);
+                        if (subject) bVal = subject.label;
+                    }
+                }
+
+                const result = aVal.localeCompare(bVal);
+                return currentSortDirection === 'asc' ? result : -result;
+            });
+
+            currentPage = 1;
+            renderList();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+            if (totalPages <= 1) {
+                document.getElementById('pagination').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('pagination').classList.remove('hidden');
+
+            let html = '';
+
+            // Previous button
+            html += `
+                <button onclick="changePage(${currentPage - 1})"
+                        ${currentPage === 1 ? 'disabled' : ''}
+                        class="px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white hover:bg-opacity-80'}">
+                    ← Prev
+                </button>
+            `;
+
+            // Page numbers
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            if (startPage > 1) {
+                html += `<button onclick="changePage(1)" class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">1</button>`;
+                if (startPage > 2) html += `<span class="px-2">...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `
+                    <button onclick="changePage(${i})"
+                            class="px-3 py-1 rounded ${i === currentPage ? 'bg-primary text-white' : 'bg-gray-200 hover:bg-gray-300'}">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="px-2">...</span>`;
+                html += `<button onclick="changePage(${totalPages})" class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">${totalPages}</button>`;
+            }
+
+            // Next button
+            html += `
+                <button onclick="changePage(${currentPage + 1})"
+                        ${currentPage === totalPages ? 'disabled' : ''}
+                        class="px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white hover:bg-opacity-80'}">
+                    Next →
+                </button>
+            `;
+
+            // Items per page selector
+            html += `
+                <select onchange="changeItemsPerPage(this.value)"
+                        class="ml-4 px-3 py-1 border border-gray-300 rounded">
+                    <option value="50" ${itemsPerPage === 50 ? 'selected' : ''}>50/page</option>
+                    <option value="100" ${itemsPerPage === 100 ? 'selected' : ''}>100/page</option>
+                    <option value="200" ${itemsPerPage === 200 ? 'selected' : ''}>200/page</option>
+                    <option value="500" ${itemsPerPage === 500 ? 'selected' : ''}>500/page</option>
+                </select>
+            `;
+
+            document.getElementById('pagination').innerHTML = html;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderList();
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function changeItemsPerPage(value) {
+            itemsPerPage = parseInt(value);
+            currentPage = 1;
+            renderList();
+        }
+
+        function updateCounts() {
+            if (document.getElementById('filteredCount')) {
+                document.getElementById('filteredCount').textContent = filteredItems.length;
+            }
+            if (document.getElementById('totalCount')) {
+                document.getElementById('totalCount').textContent = currentItems.length;
+            }
         }
 
         function showDetails(id) {
