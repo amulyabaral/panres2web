@@ -203,6 +203,17 @@
             font-style: italic;
             transition: opacity 0.3s ease-in-out;
         }
+
+        /* Fix list item alignment for long names */
+        ul.list-disc.list-inside li {
+            padding-left: 0;
+        }
+
+        ul.list-disc.list-inside li a {
+            display: inline;
+            word-break: break-word;
+            vertical-align: top;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -403,7 +414,7 @@
                         class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium mr-2">
                     ← Back to Home
                 </button>
-                <button onclick="history.back()"
+                <button onclick="goBackToPreviousView()"
                         class="bg-accent-1 hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
                     ← Back
                 </button>
@@ -653,6 +664,18 @@
             document.getElementById('homeView').classList.remove('hidden');
             document.getElementById('listView').classList.add('hidden');
             document.getElementById('detailsView').classList.add('hidden');
+        }
+
+        function goBackToPreviousView() {
+            // If we have a current category, go back to the list view
+            if (currentCategory) {
+                document.getElementById('homeView').classList.add('hidden');
+                document.getElementById('listView').classList.remove('hidden');
+                document.getElementById('detailsView').classList.add('hidden');
+            } else {
+                // Otherwise go back to home
+                showHome();
+            }
         }
 
         function showCategory(category) {
@@ -1609,16 +1632,52 @@
                 const results = [];
 
                 for (const [id, subject] of Object.entries(panresData.subjects)) {
-                    if (subject.label.toLowerCase().includes(query) ||
-                        subject.id.toLowerCase().includes(query)) {
-                        results.push(subject);
-                    }
+                    const labelLower = subject.label.toLowerCase();
+                    const idLower = subject.id.toLowerCase();
 
-                    if (results.length >= 20) break;
+                    if (labelLower.includes(query) || idLower.includes(query)) {
+                        // Calculate match score for prioritization
+                        let score = 0;
+
+                        // Highest priority: exact match
+                        if (labelLower === query || idLower === query) {
+                            score = 1000;
+                        }
+                        // High priority: starts with query
+                        else if (labelLower.startsWith(query) || idLower.startsWith(query)) {
+                            score = 500;
+                        }
+                        // Medium priority: contains query with word boundary
+                        else if (labelLower.match(new RegExp('\\b' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))) ||
+                                 idLower.match(new RegExp('\\b' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))) {
+                            score = 100;
+                        }
+                        // Lower priority: contains query anywhere
+                        else {
+                            score = 50;
+                        }
+
+                        // Bonus for shorter names (more specific matches)
+                        score += Math.max(0, 50 - subject.label.length);
+
+                        results.push({ subject, score });
+                    }
                 }
 
-                const resultsHtml = results
-                    .map(item => {
+                // Sort by score (descending), then by label length (ascending), then alphabetically
+                results.sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    if (a.subject.label.length !== b.subject.label.length) {
+                        return a.subject.label.length - b.subject.label.length;
+                    }
+                    return a.subject.label.localeCompare(b.subject.label);
+                });
+
+                // Take top 20 results
+                const topResults = results.slice(0, 20);
+
+                const resultsHtml = topResults
+                    .map(({ subject: item }) => {
                         // Determine type
                         let typeLabel = 'Other';
                         if (panresData.categories.PanGene.includes(item.id)) typeLabel = 'PanGene';
