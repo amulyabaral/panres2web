@@ -214,6 +214,103 @@
             word-break: break-word;
             vertical-align: top;
         }
+
+        /* Sequence viewer styles */
+        .sequence-container {
+            background: #fafafa;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            word-break: break-all;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 8px;
+            border-left: 3px solid #1b7f58;
+        }
+
+        .sequence-stats {
+            font-size: 11px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        #sequence-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sequence-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sequence-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .sequence-btn:hover {
+            background: #f9fafb;
+            border-color: #1b7f58;
+            color: #1b7f58;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #1f2937;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -239,6 +336,17 @@
 
         <div class="loading-text">
             Loading the database<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+        </div>
+    </div>
+
+    <!-- Sequence Modal -->
+    <div id="sequence-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title" class="text-lg font-semibold"></h3>
+                <button class="close-modal" onclick="closeSequenceModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
         </div>
     </div>
 
@@ -415,7 +523,7 @@
                     ← Back to Home
                 </button>
                 <button onclick="goBackToPreviousView()"
-                        class="bg-accent-1 hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
+                        class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded text-sm font-medium">
                     ← Back
                 </button>
             </div>
@@ -441,6 +549,9 @@
             mechanism: '',
             search: ''
         };
+
+        // Navigation history stack
+        let navigationHistory = [];
 
         // Predicate display names
         const PREDICATE_NAMES = {
@@ -661,19 +772,100 @@
 
         // View functions
         function showHome() {
+            navigationHistory = []; // Clear history when going home
             document.getElementById('homeView').classList.remove('hidden');
             document.getElementById('listView').classList.add('hidden');
             document.getElementById('detailsView').classList.add('hidden');
         }
 
         function goBackToPreviousView() {
-            // If we have a current category, go back to the list view
-            if (currentCategory) {
-                document.getElementById('homeView').classList.add('hidden');
-                document.getElementById('listView').classList.remove('hidden');
-                document.getElementById('detailsView').classList.add('hidden');
+            // Pop the current view from history
+            if (navigationHistory.length > 0) {
+                navigationHistory.pop(); // Remove current view
+            }
+
+            // If there's a previous view in history, restore it
+            if (navigationHistory.length > 0) {
+                const previousView = navigationHistory[navigationHistory.length - 1];
+
+                if (previousView.view === 'list') {
+                    // Restore the list view with all its state
+                    currentCategory = previousView.category;
+                    currentPage = previousView.page || 1;
+                    currentViewMode = previousView.viewMode || 'list';
+                    activeFilters = previousView.filters || {
+                        database: '',
+                        phenotype: '',
+                        class: '',
+                        mechanism: '',
+                        search: ''
+                    };
+
+                    // Restore filter UI
+                    if (document.getElementById('filterDatabase')) {
+                        document.getElementById('filterDatabase').value = activeFilters.database;
+                    }
+                    if (document.getElementById('filterPhenotype')) {
+                        document.getElementById('filterPhenotype').value = activeFilters.phenotype;
+                    }
+                    if (document.getElementById('filterClass')) {
+                        document.getElementById('filterClass').value = activeFilters.class;
+                    }
+                    if (document.getElementById('filterMechanism')) {
+                        document.getElementById('filterMechanism').value = activeFilters.mechanism;
+                    }
+                    if (document.getElementById('filterSearch')) {
+                        document.getElementById('filterSearch').value = activeFilters.search;
+                    }
+                    if (document.getElementById('groupBy')) {
+                        document.getElementById('groupBy').value = previousView.groupBy || '';
+                    }
+
+                    // Re-render the list
+                    const titles = {
+                        PanGene: 'PanRes Genes',
+                        AntibioticClass: 'Antibiotic Classes',
+                        Phenotype: 'Predicted Phenotypes',
+                        Mechanism: 'Resistance Mechanisms',
+                        Database: 'Source Databases'
+                    };
+
+                    const itemIds = panresData.categories[currentCategory];
+                    document.getElementById('listTitle').textContent =
+                        `${titles[currentCategory]} (${itemIds.length} items)`;
+
+                    currentItems = itemIds
+                        .map(id => getSubject(id))
+                        .filter(item => item && item.label !== '+')
+                        .sort((a, b) => a.label.localeCompare(b.label));
+
+                    if (currentCategory === 'PanGene') {
+                        document.getElementById('advancedFilters').classList.remove('hidden');
+                        applyFilters();
+                    } else {
+                        document.getElementById('advancedFilters').classList.add('hidden');
+                        filteredItems = currentItems;
+                        renderList();
+                    }
+
+                    document.getElementById('homeView').classList.add('hidden');
+                    document.getElementById('listView').classList.remove('hidden');
+                    document.getElementById('detailsView').classList.add('hidden');
+                } else if (previousView.view === 'relatedGenes') {
+                    // Restore the related genes view
+                    showRelatedGenes(previousView.entityId);
+                    // Remove the duplicate entry that showRelatedGenes adds
+                    navigationHistory.pop();
+                } else if (previousView.view === 'details') {
+                    // Restore the details view
+                    showDetails(previousView.itemId);
+                    // Remove the duplicate entry that showDetails adds
+                    navigationHistory.pop();
+                } else if (previousView.view === 'home') {
+                    showHome();
+                }
             } else {
-                // Otherwise go back to home
+                // No history, go back to home
                 showHome();
             }
         }
@@ -711,6 +903,16 @@
                 filteredItems = currentItems;
                 renderList();
             }
+
+            // Save current view to navigation history
+            navigationHistory.push({
+                view: 'list',
+                category: category,
+                page: currentPage,
+                viewMode: currentViewMode,
+                filters: {...activeFilters},
+                groupBy: document.getElementById('groupBy')?.value || ''
+            });
 
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('listView').classList.remove('hidden');
@@ -1349,6 +1551,36 @@
                 return;
             }
 
+            // Save current state to navigation history before showing details
+            const currentView = document.getElementById('listView').classList.contains('hidden') ? 'home' : 'list';
+            if (currentView === 'list') {
+                // Update the last history entry with current state or add new one
+                const lastHistory = navigationHistory[navigationHistory.length - 1];
+                if (lastHistory && lastHistory.view === 'list' && lastHistory.category === currentCategory) {
+                    // Update existing entry
+                    lastHistory.page = currentPage;
+                    lastHistory.viewMode = currentViewMode;
+                    lastHistory.filters = {...activeFilters};
+                    lastHistory.groupBy = document.getElementById('groupBy')?.value || '';
+                } else {
+                    // Add new entry
+                    navigationHistory.push({
+                        view: 'list',
+                        category: currentCategory,
+                        page: currentPage,
+                        viewMode: currentViewMode,
+                        filters: {...activeFilters},
+                        groupBy: document.getElementById('groupBy')?.value || ''
+                    });
+                }
+            }
+
+            // Add the detail view to history
+            navigationHistory.push({
+                view: 'details',
+                itemId: id
+            });
+
             // Determine entity type for display
             let entityType = '';
             if (panresData.categories.PanGene.includes(id)) entityType = 'PanRes Gene';
@@ -1361,11 +1593,29 @@
             const isDrugCombination = subject.properties['is_drug_combination'] &&
                                      subject.properties['is_drug_combination'][0].value === 'true';
 
+            // Check if sequences are available
+            let hasSequences = false;
+            if (subject.gene_sequence || subject.protein_sequence) {
+                hasSequences = true;
+            } else if (subject.id.startsWith('Pan_')) {
+                const geneId = subject.id.replace('Pan_', 'pan_');
+                const correspondingGene = getSubject(geneId);
+                if (correspondingGene && (correspondingGene.gene_sequence || correspondingGene.protein_sequence)) {
+                    hasSequences = true;
+                }
+            }
+
             let html = `
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
                     <div class="mb-6">
                         ${entityType ? `<div class="text-sm font-medium text-primary mb-2">${entityType}${isDrugCombination ? ' (Drug Combination)' : ''}</div>` : ''}
-                        <h2 class="text-3xl font-semibold text-gray-800 mb-2">${subject.label}</h2>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h2 class="text-3xl font-semibold text-gray-800">${subject.label}</h2>
+                            ${hasSequences ? `
+                                <button onclick="viewSequence('${subject.id}')" class="sequence-btn">View Sequence</button>
+                                <button onclick="downloadFasta('${subject.id}', 'gene')" class="sequence-btn">Download FASTA</button>
+                            ` : ''}
+                        </div>
                         <p class="text-xs text-gray-400"><code>${subject.id}</code></p>
                     </div>
             `;
@@ -1612,9 +1862,207 @@
             document.getElementById('listContent').innerHTML =
                 `<ul class="list-disc list-inside">${listHtml}</ul>`;
 
+            // Save to navigation history
+            navigationHistory.push({
+                view: 'relatedGenes',
+                entityId: entityId,
+                category: 'PanGene'
+            });
+
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('listView').classList.remove('hidden');
             document.getElementById('detailsView').classList.add('hidden');
+        }
+
+        // Sequence viewer functions
+        function viewSequence(id) {
+            const subject = getSubject(id);
+            if (!subject) return;
+
+            // Check if viewing a protein, get the gene
+            let geneForSequence = subject;
+            if (subject.id.startsWith('Pan_') && !subject.gene_sequence && !subject.protein_sequence) {
+                const geneId = subject.id.replace('Pan_', 'pan_');
+                const correspondingGene = getSubject(geneId);
+                if (correspondingGene) {
+                    geneForSequence = correspondingGene;
+                }
+            }
+
+            if (!geneForSequence.gene_sequence && !geneForSequence.protein_sequence) {
+                alert('No sequence available');
+                return;
+            }
+
+            // Build modal content
+            let html = '<div class="space-y-4">';
+
+            if (geneForSequence.gene_sequence) {
+                const geneSeq = geneForSequence.gene_sequence;
+                const gcContent = ((geneSeq.match(/[GC]/gi) || []).length / geneSeq.length * 100).toFixed(1);
+                const header = `>${geneForSequence.id}`;
+                html += `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-semibold text-gray-800">Gene Sequence (Nucleotide)</h4>
+                            <div class="flex gap-2">
+                                <button onclick="copySequence('${geneForSequence.id}', 'gene')"
+                                        class="sequence-btn">Copy Sequence</button>
+                                <button onclick="downloadFasta('${geneForSequence.id}', 'gene')"
+                                        class="sequence-btn">Download FASTA</button>
+                            </div>
+                        </div>
+                        <div class="sequence-container">${header}\n${formatSequenceWithLineNumbers(geneSeq)}</div>
+                        <div class="sequence-stats">
+                            Length: <strong>${geneSeq.length} bp</strong> |
+                            GC Content: <strong>${gcContent}%</strong>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (geneForSequence.protein_sequence) {
+                const proteinSeq = geneForSequence.protein_sequence;
+                // Use uppercase Pan_ for protein header
+                const proteinId = geneForSequence.id.replace('pan_', 'Pan_');
+                const header = `>${proteinId}`;
+                html += `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-semibold text-gray-800">Protein Sequence (Amino Acids)</h4>
+                            <div class="flex gap-2">
+                                <button onclick="copySequence('${geneForSequence.id}', 'protein')"
+                                        class="sequence-btn">Copy Sequence</button>
+                                <button onclick="downloadFasta('${geneForSequence.id}', 'protein')"
+                                        class="sequence-btn">Download FASTA</button>
+                            </div>
+                        </div>
+                        <div class="sequence-container">${header}\n${formatSequenceWithLineNumbers(proteinSeq)}</div>
+                        <div class="sequence-stats">
+                            Length: <strong>${proteinSeq.length} aa</strong>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+
+            document.getElementById('modal-title').textContent = `Sequences: ${subject.label}`;
+            document.getElementById('modal-body').innerHTML = html;
+            document.getElementById('sequence-modal').classList.add('active');
+        }
+
+        function closeSequenceModal() {
+            document.getElementById('sequence-modal').classList.remove('active');
+        }
+
+        function copySequence(id, type) {
+            let subject = getSubject(id);
+            if (!subject) return;
+
+            // If this is a protein, get the corresponding gene
+            if (subject.id.startsWith('Pan_') && !subject.gene_sequence && !subject.protein_sequence) {
+                const geneId = subject.id.replace('Pan_', 'pan_');
+                const correspondingGene = getSubject(geneId);
+                if (correspondingGene) {
+                    subject = correspondingGene;
+                }
+            }
+
+            const sequence = type === 'gene' ? subject.gene_sequence : subject.protein_sequence;
+            if (!sequence) {
+                alert('Sequence not available');
+                return;
+            }
+
+            // Format header: gene = pan_1, protein = Pan_1
+            const header = type === 'protein' ? `>${subject.id.replace('pan_', 'Pan_')}` : `>${subject.id}`;
+            const fastaContent = `${header}\n${sequence}`;
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(fastaContent).then(() => {
+                // Visual feedback - change button text temporarily
+                const buttons = document.querySelectorAll(`button[onclick*="copySequence('${id}', '${type}')"]`);
+                buttons.forEach(btn => {
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    btn.style.borderColor = '#1b7f58';
+                    btn.style.color = '#1b7f58';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.borderColor = '';
+                        btn.style.color = '';
+                    }, 2000);
+                });
+            }).catch(err => {
+                alert('Failed to copy sequence to clipboard');
+                console.error('Copy failed:', err);
+            });
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('sequence-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'sequence-modal') {
+                    closeSequenceModal();
+                }
+            });
+        });
+
+        function downloadFasta(id, type) {
+            let subject = getSubject(id);
+            if (!subject) return;
+
+            // If this is a protein, get the corresponding gene
+            if (subject.id.startsWith('Pan_') && !subject.gene_sequence && !subject.protein_sequence) {
+                const geneId = subject.id.replace('Pan_', 'pan_');
+                const correspondingGene = getSubject(geneId);
+                if (correspondingGene) {
+                    subject = correspondingGene;
+                }
+            }
+
+            // Create multi-FASTA with both sequences if available
+            let fastaContent = '';
+
+            if (subject.gene_sequence) {
+                const formattedSeq = subject.gene_sequence.match(/.{1,60}/g).join('\n');
+                fastaContent += `>${subject.id}\n${formattedSeq}\n\n`;
+            }
+
+            if (subject.protein_sequence) {
+                const proteinId = subject.id.replace('pan_', 'Pan_');
+                const formattedSeq = subject.protein_sequence.match(/.{1,60}/g).join('\n');
+                fastaContent += `>${proteinId}\n${formattedSeq}\n`;
+            }
+
+            if (!fastaContent) {
+                alert('Sequence not available');
+                return;
+            }
+
+            // Create download
+            const blob = new Blob([fastaContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${subject.id}.fasta`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function formatSequenceWithLineNumbers(sequence, charsPerLine = 60) {
+            if (!sequence) return '';
+
+            const lines = [];
+            for (let i = 0; i < sequence.length; i += charsPerLine) {
+                const lineNum = String(i + 1).padStart(6, ' ');
+                const seqChunk = sequence.substr(i, charsPerLine);
+                lines.push(`${lineNum}  ${seqChunk}`);
+            }
+            return lines.join('\n');
         }
 
         // Search functionality

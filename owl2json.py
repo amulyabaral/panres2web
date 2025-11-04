@@ -17,6 +17,8 @@ GITHUB_RAW_URL = 'https://raw.githubusercontent.com/genomicepidemiology/PanResOn
 OWL_FILE = 'panres_v2.owl'
 JSON_OUTPUT = 'panres2.json'
 BASE_IRI = "http://myonto.com/PanResOntology.owl#"
+GENES_FASTA = 'panres2_genes.fa'
+PROTEINS_FASTA = 'panres_final_protein.faa'
 
 # Namespace prefixes
 NAMESPACES = {
@@ -52,6 +54,45 @@ def clean_uri(uri_str):
             return prefix + fragment if prefix else fragment
     return uri_str
 
+def parse_fasta(fasta_file):
+    """
+    Parse a FASTA file and return a dictionary mapping sequence IDs to sequences.
+    """
+    sequences = {}
+    if not os.path.exists(fasta_file):
+        print(f"Warning: FASTA file not found: {fasta_file}")
+        return sequences
+
+    print(f"Parsing FASTA file: {fasta_file}")
+    current_id = None
+    current_seq = []
+
+    with open(fasta_file, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('>'):
+                # Save previous sequence
+                if current_id:
+                    sequences[current_id] = ''.join(current_seq)
+                # Start new sequence
+                # Extract ID from header (e.g., >pan_1 -> pan_1, >Pan_1_v1.0.1_identical -> Pan_1)
+                header = line[1:].split()[0]  # Remove '>' and take first part
+                # Remove version suffixes like _v1.0.1_identical
+                if '_v' in header and '_identical' in header:
+                    current_id = header.split('_v')[0]
+                else:
+                    current_id = header
+                current_seq = []
+            else:
+                current_seq.append(line)
+
+        # Save last sequence
+        if current_id:
+            sequences[current_id] = ''.join(current_seq)
+
+    print(f"  Parsed {len(sequences)} sequences")
+    return sequences
+
 def convert_owl_to_json(owl_file, json_file):
     """
     Parse OWL file and create a JSON structure with:
@@ -67,6 +108,11 @@ def convert_owl_to_json(owl_file, json_file):
     except Exception as e:
         print(f"Error parsing OWL file: {e}")
         sys.exit(1)
+
+    # Parse FASTA files
+    print("\nParsing sequence files...")
+    gene_sequences = parse_fasta(GENES_FASTA)
+    protein_sequences = parse_fasta(PROTEINS_FASTA)
 
     # Data structure
     data = {
@@ -174,6 +220,13 @@ def convert_owl_to_json(owl_file, json_file):
         # Convert properties to simple format
         for pred, values in props['properties'].items():
             subject_entry['properties'][pred] = values
+
+        # Add sequences if this is a gene or protein
+        # Genes start with lowercase 'pan_', proteins start with uppercase 'Pan_'
+        if subj_id in gene_sequences:
+            subject_entry['gene_sequence'] = gene_sequences[subj_id]
+        if subj_id in protein_sequences:
+            subject_entry['protein_sequence'] = protein_sequences[subj_id]
 
         data['subjects'][subj_id] = subject_entry
 
