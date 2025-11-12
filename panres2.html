@@ -1836,7 +1836,7 @@
                             ${isCluster ? `
                                 <button onclick="togglePDBViewer('${clusterViewerId}', '${id}')"
                                         class="ml-2 text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded">
-                                    <span class="rotate-icon" id="icon-${clusterViewerId}">▶</span> View 3D Structure
+                                    <span class="rotate-icon" id="icon-${clusterViewerId}">▶</span> View Centroid 3D Structure
                                 </button>
                             ` : ''}
                         </h3>
@@ -1895,7 +1895,7 @@
                                         </a>
                                         <span class="cluster-toggle-btn text-gray-600 text-xs"
                                               onclick="togglePDBViewer('${viewerId}', '${val.value}')">
-                                            <span class="rotate-icon" id="icon-${viewerId}">▶</span> View Members & 3D Structure
+                                            <span class="rotate-icon" id="icon-${viewerId}">▶</span> View Centroid 3D Structure & Members
                                         </span>
                                     </div>
                                     <div id="${viewerId}" class="pdb-viewer-container"></div>
@@ -2282,17 +2282,26 @@
             return members;
         }
 
-        // Get representative gene for cluster (the one with PDB structure)
+        // Get centroid gene for cluster (the one with PDB structure)
         async function getClusterRepresentative(clusterId) {
-            // Extract numeric part from panc_X
+            // First, try the gene matching the cluster ID
             const match = clusterId.match(/^panc_(\d+)$/);
-            if (!match) return null;
+            if (match) {
+                const geneId = `pan_${match[1]}`;
+                const hasPDB = await checkPDBExists(geneId);
+                if (hasPDB) return geneId;
+            }
 
-            const geneId = `pan_${match[1]}`;
+            // If not found, search through all cluster members
+            const members = findClusterMembers(clusterId);
+            for (const memberId of members) {
+                const hasPDB = await checkPDBExists(memberId);
+                if (hasPDB) {
+                    return memberId;
+                }
+            }
 
-            // Check if PDB exists for this gene
-            const hasPDB = await checkPDBExists(geneId);
-            return hasPDB ? geneId : null;
+            return null;
         }
 
         // Store NGL stages for multiple viewers
@@ -2354,14 +2363,14 @@
                 .sort((a, b) => a.localeCompare(b))
                 .map(geneId => {
                     const gene = getSubject(geneId);
-                    const isRep = geneId === repGene;
+                    const isCentroid = geneId === repGene;
                     return `
-                        <div class="py-1 ${isRep ? 'font-semibold text-primary' : ''}">
+                        <div class="py-1 ${isCentroid ? 'font-semibold text-primary' : ''}">
                             <a href="#" onclick="showDetails('${geneId}'); return false;"
                                class="text-primary hover:underline">
                                 ${gene ? gene.label : geneId}
                             </a>
-                            ${isRep ? ' (Representative - 3D structure shown)' : ''}
+                            ${isCentroid ? ' <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">Centroid - 3D structure</span>' : ''}
                         </div>
                     `;
                 }).join('');
@@ -2380,7 +2389,7 @@
                 <div class="cluster-info">
                     <div class="text-sm">
                         <strong>Cluster:</strong> ${clusterId} |
-                        <strong>Representative:</strong> ${repGene} |
+                        <strong>Centroid:</strong> ${repGene} (3D structure) |
                         <strong>Members:</strong> ${members.length}
                     </div>
                 </div>
