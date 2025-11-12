@@ -6,6 +6,7 @@
     <title>PanRes 2.0 Database</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ngl@2.0.0-dev.37/dist/ngl.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -311,6 +312,96 @@
         .close-modal:hover {
             color: #1f2937;
         }
+
+        /* PDB Viewer Expandable Section */
+        .pdb-viewer-container {
+            display: none;
+            margin-top: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            overflow: hidden;
+        }
+
+        .pdb-viewer-container.active {
+            display: block;
+        }
+
+        #viewport {
+            width: 100%;
+            height: 500px;
+            background: #000;
+        }
+
+        .cluster-info {
+            background: #f9fafb;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cluster-members {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .viz-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            flex-wrap: wrap;
+        }
+
+        .viz-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .viz-btn:hover {
+            background: #f9fafb;
+            border-color: #1b7f58;
+            color: #1b7f58;
+        }
+
+        .viz-btn.active {
+            background: #1b7f58;
+            border-color: #1b7f58;
+            color: white;
+        }
+
+        .cluster-toggle-btn {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .cluster-toggle-btn:hover {
+            color: #1b7f58;
+        }
+
+        .rotate-icon {
+            display: inline-block;
+            transition: transform 0.3s;
+        }
+
+        .rotate-icon.open {
+            transform: rotate(90deg);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -349,6 +440,7 @@
             <div class="modal-body" id="modal-body"></div>
         </div>
     </div>
+
 
     <!-- Main Content -->
     <main id="mainContent" class="hidden container mx-auto px-6 py-8">
@@ -1726,18 +1818,29 @@
                 }
             }
 
-            // Show related genes if this is an antibiotic class, phenotype, mechanism, or database
+            // Show related genes if this is an antibiotic class, phenotype, mechanism, database, or cluster
             const relatedGenes = findRelatedGenes(id);
             if (relatedGenes.length > 0) {
+                // Check if this is a cluster (panc_*)
+                const isCluster = id.startsWith('panc_');
+                const clusterViewerId = `pdb-viewer-${id}`;
+
                 html += `
                     <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
                         <h3 class="text-lg font-semibold text-gray-800 mb-3">
-                            Related Genes (${relatedGenes.length})
+                            ${isCluster ? 'Cluster Members' : 'Related Genes'} (${relatedGenes.length})
                             <button onclick="showRelatedGenes('${id}')"
                                     class="ml-2 text-sm bg-primary hover:bg-opacity-80 text-white px-3 py-1 rounded">
                                 Browse All
                             </button>
+                            ${isCluster ? `
+                                <button onclick="togglePDBViewer('${clusterViewerId}', '${id}')"
+                                        class="ml-2 text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded">
+                                    <span class="rotate-icon" id="icon-${clusterViewerId}">▶</span> View 3D Structure
+                                </button>
+                            ` : ''}
                         </h3>
+                        <div id="${clusterViewerId}" class="pdb-viewer-container"></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                             ${relatedGenes.slice(0, 9).map(geneId => {
                                 const gene = getSubject(geneId);
@@ -1768,6 +1871,45 @@
                 if (pred.startsWith('owl:') || pred.startsWith('rdfs:')) continue;
 
                 const predDisplay = getPredicate(pred);
+
+                // Special handling for member_of (cluster membership)
+                if (pred === 'member_of') {
+                    html += `
+                        <div class="py-3">
+                            <dt class="text-sm font-medium text-gray-600 mb-1">${predDisplay}</dt>
+                            <dd class="text-sm text-gray-800">
+                    `;
+
+                    for (const val of values) {
+                        if (!val.is_literal) {
+                            const clusterSubject = getSubject(val.value);
+                            const displayName = clusterSubject ? clusterSubject.label : val.value;
+                            const viewerId = `pdb-viewer-${val.value}`;
+
+                            html += `
+                                <div class="mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <a href="#" onclick="showDetails('${val.value}'); return false;"
+                                           class="text-primary hover:underline">
+                                            ${displayName}
+                                        </a>
+                                        <span class="cluster-toggle-btn text-gray-600 text-xs"
+                                              onclick="togglePDBViewer('${viewerId}', '${val.value}')">
+                                            <span class="rotate-icon" id="icon-${viewerId}">▶</span> View Members & 3D Structure
+                                        </span>
+                                    </div>
+                                    <div id="${viewerId}" class="pdb-viewer-container"></div>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    html += `
+                            </dd>
+                        </div>
+                    `;
+                    continue;
+                }
 
                 html += `
                     <div class="py-3">
@@ -2063,6 +2205,287 @@
                 lines.push(`${lineNum}  ${seqChunk}`);
             }
             return lines.join('\n');
+        }
+
+        // PDB Visualization Functions
+        let nglStage = null;
+
+        // Extract pan ID from filename (e.g., "pan_1_v1.0.1_..." -> "pan_1")
+        function extractPanIdFromFilename(filename) {
+            const match = filename.match(/^(pan_\d+)_/);
+            return match ? match[1] : null;
+        }
+
+        // Get cluster ID from gene ID (e.g., "pan_53" -> "panc_53")
+        function getClusterIdFromGene(geneId) {
+            // Extract the numeric part from pan_X
+            const match = geneId.match(/^pan_(\d+)$/);
+            if (match) {
+                return `panc_${match[1]}`;
+            }
+            return null;
+        }
+
+        // Check if PDB file exists for a gene
+        async function checkPDBExists(geneId) {
+            try {
+                // Try to find a PDB file matching pan_X_v*.pdb pattern
+                const response = await fetch(`pdb_files/${geneId}_v1.0.1_identical_unrelaxed_rank_001_alphafold2_ptm_model_1_seed_000.pdb`, {
+                    method: 'HEAD'
+                });
+                if (response.ok) return true;
+
+                // Try other model variants
+                for (let model = 1; model <= 5; model++) {
+                    const testResponse = await fetch(`pdb_files/${geneId}_v1.0.1_identical_unrelaxed_rank_001_alphafold2_ptm_model_${model}_seed_000.pdb`, {
+                        method: 'HEAD'
+                    });
+                    if (testResponse.ok) return true;
+                }
+                return false;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Get PDB file path for a gene
+        async function getPDBPath(geneId) {
+            // Try different model variants
+            for (let model = 1; model <= 5; model++) {
+                const path = `pdb_files/${geneId}_v1.0.1_identical_unrelaxed_rank_001_alphafold2_ptm_model_${model}_seed_000.pdb`;
+                try {
+                    const response = await fetch(path, { method: 'HEAD' });
+                    if (response.ok) return path;
+                } catch (error) {
+                    continue;
+                }
+            }
+            return null;
+        }
+
+        // Find cluster members
+        function findClusterMembers(clusterId) {
+            const members = [];
+            for (const geneId of panresData.categories.PanGene) {
+                const gene = getSubject(geneId);
+                if (!gene || !gene.properties['member_of']) continue;
+
+                // Check if this gene is a member of the cluster
+                const isMember = gene.properties['member_of'].some(val =>
+                    !val.is_literal && val.value === clusterId
+                );
+
+                if (isMember) {
+                    members.push(geneId);
+                }
+            }
+            return members;
+        }
+
+        // Get representative gene for cluster (the one with PDB structure)
+        async function getClusterRepresentative(clusterId) {
+            // Extract numeric part from panc_X
+            const match = clusterId.match(/^panc_(\d+)$/);
+            if (!match) return null;
+
+            const geneId = `pan_${match[1]}`;
+
+            // Check if PDB exists for this gene
+            const hasPDB = await checkPDBExists(geneId);
+            return hasPDB ? geneId : null;
+        }
+
+        // Store NGL stages for multiple viewers
+        const nglStages = {};
+        const nglComponents = {};
+        const currentRepresentation = {};
+
+        // Toggle PDB viewer expansion
+        async function togglePDBViewer(viewerId, clusterId) {
+            const container = document.getElementById(viewerId);
+            const icon = document.getElementById(`icon-${viewerId}`);
+
+            if (!container) return;
+
+            // If already open, close it
+            if (container.classList.contains('active')) {
+                container.classList.remove('active');
+                icon.classList.remove('open');
+                if (nglStages[viewerId]) {
+                    nglStages[viewerId].dispose();
+                    delete nglStages[viewerId];
+                    delete nglComponents[viewerId];
+                    delete currentRepresentation[viewerId];
+                }
+                return;
+            }
+
+            // Open and load content
+            icon.classList.add('open');
+
+            const clusterSubject = getSubject(clusterId);
+            if (!clusterSubject) {
+                alert('Cluster not found');
+                return;
+            }
+
+            // Get representative gene
+            const repGene = await getClusterRepresentative(clusterId);
+            if (!repGene) {
+                container.innerHTML = '<div class="p-4 text-sm text-gray-600">No PDB structure available for this cluster</div>';
+                container.classList.add('active');
+                return;
+            }
+
+            // Get PDB file path
+            const pdbPath = await getPDBPath(repGene);
+            if (!pdbPath) {
+                container.innerHTML = '<div class="p-4 text-sm text-gray-600">PDB file not found</div>';
+                container.classList.add('active');
+                return;
+            }
+
+            // Get cluster members
+            const members = findClusterMembers(clusterId);
+
+            // Build viewer HTML
+            const viewportId = `viewport-${viewerId}`;
+            const membersHtml = members
+                .sort((a, b) => a.localeCompare(b))
+                .map(geneId => {
+                    const gene = getSubject(geneId);
+                    const isRep = geneId === repGene;
+                    return `
+                        <div class="py-1 ${isRep ? 'font-semibold text-primary' : ''}">
+                            <a href="#" onclick="showDetails('${geneId}'); return false;"
+                               class="text-primary hover:underline">
+                                ${gene ? gene.label : geneId}
+                            </a>
+                            ${isRep ? ' (Representative - 3D structure shown)' : ''}
+                        </div>
+                    `;
+                }).join('');
+
+            container.innerHTML = `
+                <div class="viz-controls">
+                    <span class="text-xs font-medium text-gray-600">Representation:</span>
+                    <button class="viz-btn active" onclick="changeRepresentation('${viewerId}', 'cartoon')">Cartoon</button>
+                    <button class="viz-btn" onclick="changeRepresentation('${viewerId}', 'backbone')">Backbone</button>
+                    <button class="viz-btn" onclick="changeRepresentation('${viewerId}', 'spacefill')">Spacefill</button>
+                    <button class="viz-btn" onclick="changeRepresentation('${viewerId}', 'surface')">Surface</button>
+                    <button class="viz-btn" onclick="changeRepresentation('${viewerId}', 'ribbon')">Ribbon</button>
+                    <span class="text-xs font-medium text-gray-600 ml-4">Actions:</span>
+                    <button class="viz-btn" onclick="downloadPDB('${pdbPath}', '${repGene}')">Download PDB</button>
+                </div>
+                <div class="cluster-info">
+                    <div class="text-sm">
+                        <strong>Cluster:</strong> ${clusterId} |
+                        <strong>Representative:</strong> ${repGene} |
+                        <strong>Members:</strong> ${members.length}
+                    </div>
+                </div>
+                <div id="${viewportId}" style="width: 100%; height: 500px; background: #000;"></div>
+                <div class="cluster-members">
+                    <h4 class="font-semibold text-gray-800 mb-2">Cluster Members (${members.length}):</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">${membersHtml}</div>
+                </div>
+            `;
+
+            container.classList.add('active');
+
+            // Initialize representation tracking
+            currentRepresentation[viewerId] = 'cartoon';
+
+            // Load PDB structure
+            setTimeout(() => loadPDBStructure(viewportId, viewerId, pdbPath), 100);
+        }
+
+        // Load PDB structure using NGL
+        function loadPDBStructure(viewportId, viewerId, pdbPath) {
+            const viewport = document.getElementById(viewportId);
+            if (!viewport) return;
+
+            // Clear previous structure for this viewer
+            if (nglStages[viewerId]) {
+                nglStages[viewerId].dispose();
+            }
+
+            // Create new NGL stage
+            nglStages[viewerId] = new NGL.Stage(viewport, {
+                backgroundColor: 'black'
+            });
+
+            // Load PDB file
+            nglStages[viewerId].loadFile(pdbPath, { ext: 'pdb' }).then(function (component) {
+                nglComponents[viewerId] = component;
+
+                // Default representation: cartoon
+                component.addRepresentation('cartoon', {
+                    colorScheme: 'chainid'
+                });
+
+                // Auto-view
+                component.autoView();
+
+                // Handle window resize
+                window.addEventListener('resize', function () {
+                    if (nglStages[viewerId]) nglStages[viewerId].handleResize();
+                });
+            }).catch(function (error) {
+                console.error('Error loading PDB:', error);
+                viewport.innerHTML = '<div class="flex items-center justify-center h-full text-white">Failed to load PDB structure</div>';
+            });
+        }
+
+        // Change visualization representation
+        function changeRepresentation(viewerId, repType) {
+            if (!nglComponents[viewerId]) return;
+
+            // Update button states
+            const container = document.getElementById(viewerId);
+            container.querySelectorAll('.viz-btn').forEach(btn => {
+                if (btn.textContent.toLowerCase() === repType) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Remove all representations
+            nglComponents[viewerId].removeAllRepresentations();
+
+            // Add new representation
+            const repConfig = {
+                colorScheme: 'chainid'
+            };
+
+            if (repType === 'surface') {
+                repConfig.opacity = 0.8;
+            }
+
+            nglComponents[viewerId].addRepresentation(repType, repConfig);
+            nglComponents[viewerId].autoView();
+
+            currentRepresentation[viewerId] = repType;
+        }
+
+        // Download PDB file
+        async function downloadPDB(pdbPath, geneName) {
+            try {
+                const response = await fetch(pdbPath);
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${geneName}.pdb`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error downloading PDB:', error);
+                alert('Failed to download PDB file');
+            }
         }
 
         // Search functionality
