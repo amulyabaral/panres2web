@@ -1700,6 +1700,7 @@
             // Determine entity type for display
             let entityType = '';
             if (panresData.categories.PanGene.includes(id)) entityType = 'PanRes Gene';
+            else if (subject.types && subject.types.includes('PanProtein')) entityType = 'PanRes Protein';
             else if (panresData.categories.AntibioticClass.includes(id)) entityType = 'Antibiotic Class';
             else if (panresData.categories.Phenotype.includes(id)) entityType = 'Phenotype';
             else if (panresData.categories.Mechanism.includes(id)) entityType = 'Resistance Mechanism';
@@ -1759,8 +1760,9 @@
 
             html += ``;
 
-            // For genes, show key information first
+            // Detect entity type
             const isGene = panresData.categories.PanGene.includes(id);
+            const isProtein = subject.types && subject.types.includes('PanProtein');
 
             if (isGene) {
                 html += '<div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">';
@@ -1842,23 +1844,85 @@
                 }
             }
 
+            // For proteins, show protein cluster and 3D structure
+            let correspondingGene = null;
+            if (isProtein) {
+                // Show protein cluster membership
+                if (subject.properties['member_of']) {
+                    for (const clusterRef of subject.properties['member_of']) {
+                        if (!clusterRef.is_literal) {
+                            const proteinClusterId = clusterRef.value;
+                            const proteinCluster = getSubject(proteinClusterId);
+                            const proteinClusterName = proteinCluster ? proteinCluster.label : proteinClusterId;
+                            const proteinViewerId = `pdb-viewer-protein-${id}`;
+                            const proteinMembers = findProteinClusterMembers(proteinClusterId);
+
+                            html += `
+                                <div class="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Protein Cluster</h3>
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                                        <div class="text-sm font-medium text-gray-700">
+                                            <a href="#" onclick="showDetails('${proteinClusterId}'); return false;"
+                                               class="text-primary hover:underline">
+                                                ${proteinClusterName}
+                                            </a>
+                                        </div>
+                                        <button class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
+                                                onclick="togglePDBViewer('${proteinViewerId}', '${proteinClusterId}')">
+                                            <span class="rotate-icon" id="icon-${proteinViewerId}">▶</span> View Centroid 3D Structure & Cluster Members
+                                        </button>
+                                    </div>
+                                    <div class="text-xs text-gray-600 mb-2">
+                                        Protein Members: ${proteinMembers.length}
+                                    </div>
+                                    <div id="${proteinViewerId}" class="pdb-viewer-container"></div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                // Show corresponding gene if this protein has one
+                const proteinMatch = id.match(/^Pan_(\d+)$/);
+                if (proteinMatch) {
+                    correspondingGene = `pan_${proteinMatch[1]}`;
+                    const geneSubject = getSubject(correspondingGene);
+                    if (geneSubject) {
+                        html += `
+                            <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-3">Corresponding Gene</h3>
+                                <a href="#" onclick="showDetails('${correspondingGene}'); return false;"
+                                   class="text-primary hover:underline text-sm font-medium">
+                                    ${geneSubject.label}
+                                </a>
+                            </div>
+                        `;
+                    }
+                }
+            }
+
             // Show related genes if this is an antibiotic class, phenotype, mechanism, database, or cluster
+            // For proteins, exclude the corresponding gene from related genes
             const relatedGenes = findRelatedGenes(id);
-            if (relatedGenes.length > 0) {
+            const filteredRelatedGenes = subject.types && subject.types.includes('PanProtein') && correspondingGene
+                ? relatedGenes.filter(geneId => geneId !== correspondingGene)
+                : relatedGenes;
+
+            if (filteredRelatedGenes.length > 0) {
                 // Check if this is a cluster (panc_*)
                 const isCluster = id.startsWith('panc_');
 
                 html += `
                     <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
                         <h3 class="text-lg font-semibold text-gray-800 mb-3">
-                            ${isCluster ? 'Cluster Members' : 'Related Genes'} (${relatedGenes.length})
+                            ${isCluster ? 'Cluster Members' : 'Related Genes'} (${filteredRelatedGenes.length})
                             <button onclick="showRelatedGenes('${id}')"
                                     class="ml-2 text-sm bg-primary hover:bg-opacity-80 text-white px-3 py-1 rounded">
                                 Browse All ▶
                             </button>
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            ${relatedGenes.slice(0, 9).map(geneId => {
+                            ${filteredRelatedGenes.slice(0, 9).map(geneId => {
                                 const gene = getSubject(geneId);
                                 return `
                                     <a href="#" onclick="showDetails('${geneId}'); return false;"
@@ -1867,7 +1931,7 @@
                                     </a>
                                 `;
                             }).join('')}
-                            ${relatedGenes.length > 9 ? `<div class="text-sm text-gray-500">...and ${relatedGenes.length - 9} more</div>` : ''}
+                            ${filteredRelatedGenes.length > 9 ? `<div class="text-sm text-gray-500">...and ${filteredRelatedGenes.length - 9} more</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -1919,12 +1983,24 @@
             }
 
             // Other properties section
-            html += '<h3 class="text-xl font-semibold text-gray-800 mb-3">Additional Information</h3>';
-            html += '<dl class="divide-y divide-gray-200">';
-
             // Skip certain properties that we've already shown or don't want to display
             const skipProps = ['rdfs:label', 'rdf:type', 'rdfs:subClassOf', 'is_drug_combination'];
-            const alreadyShown = isGene ? ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance', 'is_from_database', 'same_as'] : [];
+            const alreadyShown = isGene ? ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance', 'is_from_database', 'same_as'] : ['member_of'];
+
+            // Check if there are any properties to show
+            let hasAdditionalInfo = false;
+            for (const [pred, values] of Object.entries(subject.properties)) {
+                if (skipProps.includes(pred) || alreadyShown.includes(pred)) continue;
+                if (pred.startsWith('owl:') || pred.startsWith('rdfs:')) continue;
+                hasAdditionalInfo = true;
+                break;
+            }
+
+            // Only show Additional Information section if there's content
+            if (hasAdditionalInfo) {
+                html += '<h3 class="text-xl font-semibold text-gray-800 mb-3">Additional Information</h3>';
+                html += '<dl class="divide-y divide-gray-200">';
+            }
 
             for (const [pred, values] of Object.entries(subject.properties)) {
                 // Filter out owl: and rdfs: prefixed properties, and skip already shown
@@ -1935,9 +2011,21 @@
 
                 // Special handling for member_of (cluster membership)
                 if (pred === 'member_of') {
+                    // Determine cluster type based on the cluster ID
+                    // panc_* = gene cluster, Pan_* = protein cluster
+                    let clusterLabel = 'Cluster';
+                    if (values.length > 0 && !values[0].is_literal) {
+                        const clusterId = values[0].value;
+                        if (clusterId.match(/^panc_\d+$/)) {
+                            clusterLabel = 'Gene Cluster';
+                        } else if (clusterId.match(/^Pan_\d+$/)) {
+                            clusterLabel = 'Protein Cluster';
+                        }
+                    }
+
                     html += `
                         <div class="py-3">
-                            <dt class="text-sm font-medium text-gray-600 mb-1">Gene Cluster</dt>
+                            <dt class="text-sm font-medium text-gray-600 mb-1">${clusterLabel}</dt>
                             <dd class="text-sm text-gray-800">
                     `;
 
@@ -2061,10 +2149,13 @@
                 `;
             }
 
-            html += `
-                    </dl>
-                </div>
-            `;
+            // Close Additional Information section only if we opened it
+            if (hasAdditionalInfo) {
+                html += `
+                        </dl>
+                    </div>
+                `;
+            }
 
             document.getElementById('detailsContent').innerHTML = html;
             document.getElementById('homeView').classList.add('hidden');
@@ -2594,17 +2685,21 @@
             let members = [];
             let clusterType = 'Cluster';
             let memberType = 'Members';
+            let centroidLabel = 'Centroid';
 
             if (isProteinCluster) {
                 members = findProteinClusterMembers(clusterId);
                 clusterType = 'Protein Cluster';
                 memberType = 'Protein Members';
+                centroidLabel = 'Centroid Protein';
             } else if (isGeneCluster) {
                 members = findClusterMembers(clusterId);
                 clusterType = 'Gene Cluster';
                 memberType = 'Gene Members';
+                centroidLabel = 'Centroid Gene';
             } else {
                 members = findClusterMembers(clusterId);
+                centroidLabel = 'Centroid Gene';
             }
 
             // Build viewer HTML
@@ -2681,12 +2776,13 @@
                         <button class="viz-btn" onclick="downloadPDB('${pdbPath}', '${repGene}')">Download PDB</button>
                         <button class="viz-btn" onclick="resetView('${viewerId}')">Reset View</button>
                         <button class="viz-btn" onclick="toggleSpin('${viewerId}')">Toggle Spin</button>
+                        <span class="text-xs text-gray-500 ml-4 italic">💡 Tip: Use mouse scroll or two-finger drag to zoom</span>
                     </div>
                 </div>
                 <div class="cluster-info">
                     <div class="text-sm">
                         <strong>${clusterType}:</strong> ${clusterId} |
-                        <strong>Centroid Gene:</strong> ${repGene} (3D structure) |
+                        <strong>${centroidLabel}:</strong> ${repGene} (3D structure) |
                         <strong>${memberType}:</strong> ${members.length}
                     </div>
                 </div>
@@ -2731,6 +2827,12 @@
             // Load PDB file
             nglStages[viewerId].loadFile(pdbPath, { ext: 'pdb' }).then(function (component) {
                 nglComponents[viewerId] = component;
+
+                // Remove loading spinner
+                const spinner = viewport.querySelector('.pdb-loading-spinner');
+                if (spinner) {
+                    spinner.remove();
+                }
 
                 // Default representation: cartoon with package default colors
                 component.addRepresentation('cartoon');
@@ -2838,8 +2940,15 @@
 
         // Reset view to default
         function resetView(viewerId) {
-            if (!nglComponents[viewerId]) return;
-            nglComponents[viewerId].autoView();
+            if (!nglStages[viewerId]) return;
+
+            const viewer = nglStages[viewerId].viewer;
+
+            // Reset camera position, zoom, and rotation to fit all components
+            nglStages[viewerId].autoView();
+
+            // Reset camera rotation to default orientation
+            viewer.controls.reset();
         }
 
         // Toggle spin animation
@@ -2892,8 +3001,12 @@
                         // Calculate match score for prioritization
                         let score = 0;
 
-                        // Highest priority: exact match
-                        if (labelLower === query || idLower === query) {
+                        // Check for case-sensitive exact match first (highest priority)
+                        if (subject.label === e.target.value.trim() || subject.id === e.target.value.trim()) {
+                            score = 2000;
+                        }
+                        // Exact match (case-insensitive)
+                        else if (labelLower === query || idLower === query) {
                             score = 1000;
                         }
                         // High priority: starts with query
@@ -2934,6 +3047,7 @@
                         // Determine type
                         let typeLabel = 'Other';
                         if (panresData.categories.PanGene.includes(item.id)) typeLabel = 'PanGene';
+                        else if (item.types && item.types.includes('PanProtein')) typeLabel = 'Protein';
                         else if (panresData.categories.AntibioticClass.includes(item.id)) typeLabel = 'Resistance Class';
                         else if (panresData.categories.Phenotype.includes(item.id)) typeLabel = 'Phenotype';
                         else if (panresData.categories.Mechanism.includes(item.id)) typeLabel = 'Mechanism';
@@ -2941,7 +3055,7 @@
 
                         return `
                             <div class="py-2 px-3 hover:bg-accent-2 hover:bg-opacity-20 cursor-pointer border-b border-gray-200"
-                                 onclick="showDetails('${item.id}')">
+                                 onclick="showDetails('${item.id}'); return false;">
                                 <div class="font-medium text-primary">${item.label}</div>
                                 <div class="text-xs text-gray-500">${item.id} • ${typeLabel}</div>
                             </div>
