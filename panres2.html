@@ -327,6 +327,30 @@
             display: block;
         }
 
+        /* Loading spinner for PDB viewer */
+        .pdb-loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .pdb-spinner {
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #9333ea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         #viewport {
             width: 100%;
             height: 500px;
@@ -1823,7 +1847,6 @@
             if (relatedGenes.length > 0) {
                 // Check if this is a cluster (panc_*)
                 const isCluster = id.startsWith('panc_');
-                const clusterViewerId = `pdb-viewer-${id}`;
 
                 html += `
                     <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -1831,16 +1854,9 @@
                             ${isCluster ? 'Cluster Members' : 'Related Genes'} (${relatedGenes.length})
                             <button onclick="showRelatedGenes('${id}')"
                                     class="ml-2 text-sm bg-primary hover:bg-opacity-80 text-white px-3 py-1 rounded">
-                                Browse All
+                                Browse All ▶
                             </button>
-                            ${isCluster ? `
-                                <button onclick="togglePDBViewer('${clusterViewerId}', '${id}')"
-                                        class="ml-2 text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded">
-                                    <span class="rotate-icon" id="icon-${clusterViewerId}">▶</span> View Centroid 3D Structure
-                                </button>
-                            ` : ''}
                         </h3>
-                        <div id="${clusterViewerId}" class="pdb-viewer-container"></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                             ${relatedGenes.slice(0, 9).map(geneId => {
                                 const gene = getSubject(geneId);
@@ -1855,6 +1871,51 @@
                         </div>
                     </div>
                 `;
+            }
+
+            // Show protein clusters for gene clusters (panc_*)
+            if (id.startsWith('panc_')) {
+                const proteinClusterIds = findProteinClustersForGeneCluster(id);
+                if (proteinClusterIds.length > 0) {
+                    html += `
+                        <div class="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-200">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                                Associated Protein Clusters (${proteinClusterIds.length})
+                            </h3>
+                    `;
+
+                    for (const proteinClusterId of proteinClusterIds) {
+                        const proteinCluster = getSubject(proteinClusterId);
+                        const proteinClusterName = proteinCluster ? proteinCluster.label : proteinClusterId;
+                        const proteinViewerId = `pdb-viewer-protein-cluster-${proteinClusterId}`;
+                        const proteinMembers = findProteinClusterMembers(proteinClusterId);
+
+                        html += `
+                            <div class="mb-4 pb-4 border-b border-purple-200 last:border-b-0 last:pb-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                                    <div class="text-sm font-medium text-gray-700">
+                                        <a href="#" onclick="showDetails('${proteinClusterId}'); return false;"
+                                           class="text-primary hover:underline">
+                                            ${proteinClusterName}
+                                        </a>
+                                    </div>
+                                    <button class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
+                                            onclick="togglePDBViewer('${proteinViewerId}', '${proteinClusterId}')">
+                                        <span class="rotate-icon" id="icon-${proteinViewerId}">▶</span> View Centroid 3D Structure & Cluster Members
+                                    </button>
+                                </div>
+                                <div class="text-xs text-gray-600 mb-2">
+                                    Protein Members: ${proteinMembers.length}
+                                </div>
+                                <div id="${proteinViewerId}" class="pdb-viewer-container"></div>
+                            </div>
+                        `;
+                    }
+
+                    html += `
+                        </div>
+                    `;
+                }
             }
 
             // Other properties section
@@ -1876,7 +1937,7 @@
                 if (pred === 'member_of') {
                     html += `
                         <div class="py-3">
-                            <dt class="text-sm font-medium text-gray-600 mb-1">${predDisplay}</dt>
+                            <dt class="text-sm font-medium text-gray-600 mb-1">Gene Cluster</dt>
                             <dd class="text-sm text-gray-800">
                     `;
 
@@ -1884,7 +1945,7 @@
                         if (!val.is_literal) {
                             const clusterSubject = getSubject(val.value);
                             const displayName = clusterSubject ? clusterSubject.label : val.value;
-                            const viewerId = `pdb-viewer-${val.value}`;
+                            const viewerId = `pdb-viewer-gene-cluster-${val.value}`;
 
                             html += `
                                 <div class="mb-2">
@@ -1893,14 +1954,69 @@
                                            class="text-primary hover:underline">
                                             ${displayName}
                                         </a>
-                                        <span class="cluster-toggle-btn text-gray-600 text-xs"
-                                              onclick="togglePDBViewer('${viewerId}', '${val.value}')">
-                                            <span class="rotate-icon" id="icon-${viewerId}">▶</span> View Centroid 3D Structure & Members
-                                        </span>
                                     </div>
-                                    <div id="${viewerId}" class="pdb-viewer-container"></div>
                                 </div>
                             `;
+                        }
+                    }
+
+                    html += `
+                            </dd>
+                        </div>
+                    `;
+                    continue;
+                }
+
+                // Special handling for translates_to to also show protein cluster
+                if (pred === 'translates_to' && isGene) {
+                    html += `
+                        <div class="py-3">
+                            <dt class="text-sm font-medium text-gray-600 mb-1">${predDisplay}</dt>
+                            <dd class="text-sm text-gray-800">
+                    `;
+
+                    for (const val of values) {
+                        if (!val.is_literal) {
+                            const proteinSubject = getSubject(val.value);
+                            const displayName = proteinSubject ? proteinSubject.label : val.value;
+
+                            html += `
+                                <div class="mb-2">
+                                    <a href="#" onclick="showDetails('${val.value}'); return false;"
+                                       class="text-primary hover:underline">
+                                        ${displayName}
+                                    </a>
+                                </div>
+                            `;
+
+                            // Check if this protein has a protein cluster
+                            if (proteinSubject && proteinSubject.properties['member_of']) {
+                                for (const proteinClusterRef of proteinSubject.properties['member_of']) {
+                                    if (!proteinClusterRef.is_literal) {
+                                        const proteinClusterId = proteinClusterRef.value;
+                                        const proteinCluster = getSubject(proteinClusterId);
+                                        const proteinClusterName = proteinCluster ? proteinCluster.label : proteinClusterId;
+                                        const proteinViewerId = `pdb-viewer-protein-cluster-${proteinClusterId}`;
+
+                                        html += `
+                                            <div class="mt-3 pt-3 border-t border-gray-200">
+                                                <div class="text-sm font-medium text-gray-600 mb-2">Protein Cluster</div>
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <a href="#" onclick="showDetails('${proteinClusterId}'); return false;"
+                                                       class="text-primary hover:underline">
+                                                        ${proteinClusterName}
+                                                    </a>
+                                                    <button class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
+                                                            onclick="togglePDBViewer('${proteinViewerId}', '${proteinClusterId}')">
+                                                        <span class="rotate-icon" id="icon-${proteinViewerId}">▶</span> View 3D Structure & Cluster Members
+                                                    </button>
+                                                </div>
+                                                <div id="${proteinViewerId}" class="pdb-viewer-container"></div>
+                                            </div>
+                                        `;
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -2282,8 +2398,122 @@
             return members;
         }
 
+        // Find protein cluster members (all proteins that are member_of a protein cluster centroid)
+        function findProteinClusterMembers(proteinClusterId) {
+            const members = [];
+            // Search through all subjects to find proteins
+            for (const subjectId in panresData.subjects) {
+                const subject = panresData.subjects[subjectId];
+
+                // Check if this is a PanProtein type
+                if (!subject.types || !subject.types.includes('PanProtein')) continue;
+                if (!subject.properties['member_of']) continue;
+
+                // Check if this protein is a member of the cluster
+                const isMember = subject.properties['member_of'].some(val =>
+                    !val.is_literal && val.value === proteinClusterId
+                );
+
+                if (isMember) {
+                    members.push(subjectId);
+                }
+            }
+            return members;
+        }
+
+        // Find all unique protein clusters associated with genes in a gene cluster
+        function findProteinClustersForGeneCluster(geneClusterId) {
+            const proteinClusters = new Set();
+
+            // Get all genes in the gene cluster
+            const genes = findClusterMembers(geneClusterId);
+
+            // For each gene, find its proteins and their protein clusters
+            for (const geneId of genes) {
+                const gene = getSubject(geneId);
+                if (!gene || !gene.properties['translates_to']) continue;
+
+                // Get proteins this gene translates to
+                for (const proteinRef of gene.properties['translates_to']) {
+                    if (proteinRef.is_literal) continue;
+
+                    const proteinId = proteinRef.value;
+                    const protein = getSubject(proteinId);
+                    if (!protein || !protein.properties['member_of']) continue;
+
+                    // Get protein clusters this protein belongs to
+                    for (const clusterRef of protein.properties['member_of']) {
+                        if (!clusterRef.is_literal) {
+                            proteinClusters.add(clusterRef.value);
+                        }
+                    }
+                }
+            }
+
+            return Array.from(proteinClusters);
+        }
+
+        // Resolve protein cluster (Pan_XXXX) to gene with PDB structure
+        async function resolveProteinToGene(proteinClusterId) {
+            const proteinCluster = getSubject(proteinClusterId);
+            if (!proteinCluster) return null;
+
+            // Check if this protein cluster has a corresponding gene
+            // Pattern: Pan_XXXX -> pan_XXXX
+            const match = proteinClusterId.match(/^Pan_(\d+)$/);
+            if (match) {
+                const geneId = `pan_${match[1]}`;
+                const gene = getSubject(geneId);
+
+                // Check if this gene has a PDB
+                if (gene) {
+                    const hasPDB = await checkPDBExists(geneId);
+                    if (hasPDB) return geneId;
+
+                    // If this gene doesn't have PDB, check its cluster
+                    if (gene.properties['member_of']) {
+                        for (const clusterRef of gene.properties['member_of']) {
+                            if (!clusterRef.is_literal) {
+                                const repGene = await getClusterRepresentative(clusterRef.value);
+                                if (repGene) return repGene;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // If the protein cluster itself has member_of pointing to another protein cluster
+            // Follow that chain (e.g., Pan_10044 -> member_of -> Pan_8331)
+            if (proteinCluster.properties['member_of']) {
+                for (const memberOf of proteinCluster.properties['member_of']) {
+                    if (!memberOf.is_literal) {
+                        const parentProteinId = memberOf.value;
+
+                        // Check if parent is also a protein cluster (Pan_XXXX)
+                        if (parentProteinId.match(/^Pan_\d+$/)) {
+                            const result = await resolveProteinToGene(parentProteinId);
+                            if (result) return result;
+                        }
+                        // Or if it's a gene cluster (panc_XXXX)
+                        else if (parentProteinId.match(/^panc_\d+$/)) {
+                            const result = await getClusterRepresentative(parentProteinId);
+                            if (result) return result;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
         // Get centroid gene for cluster (the one with PDB structure)
         async function getClusterRepresentative(clusterId) {
+            // Handle protein clusters (Pan_XXXX)
+            if (clusterId.match(/^Pan_\d+$/)) {
+                return await resolveProteinToGene(clusterId);
+            }
+
+            // Handle gene clusters (panc_XXXX)
             // First, try the gene matching the cluster ID
             const match = clusterId.match(/^panc_(\d+)$/);
             if (match) {
@@ -2308,6 +2538,8 @@
         const nglStages = {};
         const nglComponents = {};
         const currentRepresentation = {};
+        const currentColorScheme = {};
+        const isSpinning = {};
 
         // Toggle PDB viewer expansion
         async function togglePDBViewer(viewerId, clusterId) {
@@ -2354,56 +2586,128 @@
                 return;
             }
 
+            // Determine if this is a protein cluster (Pan_XXXX) or gene cluster (panc_XXXX)
+            const isProteinCluster = clusterId.match(/^Pan_\d+$/);
+            const isGeneCluster = clusterId.match(/^panc_\d+$/);
+
             // Get cluster members
-            const members = findClusterMembers(clusterId);
+            let members = [];
+            let clusterType = 'Cluster';
+            let memberType = 'Members';
+
+            if (isProteinCluster) {
+                members = findProteinClusterMembers(clusterId);
+                clusterType = 'Protein Cluster';
+                memberType = 'Protein Members';
+            } else if (isGeneCluster) {
+                members = findClusterMembers(clusterId);
+                clusterType = 'Gene Cluster';
+                memberType = 'Gene Members';
+            } else {
+                members = findClusterMembers(clusterId);
+            }
 
             // Build viewer HTML
             const viewportId = `viewport-${viewerId}`;
             const membersHtml = members
                 .sort((a, b) => a.localeCompare(b))
-                .map(geneId => {
-                    const gene = getSubject(geneId);
-                    const isCentroid = geneId === repGene;
+                .map(memberId => {
+                    const member = getSubject(memberId);
+                    const isCentroid = memberId === clusterId || memberId === repGene;
+
+                    // For protein clusters, show both the protein and its corresponding gene
+                    let extraInfo = '';
+                    if (isProteinCluster && member) {
+                        // Try to find the corresponding gene
+                        const geneMatch = memberId.match(/^Pan_(\d+)$/);
+                        if (geneMatch) {
+                            const correspondingGene = `pan_${geneMatch[1]}`;
+                            const geneSubject = getSubject(correspondingGene);
+                            if (geneSubject) {
+                                extraInfo = ` <span class="text-xs text-gray-500">(gene: <a href="#" onclick="showDetails('${correspondingGene}'); return false;" class="text-primary hover:underline">${correspondingGene}</a>)</span>`;
+                            }
+                        }
+                    }
+
                     return `
                         <div class="py-1 ${isCentroid ? 'font-semibold text-primary' : ''}">
-                            <a href="#" onclick="showDetails('${geneId}'); return false;"
+                            <a href="#" onclick="showDetails('${memberId}'); return false;"
                                class="text-primary hover:underline">
-                                ${gene ? gene.label : geneId}
+                                ${member ? member.label : memberId}
                             </a>
                             ${isCentroid ? ' <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">Centroid - 3D structure</span>' : ''}
+                            ${extraInfo}
                         </div>
                     `;
                 }).join('');
 
             container.innerHTML = `
                 <div class="viz-controls">
-                    <span class="text-xs font-medium text-gray-600">Representation:</span>
-                    <button class="viz-btn active" onclick="changeRepresentation('${viewerId}', 'cartoon')">Cartoon</button>
-                    <button class="viz-btn" onclick="changeRepresentation('${viewerId}', 'backbone')">Backbone</button>
-                    <button class="viz-btn" onclick="changeRepresentation('${viewerId}', 'spacefill')">Spacefill</button>
-                    <button class="viz-btn" onclick="changeRepresentation('${viewerId}', 'surface')">Surface</button>
-                    <button class="viz-btn" onclick="changeRepresentation('${viewerId}', 'ribbon')">Ribbon</button>
-                    <span class="text-xs font-medium text-gray-600 ml-4">Actions:</span>
-                    <button class="viz-btn" onclick="downloadPDB('${pdbPath}', '${repGene}')">Download PDB</button>
+                    <div class="mb-2">
+                        <span class="text-xs font-medium text-gray-600">Representation:</span>
+                        <button class="viz-btn active" data-rep onclick="changeRepresentation('${viewerId}', 'cartoon')">Cartoon</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'backbone')">Backbone</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'ball+stick')">Ball+Stick</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'licorice')">Licorice</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'spacefill')">Spacefill</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'surface')">Surface</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'ribbon')">Ribbon</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'rope')">Rope</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'tube')">Tube</button>
+                    </div>
+                    <div class="mb-2">
+                        <span class="text-xs font-medium text-gray-600">Color Scheme:</span>
+                        <button class="viz-btn active" data-color onclick="changeColorScheme('${viewerId}', '')">Default</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'chainname')">Chain</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'element')">Element</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'residueindex')">Residue</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'sstruc')">Secondary Structure</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'bfactor')">B-factor</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'hydrophobicity')">Hydrophobicity</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'atomindex')">Atom Index</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'random')">Random</button>
+                    </div>
+                    <div class="mb-2">
+                        <span class="text-xs font-medium text-gray-600">Background:</span>
+                        <button class="viz-btn active" data-bg onclick="changeBackground('${viewerId}', 'black')">Black</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'white')">White</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'gray')">Gray</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', '#1a1a2e')">Dark Blue</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', '#0f0f23')">Navy</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', '#2d2d2d')">Charcoal</button>
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-gray-600">Actions:</span>
+                        <button class="viz-btn" onclick="downloadPDB('${pdbPath}', '${repGene}')">Download PDB</button>
+                        <button class="viz-btn" onclick="resetView('${viewerId}')">Reset View</button>
+                        <button class="viz-btn" onclick="toggleSpin('${viewerId}')">Toggle Spin</button>
+                    </div>
                 </div>
                 <div class="cluster-info">
                     <div class="text-sm">
-                        <strong>Cluster:</strong> ${clusterId} |
-                        <strong>Centroid:</strong> ${repGene} (3D structure) |
-                        <strong>Members:</strong> ${members.length}
+                        <strong>${clusterType}:</strong> ${clusterId} |
+                        <strong>Centroid Gene:</strong> ${repGene} (3D structure) |
+                        <strong>${memberType}:</strong> ${members.length}
                     </div>
                 </div>
-                <div id="${viewportId}" style="width: 100%; height: 500px; background: #000;"></div>
+                <div id="${viewportId}" style="width: 100%; height: 500px; background: #000000; border: 1px solid #e5e7eb; border-radius: 8px;">
+                    <div class="pdb-loading-spinner">
+                        <div class="pdb-spinner"></div>
+                        <span>Loading 3D structure...</span>
+                    </div>
+                </div>
                 <div class="cluster-members">
-                    <h4 class="font-semibold text-gray-800 mb-2">Cluster Members (${members.length}):</h4>
+                    <h4 class="font-semibold text-gray-800 mb-2">${memberType} (${members.length}):</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">${membersHtml}</div>
                 </div>
             `;
 
             container.classList.add('active');
 
-            // Initialize representation tracking
+            // Initialize representation and color tracking
             currentRepresentation[viewerId] = 'cartoon';
+            currentColorScheme[viewerId] = '';
+            isSpinning[viewerId] = false;
 
             // Load PDB structure
             setTimeout(() => loadPDBStructure(viewportId, viewerId, pdbPath), 100);
@@ -2428,10 +2732,8 @@
             nglStages[viewerId].loadFile(pdbPath, { ext: 'pdb' }).then(function (component) {
                 nglComponents[viewerId] = component;
 
-                // Default representation: cartoon
-                component.addRepresentation('cartoon', {
-                    colorScheme: 'chainid'
-                });
+                // Default representation: cartoon with package default colors
+                component.addRepresentation('cartoon');
 
                 // Auto-view
                 component.autoView();
@@ -2450,10 +2752,10 @@
         function changeRepresentation(viewerId, repType) {
             if (!nglComponents[viewerId]) return;
 
-            // Update button states
+            // Update button states for representation buttons
             const container = document.getElementById(viewerId);
-            container.querySelectorAll('.viz-btn').forEach(btn => {
-                if (btn.textContent.toLowerCase() === repType) {
+            container.querySelectorAll('.viz-btn[data-rep]').forEach(btn => {
+                if (btn.textContent.toLowerCase().replace('+', '') === repType.replace('+', '')) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
@@ -2463,11 +2765,15 @@
             // Remove all representations
             nglComponents[viewerId].removeAllRepresentations();
 
-            // Add new representation
-            const repConfig = {
-                colorScheme: 'chainid'
-            };
+            // Build representation config
+            const repConfig = {};
 
+            // Apply current color scheme if set
+            if (currentColorScheme[viewerId]) {
+                repConfig.colorScheme = currentColorScheme[viewerId];
+            }
+
+            // Add type-specific settings
             if (repType === 'surface') {
                 repConfig.opacity = 0.8;
             }
@@ -2495,6 +2801,73 @@
                 console.error('Error downloading PDB:', error);
                 alert('Failed to download PDB file');
             }
+        }
+
+        // Change color scheme
+        function changeColorScheme(viewerId, colorScheme) {
+            if (!nglComponents[viewerId]) return;
+
+            // Update button states for color buttons
+            const container = document.getElementById(viewerId);
+            container.querySelectorAll('.viz-btn[data-color]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Store the color scheme
+            currentColorScheme[viewerId] = colorScheme;
+
+            // Remove all representations
+            nglComponents[viewerId].removeAllRepresentations();
+
+            // Build representation config
+            const repConfig = {};
+            if (colorScheme) {
+                repConfig.colorScheme = colorScheme;
+            }
+
+            // Add type-specific settings
+            const repType = currentRepresentation[viewerId];
+            if (repType === 'surface') {
+                repConfig.opacity = 0.8;
+            }
+
+            nglComponents[viewerId].addRepresentation(repType, repConfig);
+            nglComponents[viewerId].autoView();
+        }
+
+        // Reset view to default
+        function resetView(viewerId) {
+            if (!nglComponents[viewerId]) return;
+            nglComponents[viewerId].autoView();
+        }
+
+        // Toggle spin animation
+        function toggleSpin(viewerId) {
+            if (!nglStages[viewerId]) return;
+
+            isSpinning[viewerId] = !isSpinning[viewerId];
+
+            if (isSpinning[viewerId]) {
+                nglStages[viewerId].setSpin(true);
+            } else {
+                nglStages[viewerId].setSpin(false);
+            }
+        }
+
+        // Change background color
+        function changeBackground(viewerId, color) {
+            if (!nglStages[viewerId]) return;
+
+            // Update button states for background buttons
+            const container = document.getElementById(viewerId);
+            container.querySelectorAll('.viz-btn[data-bg]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Set the background color
+            nglStages[viewerId].setParameters({ backgroundColor: color });
         }
 
         // Search functionality
