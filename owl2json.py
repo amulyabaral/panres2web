@@ -16,7 +16,7 @@ import os
 GITHUB_RAW_URL = 'https://raw.githubusercontent.com/rambiolab/PanResOntology/refs/heads/master/ontology/panres_v2.owl'
 OWL_FILE = 'panres_v2.owl'
 JSON_OUTPUT = 'panres2.json'
-BASE_IRI = "http://myonto.com/PanResOntology.owl#"
+BASE_IRI = "http://genepi.dk/PanResOntology.owl#"
 GENES_FASTA = 'panres2_genes.fa'
 PROTEINS_FASTA = 'panres_final_protein.faa'
 
@@ -222,7 +222,8 @@ def convert_owl_to_json(owl_file, json_file):
             subject_entry['properties'][pred] = values
 
         # Add sequences if this is a gene or protein
-        # Genes start with lowercase 'pan_', proteins start with uppercase 'Pan_'
+        # Genes are in original format (various patterns from databases)
+        # Proteins now use PAN* format (e.g., PAN1, PAN2) instead of Pan_* format
         if subj_id in gene_sequences:
             subject_entry['gene_sequence'] = gene_sequences[subj_id]
         if subj_id in protein_sequences:

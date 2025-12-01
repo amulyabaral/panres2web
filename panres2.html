@@ -1701,6 +1701,10 @@
             let entityType = '';
             if (panresData.categories.PanGene.includes(id)) entityType = 'PanRes Gene';
             else if (subject.types && subject.types.includes('PanProtein')) entityType = 'PanRes Protein';
+            else if (subject.types && subject.types.includes('PanStructure')) entityType = 'Protein Structure';
+            else if (subject.types && subject.types.includes('PanStructureCluster')) entityType = 'Protein Structure Cluster';
+            else if (subject.types && subject.types.includes('PanProteinCluster')) entityType = 'Protein Cluster';
+            else if (subject.types && subject.types.includes('PanGeneCluster')) entityType = 'Gene Cluster';
             else if (panresData.categories.AntibioticClass.includes(id)) entityType = 'Antibiotic Class';
             else if (panresData.categories.Phenotype.includes(id)) entityType = 'Phenotype';
             else if (panresData.categories.Mechanism.includes(id)) entityType = 'Resistance Mechanism';
@@ -1714,12 +1718,11 @@
             let hasSequences = false;
             if (subject.gene_sequence || subject.protein_sequence) {
                 hasSequences = true;
-            } else if (subject.id.startsWith('Pan_')) {
-                const geneId = subject.id.replace('Pan_', 'pan_');
-                const correspondingGene = getSubject(geneId);
-                if (correspondingGene && (correspondingGene.gene_sequence || correspondingGene.protein_sequence)) {
-                    hasSequences = true;
-                }
+            } else if (subject.id.startsWith('PAN') && !subject.id.includes('_struct') && !subject.id.startsWith('PANCL')) {
+                // Protein PAN* (but not PAN*_struct or PANCL*)
+                // Note: In new schema, proteins are PAN* but don't have direct gene correspondence by number
+                // Sequences should be in the protein subject itself
+                hasSequences = subject.gene_sequence || subject.protein_sequence;
             }
 
             let html = `
@@ -1763,6 +1766,32 @@
             // Detect entity type
             const isGene = panresData.categories.PanGene.includes(id);
             const isProtein = subject.types && subject.types.includes('PanProtein');
+
+            // Show E. coli homolog warning for proteins
+            if (isProtein && subject.properties['is_ecoli_homolog']) {
+                const isHomolog = subject.properties['is_ecoli_homolog'].some(val =>
+                    val.is_literal && val.value.toLowerCase() === 'true'
+                );
+                if (isHomolog) {
+                    html += `
+                        <div class="mb-6 bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-yellow-800">E. coli Core Protein Homolog</h3>
+                                    <div class="mt-2 text-sm text-yellow-700">
+                                        <p>Homolog to an E. coli core protein (&gt;95% of strains). Read-based detection may be misleading.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
 
             if (isGene) {
                 html += '<div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">';
@@ -1883,22 +1912,51 @@
                 }
 
                 // Show corresponding gene if this protein has one
-                const proteinMatch = id.match(/^Pan_(\d+)$/);
-                if (proteinMatch) {
-                    correspondingGene = `pan_${proteinMatch[1]}`;
-                    const geneSubject = getSubject(correspondingGene);
-                    if (geneSubject) {
-                        html += `
-                            <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-3">Corresponding Gene</h3>
-                                <a href="#" onclick="showDetails('${correspondingGene}'); return false;"
-                                   class="text-primary hover:underline text-sm font-medium">
-                                    ${geneSubject.label}
-                                </a>
-                            </div>
-                        `;
+                // In the new schema, we need to look for translates_to relationships backwards
+                // i.e., find genes that translate to this protein
+                if (subject.types && subject.types.includes('PanProtein')) {
+                    // Find gene that translates to this protein
+                    const translatingGenes = Object.entries(panresData.subjects)
+                        .filter(([geneId, geneSub]) => {
+                            if (geneSub.properties && geneSub.properties['translates_to']) {
+                                return geneSub.properties['translates_to'].some(t => t.value === id);
+                            }
+                            return false;
+                        })
+                        .map(([geneId]) => geneId);
+
+                    if (translatingGenes.length > 0) {
+                        correspondingGene = translatingGenes[0];
+                        const geneSubject = getSubject(correspondingGene);
+                        if (geneSubject) {
+                            html += `
+                                <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Corresponding Gene</h3>
+                                    <a href="#" onclick="showDetails('${correspondingGene}'); return false;"
+                                       class="text-primary hover:underline text-sm font-medium">
+                                        ${geneSubject.label}
+                                    </a>
+                                </div>
+                            `;
+                        }
                     }
                 }
+            }
+
+            // For protein structures (PAN*_struct), show 3D structure viewer
+            if (subject.types && subject.types.includes('PanStructure')) {
+                const structViewerId = `pdb-viewer-struct-${id}`;
+
+                html += `
+                    <div class="mb-6 bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">3D Structure</h3>
+                        <button class="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded mb-3"
+                                onclick="toggleStructureViewer('${structViewerId}', '${id}')">
+                            <span class="rotate-icon" id="icon-${structViewerId}">▶</span> View 3D Structure
+                        </button>
+                        <div id="${structViewerId}" class="pdb-viewer-container"></div>
+                    </div>
+                `;
             }
 
             // Show related genes if this is an antibiotic class, phenotype, mechanism, database, or cluster
@@ -1937,8 +1995,8 @@
                 `;
             }
 
-            // Show protein clusters for gene clusters (panc_*)
-            if (id.startsWith('panc_')) {
+            // Show protein clusters for gene clusters (pan_cl*)
+            if (id.startsWith('pan_cl')) {
                 const proteinClusterIds = findProteinClustersForGeneCluster(id);
                 if (proteinClusterIds.length > 0) {
                     html += `
@@ -1982,10 +2040,62 @@
                 }
             }
 
+            // For protein clusters (PANCL*), show folds_to and member proteins
+            const isProteinCluster = subject.types && subject.types.includes('PanProteinCluster');
+            if (isProteinCluster) {
+                html += `
+                    <div class="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Protein Cluster Information</h3>
+                `;
+
+                // Show folds_to structure
+                if (subject.properties['folds_to']) {
+                    html += `<div class="mb-3">`;
+                    html += `<div class="text-sm font-medium text-gray-600 mb-1">Folds To</div>`;
+                    for (const val of subject.properties['folds_to']) {
+                        if (!val.is_literal) {
+                            const structSubject = getSubject(val.value);
+                            const displayName = structSubject ? structSubject.label : val.value;
+                            html += `
+                                <a href="#" onclick="showDetails('${val.value}'); return false;"
+                                   class="text-primary hover:underline font-medium">
+                                    ${displayName}
+                                </a>
+                            `;
+                        }
+                    }
+                    html += `</div>`;
+                }
+
+                // Show actual protein members (not just the count)
+                const proteinMembers = findProteinClusterMembers(id);
+                html += `
+                    <div class="mb-3">
+                        <div class="text-sm font-medium text-gray-600 mb-2">Protein Members (${proteinMembers.length})</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                `;
+                for (const proteinId of proteinMembers) {
+                    const protein = getSubject(proteinId);
+                    const proteinLabel = protein ? protein.label : proteinId;
+                    html += `
+                        <a href="#" onclick="showDetails('${proteinId}'); return false;"
+                           class="text-primary hover:underline text-sm">
+                            ${proteinLabel}
+                        </a>
+                    `;
+                }
+                html += `
+                        </div>
+                    </div>
+                `;
+
+                html += `</div>`;
+            }
+
             // Other properties section
             // Skip certain properties that we've already shown or don't want to display
             const skipProps = ['rdfs:label', 'rdf:type', 'rdfs:subClassOf', 'is_drug_combination'];
-            const alreadyShown = isGene ? ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance', 'is_from_database', 'same_as'] : ['member_of'];
+            const alreadyShown = isGene ? ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance', 'is_from_database', 'same_as'] : (isProteinCluster ? ['member_of', 'folds_to', 'has_members'] : ['member_of']);
 
             // Check if there are any properties to show
             let hasAdditionalInfo = false;
@@ -2012,13 +2122,15 @@
                 // Special handling for member_of (cluster membership)
                 if (pred === 'member_of') {
                     // Determine cluster type based on the cluster ID
-                    // panc_* = gene cluster, Pan_* = protein cluster
+                    // pan_cl* = gene cluster, PANCL* = protein cluster, PANCL*_struct = structure cluster
                     let clusterLabel = 'Cluster';
                     if (values.length > 0 && !values[0].is_literal) {
                         const clusterId = values[0].value;
-                        if (clusterId.match(/^panc_\d+$/)) {
+                        if (clusterId.match(/^pan_cl\d+$/)) {
                             clusterLabel = 'Gene Cluster';
-                        } else if (clusterId.match(/^Pan_\d+$/)) {
+                        } else if (clusterId.match(/^PANCL\d+_struct$/)) {
+                            clusterLabel = 'Protein Structure Cluster';
+                        } else if (clusterId.match(/^PANCL\d+$/)) {
                             clusterLabel = 'Protein Cluster';
                         }
                     }
@@ -2230,9 +2342,8 @@
 
             // Check if viewing a protein, get the gene
             let geneForSequence = subject;
-            if (subject.id.startsWith('Pan_') && !subject.gene_sequence && !subject.protein_sequence) {
-                const geneId = subject.id.replace('Pan_', 'pan_');
-                const correspondingGene = getSubject(geneId);
+            if (subject.id.startsWith('PAN') && !subject.id.includes('_struct') && !subject.id.startsWith('PANCL') && !subject.gene_sequence && !subject.protein_sequence) {
+                const correspondingGene = findGeneForProtein(subject.id);
                 if (correspondingGene) {
                     geneForSequence = correspondingGene;
                 }
@@ -2272,8 +2383,14 @@
 
             if (geneForSequence.protein_sequence) {
                 const proteinSeq = geneForSequence.protein_sequence;
-                // Use uppercase Pan_ for protein header
-                const proteinId = geneForSequence.id.replace('pan_', 'Pan_');
+                // Find the protein ID that this gene translates to
+                let proteinId = geneForSequence.id; // Default to gene id
+                if (geneForSequence.properties && geneForSequence.properties['translates_to']) {
+                    const translatesTo = geneForSequence.properties['translates_to'][0];
+                    if (translatesTo && !translatesTo.is_literal) {
+                        proteinId = translatesTo.value;
+                    }
+                }
                 const header = `>${proteinId}`;
                 html += `
                     <div>
@@ -2310,9 +2427,8 @@
             if (!subject) return;
 
             // If this is a protein, get the corresponding gene
-            if (subject.id.startsWith('Pan_') && !subject.gene_sequence && !subject.protein_sequence) {
-                const geneId = subject.id.replace('Pan_', 'pan_');
-                const correspondingGene = getSubject(geneId);
+            if (subject.id.startsWith('PAN') && !subject.id.includes('_struct') && !subject.id.startsWith('PANCL') && !subject.gene_sequence && !subject.protein_sequence) {
+                const correspondingGene = findGeneForProtein(subject.id);
                 if (correspondingGene) {
                     subject = correspondingGene;
                 }
@@ -2324,8 +2440,14 @@
                 return;
             }
 
-            // Format header: gene = pan_1, protein = Pan_1
-            const header = type === 'protein' ? `>${subject.id.replace('pan_', 'Pan_')}` : `>${subject.id}`;
+            // Format header: use the actual ID or find protein ID if it's a gene
+            let header = `>${subject.id}`;
+            if (type === 'protein' && subject.properties && subject.properties['translates_to']) {
+                const translatesTo = subject.properties['translates_to'][0];
+                if (translatesTo && !translatesTo.is_literal) {
+                    header = `>${translatesTo.value}`;
+                }
+            }
             const fastaContent = `${header}\n${sequence}`;
 
             // Copy to clipboard
@@ -2363,9 +2485,8 @@
             if (!subject) return;
 
             // If this is a protein, get the corresponding gene
-            if (subject.id.startsWith('Pan_') && !subject.gene_sequence && !subject.protein_sequence) {
-                const geneId = subject.id.replace('Pan_', 'pan_');
-                const correspondingGene = getSubject(geneId);
+            if (subject.id.startsWith('PAN') && !subject.id.includes('_struct') && !subject.id.startsWith('PANCL') && !subject.gene_sequence && !subject.protein_sequence) {
+                const correspondingGene = findGeneForProtein(subject.id);
                 if (correspondingGene) {
                     subject = correspondingGene;
                 }
@@ -2380,7 +2501,14 @@
             }
 
             if (subject.protein_sequence) {
-                const proteinId = subject.id.replace('pan_', 'Pan_');
+                // Find the protein ID that this gene translates to
+                let proteinId = subject.id; // Default to gene id
+                if (subject.properties && subject.properties['translates_to']) {
+                    const translatesTo = subject.properties['translates_to'][0];
+                    if (translatesTo && !translatesTo.is_literal) {
+                        proteinId = translatesTo.value;
+                    }
+                }
                 const formattedSeq = subject.protein_sequence.match(/.{1,60}/g).join('\n');
                 fastaContent += `>${proteinId}\n${formattedSeq}\n`;
             }
@@ -2417,25 +2545,61 @@
         // PDB Visualization Functions
         let nglStage = null;
 
+        // Helper function to find gene that translates to a protein
+        function findGeneForProtein(proteinId) {
+            if (!panresData || !panresData.subjects) return null;
+
+            for (const [geneId, geneSub] of Object.entries(panresData.subjects)) {
+                if (geneSub.properties && geneSub.properties['translates_to']) {
+                    const translatesTo = geneSub.properties['translates_to'].find(t => t.value === proteinId);
+                    if (translatesTo) {
+                        return getSubject(geneId);
+                    }
+                }
+            }
+            return null;
+        }
+
         // Extract pan ID from filename (e.g., "pan_1_v1.0.1_..." -> "pan_1")
         function extractPanIdFromFilename(filename) {
             const match = filename.match(/^(pan_\d+)_/);
             return match ? match[1] : null;
         }
 
-        // Get cluster ID from gene ID (e.g., "pan_53" -> "panc_53")
+        // Get cluster ID from gene ID (no longer applicable with new naming)
+        // Gene clusters are now pan_cl* format
         function getClusterIdFromGene(geneId) {
-            // Extract the numeric part from pan_X
-            const match = geneId.match(/^pan_(\d+)$/);
-            if (match) {
-                return `panc_${match[1]}`;
+            // In the new schema, genes have member_of pointing to pan_cl* clusters
+            const gene = getSubject(geneId);
+            if (gene && gene.properties && gene.properties['member_of']) {
+                for (const clusterRef of gene.properties['member_of']) {
+                    if (!clusterRef.is_literal && clusterRef.value.match(/^pan_cl\d+$/)) {
+                        return clusterRef.value;
+                    }
+                }
             }
             return null;
         }
 
-        // Check if PDB file exists for a gene
-        async function checkPDBExists(geneId) {
+        // Convert PAN*_struct to gene ID for PDB lookup
+        // PAN12_struct -> pan_12
+        function structToGeneId(structId) {
+            if (structId.includes('_struct')) {
+                // Extract number from PAN123_struct -> 123
+                const match = structId.match(/PAN(\d+)_struct/);
+                if (match) {
+                    return `pan_${match[1]}`;
+                }
+            }
+            return structId;
+        }
+
+        // Check if PDB file exists for a gene or structure ID
+        async function checkPDBExists(id) {
             try {
+                // Convert structure ID to gene ID if needed
+                const geneId = structToGeneId(id);
+
                 // Try to find a PDB file matching pan_X_v*.pdb pattern
                 const response = await fetch(`pdb_files/${geneId}_v1.0.1_identical_unrelaxed_rank_001_alphafold2_ptm_model_1_seed_000.pdb`, {
                     method: 'HEAD'
@@ -2455,8 +2619,11 @@
             }
         }
 
-        // Get PDB file path for a gene
-        async function getPDBPath(geneId) {
+        // Get PDB file path for a gene or structure ID
+        async function getPDBPath(id) {
+            // Convert structure ID to gene ID if needed
+            const geneId = structToGeneId(id);
+
             // Try different model variants
             for (let model = 1; model <= 5; model++) {
                 const path = `pdb_files/${geneId}_v1.0.1_identical_unrelaxed_rank_001_alphafold2_ptm_model_${model}_seed_000.pdb`;
@@ -2549,48 +2716,19 @@
             const proteinCluster = getSubject(proteinClusterId);
             if (!proteinCluster) return null;
 
-            // Check if this protein cluster has a corresponding gene
-            // Pattern: Pan_XXXX -> pan_XXXX
-            const match = proteinClusterId.match(/^Pan_(\d+)$/);
-            if (match) {
-                const geneId = `pan_${match[1]}`;
-                const gene = getSubject(geneId);
+            // In new schema, PANCL* protein clusters have folds_to pointing to PAN*_struct
+            // PAN*_struct has member_of pointing to PANCL*_struct (structure cluster)
+            // We need to find genes that translate to proteins in this cluster
 
-                // Check if this gene has a PDB
+            // Find all proteins that are members of this protein cluster
+            const proteinMembers = findProteinClusterMembers(proteinClusterId);
+
+            // For each protein member, find the gene that translates to it
+            for (const proteinId of proteinMembers) {
+                const gene = findGeneForProtein(proteinId);
                 if (gene) {
-                    const hasPDB = await checkPDBExists(geneId);
-                    if (hasPDB) return geneId;
-
-                    // If this gene doesn't have PDB, check its cluster
-                    if (gene.properties['member_of']) {
-                        for (const clusterRef of gene.properties['member_of']) {
-                            if (!clusterRef.is_literal) {
-                                const repGene = await getClusterRepresentative(clusterRef.value);
-                                if (repGene) return repGene;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // If the protein cluster itself has member_of pointing to another protein cluster
-            // Follow that chain (e.g., Pan_10044 -> member_of -> Pan_8331)
-            if (proteinCluster.properties['member_of']) {
-                for (const memberOf of proteinCluster.properties['member_of']) {
-                    if (!memberOf.is_literal) {
-                        const parentProteinId = memberOf.value;
-
-                        // Check if parent is also a protein cluster (Pan_XXXX)
-                        if (parentProteinId.match(/^Pan_\d+$/)) {
-                            const result = await resolveProteinToGene(parentProteinId);
-                            if (result) return result;
-                        }
-                        // Or if it's a gene cluster (panc_XXXX)
-                        else if (parentProteinId.match(/^panc_\d+$/)) {
-                            const result = await getClusterRepresentative(parentProteinId);
-                            if (result) return result;
-                        }
-                    }
+                    const hasPDB = await checkPDBExists(gene.id);
+                    if (hasPDB) return gene.id;
                 }
             }
 
@@ -2599,21 +2737,13 @@
 
         // Get centroid gene for cluster (the one with PDB structure)
         async function getClusterRepresentative(clusterId) {
-            // Handle protein clusters (Pan_XXXX)
-            if (clusterId.match(/^Pan_\d+$/)) {
+            // Handle protein clusters (PANCL*)
+            if (clusterId.match(/^PANCL\d+$/)) {
                 return await resolveProteinToGene(clusterId);
             }
 
-            // Handle gene clusters (panc_XXXX)
-            // First, try the gene matching the cluster ID
-            const match = clusterId.match(/^panc_(\d+)$/);
-            if (match) {
-                const geneId = `pan_${match[1]}`;
-                const hasPDB = await checkPDBExists(geneId);
-                if (hasPDB) return geneId;
-            }
-
-            // If not found, search through all cluster members
+            // Handle gene clusters (pan_cl*)
+            // Search through all cluster members to find one with PDB
             const members = findClusterMembers(clusterId);
             for (const memberId of members) {
                 const hasPDB = await checkPDBExists(memberId);
@@ -2677,9 +2807,9 @@
                 return;
             }
 
-            // Determine if this is a protein cluster (Pan_XXXX) or gene cluster (panc_XXXX)
-            const isProteinCluster = clusterId.match(/^Pan_\d+$/);
-            const isGeneCluster = clusterId.match(/^panc_\d+$/);
+            // Determine if this is a protein cluster (PANCL*) or gene cluster (pan_cl*)
+            const isProteinCluster = clusterId.match(/^PANCL\d+$/);
+            const isGeneCluster = clusterId.match(/^pan_cl\d+$/);
 
             // Get cluster members
             let members = [];
@@ -2713,14 +2843,10 @@
                     // For protein clusters, show both the protein and its corresponding gene
                     let extraInfo = '';
                     if (isProteinCluster && member) {
-                        // Try to find the corresponding gene
-                        const geneMatch = memberId.match(/^Pan_(\d+)$/);
-                        if (geneMatch) {
-                            const correspondingGene = `pan_${geneMatch[1]}`;
-                            const geneSubject = getSubject(correspondingGene);
-                            if (geneSubject) {
-                                extraInfo = ` <span class="text-xs text-gray-500">(gene: <a href="#" onclick="showDetails('${correspondingGene}'); return false;" class="text-primary hover:underline">${correspondingGene}</a>)</span>`;
-                            }
+                        // Try to find the corresponding gene for this protein
+                        const correspondingGene = findGeneForProtein(memberId);
+                        if (correspondingGene) {
+                            extraInfo = ` <span class="text-xs text-gray-500">(gene: <a href="#" onclick="showDetails('${correspondingGene.id}'); return false;" class="text-primary hover:underline">${correspondingGene.id}</a>)</span>`;
                         }
                     }
 
@@ -2979,6 +3105,113 @@
             nglStages[viewerId].setParameters({ backgroundColor: color });
         }
 
+        // Toggle structure viewer for individual PAN*_struct entities
+        async function toggleStructureViewer(viewerId, structId) {
+            const container = document.getElementById(viewerId);
+            const icon = document.getElementById(`icon-${viewerId}`);
+
+            if (!container) return;
+
+            // If already open, close it
+            if (container.classList.contains('active')) {
+                container.classList.remove('active');
+                icon.classList.remove('open');
+                if (nglStages[viewerId]) {
+                    nglStages[viewerId].dispose();
+                    delete nglStages[viewerId];
+                    delete nglComponents[viewerId];
+                }
+                return;
+            }
+
+            // Open and load
+            icon.classList.add('open');
+            container.classList.add('active');
+
+            // Get PDB file path for this structure
+            const pdbPath = await getPDBPath(structId);
+            if (!pdbPath) {
+                container.innerHTML = '<div class="p-4 text-sm text-gray-600">PDB file not found</div>';
+                container.classList.add('active');
+                return;
+            }
+
+            // Build viewer HTML
+            const viewportId = `viewport-${viewerId}`;
+
+            container.innerHTML = `
+                <div class="viz-controls">
+                    <div class="mb-2">
+                        <span class="text-xs font-medium text-gray-600">Representation:</span>
+                        <button class="viz-btn active" data-rep onclick="changeRepresentation('${viewerId}', 'cartoon')">Cartoon</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'backbone')">Backbone</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'ball+stick')">Ball+Stick</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'licorice')">Licorice</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'spacefill')">Spacefill</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'surface')">Surface</button>
+                    </div>
+                    <div class="mb-2">
+                        <span class="text-xs font-medium text-gray-600">Color Scheme:</span>
+                        <button class="viz-btn active" data-color onclick="changeColorScheme('${viewerId}', '')">Default</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'chainname')">Chain</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'element')">Element</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'residueindex')">Residue</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'sstruc')">Secondary Structure</button>
+                    </div>
+                    <div class="mb-2">
+                        <span class="text-xs font-medium text-gray-600">Background:</span>
+                        <button class="viz-btn active" data-bg onclick="changeBackground('${viewerId}', 'black')">Black</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'white')">White</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'gray')">Gray</button>
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-gray-600">Actions:</span>
+                        <button class="viz-btn" onclick="downloadPDB('${pdbPath}', '${structId}')">Download PDB</button>
+                        <button class="viz-btn" onclick="resetView('${viewerId}')">Reset View</button>
+                        <button class="viz-btn" onclick="toggleSpin('${viewerId}')">Toggle Spin</button>
+                    </div>
+                </div>
+                <div id="${viewportId}" style="width: 100%; height: 500px; position: relative; background: black;">
+                    <div class="pdb-loading-spinner">
+                        <div class="pdb-spinner"></div>
+                        <div style="color: white; margin-top: 10px;">Loading structure...</div>
+                    </div>
+                </div>
+            `;
+
+            const viewport = document.getElementById(viewportId);
+
+            // Create new NGL stage
+            nglStages[viewerId] = new NGL.Stage(viewport, {
+                backgroundColor: 'black'
+            });
+
+            // Load PDB file
+            nglStages[viewerId].loadFile(pdbPath, { ext: 'pdb' }).then(function (component) {
+                nglComponents[viewerId] = component;
+
+                // Remove loading spinner
+                const spinner = viewport.querySelector('.pdb-loading-spinner');
+                if (spinner) {
+                    spinner.remove();
+                }
+
+                // Default representation: cartoon
+                component.addRepresentation('cartoon');
+
+                // Auto-view
+                component.autoView();
+
+                // Handle window resize
+                window.addEventListener('resize', function () {
+                    if (nglStages[viewerId]) nglStages[viewerId].handleResize();
+                });
+            }).catch(function (error) {
+                console.error('Error loading PDB:', error);
+                viewport.innerHTML = '<div class="flex items-center justify-center h-full text-white">Failed to load PDB structure</div>';
+            });
+        }
+
         // Search functionality
         let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -2992,6 +3225,7 @@
 
             searchTimeout = setTimeout(() => {
                 const results = [];
+                const originalQuery = e.target.value.trim();
 
                 for (const [id, subject] of Object.entries(panresData.subjects)) {
                     const labelLower = subject.label.toLowerCase();
@@ -3001,24 +3235,33 @@
                         // Calculate match score for prioritization
                         let score = 0;
 
-                        // Check for case-sensitive exact match first (highest priority)
-                        if (subject.label === e.target.value.trim() || subject.id === e.target.value.trim()) {
+                        // HIGHEST PRIORITY: Case-sensitive exact match
+                        if (subject.label === originalQuery || subject.id === originalQuery) {
+                            score = 5000;
+                        }
+                        // VERY HIGH PRIORITY: Case-sensitive starts with (e.g., "pan" -> "pan_1" before "PAN1")
+                        else if (subject.label.startsWith(originalQuery) || subject.id.startsWith(originalQuery)) {
+                            score = 3000;
+                        }
+                        // HIGH PRIORITY: Case-sensitive contains with word boundary
+                        else if (subject.label.match(new RegExp('\\b' + originalQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))) ||
+                                 subject.id.match(new RegExp('\\b' + originalQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))) {
                             score = 2000;
                         }
-                        // Exact match (case-insensitive)
+                        // MEDIUM PRIORITY: Case-insensitive exact match
                         else if (labelLower === query || idLower === query) {
                             score = 1000;
                         }
-                        // High priority: starts with query
+                        // LOWER PRIORITY: Case-insensitive starts with query
                         else if (labelLower.startsWith(query) || idLower.startsWith(query)) {
                             score = 500;
                         }
-                        // Medium priority: contains query with word boundary
+                        // LOW PRIORITY: Case-insensitive contains with word boundary
                         else if (labelLower.match(new RegExp('\\b' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))) ||
                                  idLower.match(new RegExp('\\b' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))) {
                             score = 100;
                         }
-                        // Lower priority: contains query anywhere
+                        // LOWEST PRIORITY: Case-insensitive contains query anywhere
                         else {
                             score = 50;
                         }
