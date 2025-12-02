@@ -1726,11 +1726,11 @@
             }
 
             let html = `
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                    <div class="mb-6">
-                        ${entityType ? `<div class="text-sm font-medium text-primary mb-2">${entityType}${isDrugCombination ? ' (Drug Combination)' : ''}</div>` : ''}
-                        <div class="flex items-center gap-3 mb-2">
-                            <h2 class="text-3xl font-semibold text-gray-800">${subject.label}</h2>
+                <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                    <div class="mb-4">
+                        ${entityType ? `<div class="text-sm font-medium text-primary mb-1">${entityType}${isDrugCombination ? ' (Drug Combination)' : ''}</div>` : ''}
+                        <div class="flex items-center gap-3 mb-1">
+                            <h2 class="text-2xl font-semibold text-gray-800">${subject.label}</h2>
                             ${hasSequences ? `
                                 <button onclick="viewSequence('${subject.id}')" class="sequence-btn">View Sequence</button>
                                 <button onclick="downloadFasta('${subject.id}', 'gene')" class="sequence-btn">Download FASTA</button>
@@ -1751,10 +1751,10 @@
 
                 if (components.length > 0) {
                     html += `
-                        <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                            <h3 class="text-sm font-semibold text-gray-700 mb-2">Combination Components:</h3>
-                            <div class="flex flex-wrap gap-2">
-                                ${components.map(comp => `<span class="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 border border-blue-300">${comp}</span>`).join('')}
+                        <div class="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            <h3 class="text-xs font-semibold text-gray-700 mb-1">Combination Components:</h3>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${components.map(comp => `<span class="bg-white px-2 py-0.5 rounded-full text-xs font-medium text-gray-700 border border-blue-300">${comp}</span>`).join('')}
                             </div>
                         </div>
                     `;
@@ -1767,45 +1767,18 @@
             const isGene = panresData.categories.PanGene.includes(id);
             const isProtein = subject.types && subject.types.includes('PanProtein');
 
-            // Show E. coli homolog warning for proteins
-            if (isProtein && subject.properties['is_ecoli_homolog']) {
-                const isHomolog = subject.properties['is_ecoli_homolog'].some(val =>
-                    val.is_literal && val.value.toLowerCase() === 'true'
-                );
-                if (isHomolog) {
-                    html += `
-                        <div class="mb-6 bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-yellow-800">E. coli Core Protein Homolog</h3>
-                                    <div class="mt-2 text-sm text-yellow-700">
-                                        <p>Homolog to an E. coli core protein (&gt;95% of strains). Read-based detection may be misleading.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
 
             if (isGene) {
-                html += '<div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">';
-
-                // Key attributes in cards (excluding is_from_database for now)
+                // Key attributes in a compact list (excluding is_from_database for now)
                 const keyProps = ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance'];
+                html += '<div class="mb-3 bg-gray-50 p-3 rounded-lg border border-gray-200">';
+                html += '<dl class="space-y-1.5">';
+
                 for (const prop of keyProps) {
                     if (subject.properties[prop]) {
                         const predDisplay = getPredicate(prop);
-                        html += `
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <div class="text-xs font-semibold text-gray-500 uppercase mb-2">${predDisplay}</div>
-                                <div class="space-y-1">
-                        `;
+                        const items = [];
+
                         for (const val of subject.properties[prop]) {
                             if (!val.is_literal) {
                                 const linkedSubject = getSubject(val.value);
@@ -1814,32 +1787,34 @@
                                 // Skip the standalone "+" phenotype marker
                                 if (displayName === '+') continue;
 
-                                html += `
-                                    <div>
-                                        <a href="#" onclick="showDetails('${val.value}'); return false;"
-                                           class="text-primary hover:underline font-medium">
-                                            ${displayName}
-                                        </a>
-                                    </div>
-                                `;
+                                items.push(`<a href="#" onclick="showDetails('${val.value}'); return false;" class="text-primary hover:underline">${displayName}</a>`);
                             } else {
-                                html += `<div class="font-medium">${val.value}</div>`;
+                                items.push(`<span>${val.value}</span>`);
                             }
                         }
-                        html += `</div></div>`;
+
+                        if (items.length > 0) {
+                            html += `
+                                <div class="flex flex-wrap items-baseline gap-x-2">
+                                    <dt class="text-sm font-semibold text-gray-600 min-w-fit">${predDisplay}:</dt>
+                                    <dd class="text-sm text-gray-800">${items.join(' • ')}</dd>
+                                </div>
+                            `;
+                        }
                     }
                 }
 
-                html += '</div>';
+                html += '</dl></div>';
 
                 // Show database names mapping
                 if (subject.properties['same_as']) {
                     html += `
-                        <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">Names in Source Databases</h3>
-                            <div class="space-y-2">
+                        <div class="mb-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <div class="text-sm font-semibold text-gray-600 mb-1.5">Names in Source Databases</div>
+                            <div class="text-sm text-gray-800">
                     `;
 
+                    const dbNames = [];
                     for (const val of subject.properties['same_as']) {
                         if (!val.is_literal) {
                             const originalGene = getSubject(val.value);
@@ -1851,20 +1826,12 @@
                                     })
                                     .join(', ');
 
-                                html += `
-                                    <div class="flex items-start gap-2 text-sm">
-                                        <div class="font-medium text-gray-700 min-w-[150px]">${databases}:</div>
-                                        <div>
-                                            <a href="#" onclick="showDetails('${val.value}'); return false;"
-                                               class="text-primary hover:underline">
-                                                ${originalGene.label}
-                                            </a>
-                                        </div>
-                                    </div>
-                                `;
+                                dbNames.push(`<span class="inline-block"><span class="font-medium text-gray-700">${databases}:</span> <a href="#" onclick="showDetails('${val.value}'); return false;" class="text-primary hover:underline">${originalGene.label}</a></span>`);
                             }
                         }
                     }
+
+                    html += dbNames.join(' • ');
 
                     html += `
                             </div>
@@ -1887,24 +1854,90 @@
                             const proteinMembers = findProteinClusterMembers(proteinClusterId);
 
                             html += `
-                                <div class="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Protein Cluster</h3>
-                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                                        <div class="text-sm font-medium text-gray-700">
-                                            <a href="#" onclick="showDetails('${proteinClusterId}'); return false;"
-                                               class="text-primary hover:underline">
-                                                ${proteinClusterName}
-                                            </a>
-                                        </div>
-                                        <button class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
-                                                onclick="togglePDBViewer('${proteinViewerId}', '${proteinClusterId}')">
-                                            <span class="rotate-icon" id="icon-${proteinViewerId}">▶</span> View Centroid 3D Structure & Cluster Members
-                                        </button>
+                                <div class="mb-3 bg-purple-50 p-3 rounded-lg border border-purple-200">
+                                    <h3 class="text-base font-semibold text-gray-800 mb-2">Protein Cluster</h3>
+                                    <div class="mb-1">
+                                        <a href="#" onclick="showDetails('${proteinClusterId}'); return false;"
+                                           class="text-primary hover:underline font-medium">
+                                            ${proteinClusterName}
+                                        </a>
                                     </div>
-                                    <div class="text-xs text-gray-600 mb-2">
-                                        Protein Members: ${proteinMembers.length}
+                                    <div class="text-sm text-gray-600 mb-2">
+                                        ${proteinMembers.length} similar proteins in this cluster
                                     </div>
-                                    <div id="${proteinViewerId}" class="pdb-viewer-container"></div>
+                            `;
+
+                            // Show folds_to structure and structure cluster info
+                            if (proteinCluster && proteinCluster.properties['folds_to']) {
+                                html += `<div class="mt-2 pt-2 border-t border-purple-200">`;
+                                html += `<div class="text-sm font-medium text-gray-600 mb-1">Folds To (3D Structure)</div>`;
+
+                                for (const structRef of proteinCluster.properties['folds_to']) {
+                                    if (!structRef.is_literal) {
+                                        const structSubject = getSubject(structRef.value);
+                                        const structName = structSubject ? structSubject.label : structRef.value;
+
+                                        // Check if structure has a cluster to show the button
+                                        let hasStructCluster = false;
+                                        let structViewerId = '';
+                                        let structClusterRef = null;
+
+                                        if (structSubject && structSubject.properties['member_of']) {
+                                            for (const ref of structSubject.properties['member_of']) {
+                                                if (!ref.is_literal && ref.value.match(/^PANCL\d+_struct$/)) {
+                                                    hasStructCluster = true;
+                                                    structViewerId = `pdb-viewer-struct-cluster-protein-${ref.value}`;
+                                                    structClusterRef = ref;
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        html += `
+                                            <div class="mb-2">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <a href="#" onclick="showDetails('${structRef.value}'); return false;"
+                                                       class="text-primary hover:underline">
+                                                        ${structName}
+                                                    </a>
+                                        `;
+
+                                        if (hasStructCluster) {
+                                            html += `
+                                                    <button class="text-sm bg-teal-600 hover:bg-teal-700 text-white px-3 py-1 rounded"
+                                                            onclick="togglePDBViewer('${structViewerId}', '${proteinClusterId}')">
+                                                        <span class="rotate-icon" id="icon-${structViewerId}">▶</span> View 3D Structure
+                                                    </button>
+                                            `;
+                                        }
+
+                                        html += `</div>`;
+
+                                        // Show structure cluster info
+                                        if (hasStructCluster && structClusterRef) {
+                                            const structCluster = getSubject(structClusterRef.value);
+                                            const structClusterName = structCluster ? structCluster.label : structClusterRef.value;
+                                            const memberCount = structCluster && structCluster.properties['has_members']
+                                                ? structCluster.properties['has_members'][0].value
+                                                : '?';
+
+                                            html += `
+                                                <div class="text-xs text-gray-600 ml-2 mb-2">
+                                                    ↳ Member of <a href="#" onclick="showDetails('${structClusterRef.value}'); return false;"
+                                                       class="text-primary hover:underline">${structClusterName}</a>
+                                                    (${memberCount} members)
+                                                </div>
+                                                <div id="${structViewerId}" class="pdb-viewer-container mb-2"></div>
+                                            `;
+                                        }
+
+                                        html += `</div>`;
+                                    }
+                                }
+                                html += `</div>`;
+                            }
+
+                            html += `
                                 </div>
                             `;
                         }
@@ -1930,10 +1963,10 @@
                         const geneSubject = getSubject(correspondingGene);
                         if (geneSubject) {
                             html += `
-                                <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Corresponding Gene</h3>
+                                <div class="mb-3 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                    <h3 class="text-base font-semibold text-gray-800 mb-2">Corresponding Gene</h3>
                                     <a href="#" onclick="showDetails('${correspondingGene}'); return false;"
-                                       class="text-primary hover:underline text-sm font-medium">
+                                       class="text-primary hover:underline font-medium">
                                         ${geneSubject.label}
                                     </a>
                                 </div>
@@ -1948,15 +1981,53 @@
                 const structViewerId = `pdb-viewer-struct-${id}`;
 
                 html += `
-                    <div class="mb-6 bg-indigo-50 p-4 rounded-lg border border-indigo-200">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">3D Structure</h3>
-                        <button class="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded mb-3"
+                    <div class="mb-3 bg-indigo-50 p-3 rounded-lg border border-indigo-200">
+                        <h3 class="text-base font-semibold text-gray-800 mb-2">3D Structure</h3>
+                        <button class="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded mb-2"
                                 onclick="toggleStructureViewer('${structViewerId}', '${id}')">
                             <span class="rotate-icon" id="icon-${structViewerId}">▶</span> View 3D Structure
                         </button>
                         <div id="${structViewerId}" class="pdb-viewer-container"></div>
                     </div>
                 `;
+
+                // Show structure cluster membership
+                if (subject.properties['member_of']) {
+                    for (const clusterRef of subject.properties['member_of']) {
+                        if (!clusterRef.is_literal && clusterRef.value.match(/^PANCL\d+_struct$/)) {
+                            const structClusterId = clusterRef.value;
+                            const structCluster = getSubject(structClusterId);
+                            const structClusterName = structCluster ? structCluster.label : structClusterId;
+
+                            html += `
+                                <div class="mb-3 bg-teal-50 p-3 rounded-lg border border-teal-200">
+                                    <h3 class="text-base font-semibold text-gray-800 mb-2">Structure Cluster Information</h3>
+                                    <div class="text-sm text-gray-700">
+                                        <span class="font-medium">Member of Protein Structure Cluster:</span>
+                                        <a href="#" onclick="showDetails('${structClusterId}'); return false;"
+                                           class="text-primary hover:underline font-medium ml-1">
+                                            ${structClusterName}
+                                        </a>
+                                    </div>
+                            `;
+
+                            // Show cluster member count if available
+                            if (structCluster && structCluster.properties['has_members']) {
+                                const memberCount = structCluster.properties['has_members'][0].value;
+                                html += `
+                                    <div class="text-sm text-gray-600 mt-1">
+                                        This structure is part of a structure cluster with ${memberCount} member(s).
+                                    </div>
+                                `;
+                            }
+
+                            html += `
+
+                                </div>
+                            `;
+                        }
+                    }
+                }
             }
 
             // Show related genes if this is an antibiotic class, phenotype, mechanism, database, or cluster
@@ -1971,8 +2042,8 @@
                 const isCluster = id.startsWith('panc_');
 
                 html += `
-                    <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                    <div class="mb-3 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <h3 class="text-base font-semibold text-gray-800 mb-2">
                             ${isCluster ? 'Cluster Members' : 'Related Genes'} (${filteredRelatedGenes.length})
                             <button onclick="showRelatedGenes('${id}')"
                                     class="ml-2 text-sm bg-primary hover:bg-opacity-80 text-white px-3 py-1 rounded">
@@ -1995,63 +2066,63 @@
                 `;
             }
 
-            // Show protein clusters for gene clusters (pan_cl*)
-            if (id.startsWith('pan_cl')) {
-                const proteinClusterIds = findProteinClustersForGeneCluster(id);
-                if (proteinClusterIds.length > 0) {
-                    html += `
-                        <div class="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-200">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-3">
-                                Associated Protein Clusters (${proteinClusterIds.length})
-                            </h3>
-                    `;
-
-                    for (const proteinClusterId of proteinClusterIds) {
-                        const proteinCluster = getSubject(proteinClusterId);
-                        const proteinClusterName = proteinCluster ? proteinCluster.label : proteinClusterId;
-                        const proteinViewerId = `pdb-viewer-protein-cluster-${proteinClusterId}`;
-                        const proteinMembers = findProteinClusterMembers(proteinClusterId);
-
-                        html += `
-                            <div class="mb-4 pb-4 border-b border-purple-200 last:border-b-0 last:pb-0">
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                                    <div class="text-sm font-medium text-gray-700">
-                                        <a href="#" onclick="showDetails('${proteinClusterId}'); return false;"
-                                           class="text-primary hover:underline">
-                                            ${proteinClusterName}
-                                        </a>
-                                    </div>
-                                    <button class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
-                                            onclick="togglePDBViewer('${proteinViewerId}', '${proteinClusterId}')">
-                                        <span class="rotate-icon" id="icon-${proteinViewerId}">▶</span> View Centroid 3D Structure & Cluster Members
-                                    </button>
-                                </div>
-                                <div class="text-xs text-gray-600 mb-2">
-                                    Protein Members: ${proteinMembers.length}
-                                </div>
-                                <div id="${proteinViewerId}" class="pdb-viewer-container"></div>
-                            </div>
-                        `;
-                    }
-
-                    html += `
-                        </div>
-                    `;
-                }
-            }
+            // Show protein clusters for gene clusters (pan_cl*) - REMOVED PER USER REQUEST
+            // if (id.startsWith('pan_cl')) {
+            //     const proteinClusterIds = findProteinClustersForGeneCluster(id);
+            //     if (proteinClusterIds.length > 0) {
+            //         html += `
+            //             <div class="mb-3 bg-purple-50 p-3 rounded-lg border border-purple-200">
+            //                 <h3 class="text-base font-semibold text-gray-800 mb-2">
+            //                     Associated Protein Clusters (${proteinClusterIds.length})
+            //                 </h3>
+            //         `;
+            //
+            //         for (const proteinClusterId of proteinClusterIds) {
+            //             const proteinCluster = getSubject(proteinClusterId);
+            //             const proteinClusterName = proteinCluster ? proteinCluster.label : proteinClusterId;
+            //             const proteinViewerId = `pdb-viewer-protein-cluster-${proteinClusterId}`;
+            //             const proteinMembers = findProteinClusterMembers(proteinClusterId);
+            //
+            //             html += `
+            //                 <div class="mb-2 pb-2 border-b border-purple-200 last:border-b-0 last:pb-0">
+            //                     <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+            //                         <div class="text-sm font-medium text-gray-700">
+            //                             <a href="#" onclick="showDetails('${proteinClusterId}'); return false;"
+            //                                class="text-primary hover:underline">
+            //                                 ${proteinClusterName}
+            //                             </a>
+            //                         </div>
+            //                         <button class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
+            //                                 onclick="togglePDBViewer('${proteinViewerId}', '${proteinClusterId}')">
+            //                             <span class="rotate-icon" id="icon-${proteinViewerId}">▶</span> View Centroid 3D Structure & Cluster Members
+            //                         </button>
+            //                     </div>
+            //                     <div class="text-sm text-gray-600 mb-1">
+            //                         Protein Members: ${proteinMembers.length}
+            //                     </div>
+            //                     <div id="${proteinViewerId}" class="pdb-viewer-container"></div>
+            //                 </div>
+            //             `;
+            //         }
+            //
+            //         html += `
+            //             </div>
+            //         `;
+            //     }
+            // }
 
             // For protein clusters (PANCL*), show folds_to and member proteins
             const isProteinCluster = subject.types && subject.types.includes('PanProteinCluster');
             if (isProteinCluster) {
                 html += `
-                    <div class="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-200">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Protein Cluster Information</h3>
+                    <div class="mb-3 bg-purple-50 p-3 rounded-lg border border-purple-200">
+                        <h3 class="text-base font-semibold text-gray-800 mb-2">Protein Cluster Information</h3>
                 `;
 
                 // Show folds_to structure
                 if (subject.properties['folds_to']) {
-                    html += `<div class="mb-3">`;
-                    html += `<div class="text-sm font-medium text-gray-600 mb-1">Folds To</div>`;
+                    html += `<div class="mb-2">`;
+                    html += `<div class="text-sm font-medium text-gray-600 mb-1">Folds To (3D Structure)</div>`;
                     for (const val of subject.properties['folds_to']) {
                         if (!val.is_literal) {
                             const structSubject = getSubject(val.value);
@@ -2062,6 +2133,26 @@
                                     ${displayName}
                                 </a>
                             `;
+
+                            // Show structure cluster if the structure is a member of one
+                            if (structSubject && structSubject.properties['member_of']) {
+                                for (const structClusterRef of structSubject.properties['member_of']) {
+                                    if (!structClusterRef.is_literal && structClusterRef.value.match(/^PANCL\d+_struct$/)) {
+                                        const structCluster = getSubject(structClusterRef.value);
+                                        const structClusterName = structCluster ? structCluster.label : structClusterRef.value;
+                                        const memberCount = structCluster && structCluster.properties['has_members']
+                                            ? structCluster.properties['has_members'][0].value
+                                            : '?';
+                                        html += `
+                                            <div class="text-xs text-gray-600 mt-1 ml-2">
+                                                ↳ Member of <a href="#" onclick="showDetails('${structClusterRef.value}'); return false;"
+                                                   class="text-primary hover:underline">${structClusterName}</a>
+                                                (${memberCount} members)
+                                            </div>
+                                        `;
+                                    }
+                                }
+                            }
                         }
                     }
                     html += `</div>`;
@@ -2070,17 +2161,73 @@
                 // Show actual protein members (not just the count)
                 const proteinMembers = findProteinClusterMembers(id);
                 html += `
-                    <div class="mb-3">
-                        <div class="text-sm font-medium text-gray-600 mb-2">Protein Members (${proteinMembers.length})</div>
+                    <div class="mb-2">
+                        <div class="text-sm font-medium text-gray-600 mb-1">Protein Members (${proteinMembers.length})</div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 `;
                 for (const proteinId of proteinMembers) {
                     const protein = getSubject(proteinId);
                     const proteinLabel = protein ? protein.label : proteinId;
+
+                    // Check if this protein is an E. coli homolog
+                    const isHomolog = protein && protein.properties['is_ecoli_homolog'] &&
+                        protein.properties['is_ecoli_homolog'].some(val =>
+                            val.is_literal && val.value.toLowerCase() === 'true'
+                        );
+
                     html += `
-                        <a href="#" onclick="showDetails('${proteinId}'); return false;"
+                        <div class="text-sm">
+                            <a href="#" onclick="showDetails('${proteinId}'); return false;"
+                               class="text-primary hover:underline">
+                                ${proteinLabel}
+                            </a>
+                    `;
+
+                    if (isHomolog) {
+                        html += `
+                            <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300">
+                                <svg class="w-2.5 h-2.5 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                E. coli homolog
+                            </span>
+                        `;
+                    }
+
+                    html += `
+                        </div>
+                    `;
+                }
+                html += `
+                        </div>
+                    </div>
+                `;
+
+                html += `</div>`;
+            }
+
+            // For structure clusters (PANCL*_struct), show structure members
+            const isStructureCluster = subject.types && subject.types.includes('PanStructureCluster');
+            if (isStructureCluster) {
+                html += `
+                    <div class="mb-3 bg-teal-50 p-3 rounded-lg border border-teal-200">
+                        <h3 class="text-base font-semibold text-gray-800 mb-2">Structure Cluster Information</h3>
+                `;
+
+                // Show actual structure members
+                const structureMembers = findStructureClusterMembers(id);
+                html += `
+                    <div class="mb-2">
+                        <div class="text-sm font-medium text-gray-600 mb-1">Structure Cluster Members (${structureMembers.length})</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                `;
+                for (const structId of structureMembers) {
+                    const struct = getSubject(structId);
+                    const structLabel = struct ? struct.label : structId;
+                    html += `
+                        <a href="#" onclick="showDetails('${structId}'); return false;"
                            class="text-primary hover:underline text-sm">
-                            ${proteinLabel}
+                            ${structLabel}
                         </a>
                     `;
                 }
@@ -2095,7 +2242,8 @@
             // Other properties section
             // Skip certain properties that we've already shown or don't want to display
             const skipProps = ['rdfs:label', 'rdf:type', 'rdfs:subClassOf', 'is_drug_combination'];
-            const alreadyShown = isGene ? ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance', 'is_from_database', 'same_as'] : (isProteinCluster ? ['member_of', 'folds_to', 'has_members'] : ['member_of']);
+            const isGeneCluster = subject.types && subject.types.includes('PanGeneCluster');
+            const alreadyShown = isGene ? ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance', 'is_from_database', 'same_as', 'member_of', 'has_length', 'accession'] : (isGeneCluster ? ['member_of', 'has_members'] : (isProteinCluster ? ['member_of', 'folds_to', 'has_members'] : (isStructureCluster ? ['member_of', 'has_members'] : ['member_of'])));
 
             // Check if there are any properties to show
             let hasAdditionalInfo = false;
@@ -2108,7 +2256,7 @@
 
             // Only show Additional Information section if there's content
             if (hasAdditionalInfo) {
-                html += '<h3 class="text-xl font-semibold text-gray-800 mb-3">Additional Information</h3>';
+                html += '<h3 class="text-lg font-semibold text-gray-800 mb-2">Additional Information</h3>';
                 html += '<dl class="divide-y divide-gray-200">';
             }
 
@@ -2169,8 +2317,33 @@
 
                 // Special handling for translates_to to also show protein cluster
                 if (pred === 'translates_to' && isGene) {
+                    // First show gene cluster if present (right before translates_to)
+                    if (subject.properties['member_of']) {
+                        for (const clusterRef of subject.properties['member_of']) {
+                            if (!clusterRef.is_literal) {
+                                const clusterId = clusterRef.value;
+                                if (clusterId.match(/^pan_cl\d+$/)) {
+                                    const clusterSubject = getSubject(clusterId);
+                                    const displayName = clusterSubject ? clusterSubject.label : clusterId;
+
+                                    html += `
+                                        <div class="py-2">
+                                            <dt class="text-sm font-medium text-gray-600 mb-1">Gene Cluster</dt>
+                                            <dd class="text-sm text-gray-800">
+                                                <a href="#" onclick="showDetails('${clusterId}'); return false;"
+                                                   class="text-primary hover:underline">
+                                                    ${displayName}
+                                                </a>
+                                            </dd>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        }
+                    }
+
                     html += `
-                        <div class="py-3">
+                        <div class="py-2">
                             <dt class="text-sm font-medium text-gray-600 mb-1">${predDisplay}</dt>
                             <dd class="text-sm text-gray-800">
                     `;
@@ -2180,43 +2353,123 @@
                             const proteinSubject = getSubject(val.value);
                             const displayName = proteinSubject ? proteinSubject.label : val.value;
 
+                            // Check if this protein is an E. coli homolog
+                            const isHomolog = proteinSubject && proteinSubject.properties['is_ecoli_homolog'] &&
+                                proteinSubject.properties['is_ecoli_homolog'].some(val =>
+                                    val.is_literal && val.value.toLowerCase() === 'true'
+                                );
+
                             html += `
                                 <div class="mb-2">
-                                    <a href="#" onclick="showDetails('${val.value}'); return false;"
-                                       class="text-primary hover:underline">
-                                        ${displayName}
-                                    </a>
-                                </div>
+                                    <div class="mb-1">
+                                        <a href="#" onclick="showDetails('${val.value}'); return false;"
+                                           class="text-primary hover:underline font-medium">
+                                            ${displayName}
+                                        </a>
                             `;
 
-                            // Check if this protein has a protein cluster
+                            // Show E. coli homolog warning inline
+                            if (isHomolog) {
+                                html += `
+                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                        E. coli homolog - read-based detection may be misleading
+                                    </span>
+                                `;
+                            }
+
+                            html += `</div>`;
+
+                            // Check if this protein has a protein cluster and show it like structure cluster membership
                             if (proteinSubject && proteinSubject.properties['member_of']) {
                                 for (const proteinClusterRef of proteinSubject.properties['member_of']) {
                                     if (!proteinClusterRef.is_literal) {
                                         const proteinClusterId = proteinClusterRef.value;
                                         const proteinCluster = getSubject(proteinClusterId);
                                         const proteinClusterName = proteinCluster ? proteinCluster.label : proteinClusterId;
-                                        const proteinViewerId = `pdb-viewer-protein-cluster-${proteinClusterId}`;
+                                        const proteinMembers = findProteinClusterMembers(proteinClusterId);
 
                                         html += `
-                                            <div class="mt-3 pt-3 border-t border-gray-200">
-                                                <div class="text-sm font-medium text-gray-600 mb-2">Protein Cluster</div>
-                                                <div class="flex items-center gap-2 mb-2">
-                                                    <a href="#" onclick="showDetails('${proteinClusterId}'); return false;"
-                                                       class="text-primary hover:underline">
-                                                        ${proteinClusterName}
-                                                    </a>
-                                                    <button class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
-                                                            onclick="togglePDBViewer('${proteinViewerId}', '${proteinClusterId}')">
-                                                        <span class="rotate-icon" id="icon-${proteinViewerId}">▶</span> View 3D Structure & Cluster Members
-                                                    </button>
-                                                </div>
-                                                <div id="${proteinViewerId}" class="pdb-viewer-container"></div>
+                                            <div class="text-xs text-gray-600 ml-2 mb-1">
+                                                ↳ Member of <a href="#" onclick="showDetails('${proteinClusterId}'); return false;"
+                                                   class="text-primary hover:underline">${proteinClusterName}</a>
+                                                (${proteinMembers.length} similar proteins)
                                             </div>
                                         `;
+
+                                        // Show folds_to structure and structure cluster info
+                                        if (proteinCluster && proteinCluster.properties['folds_to']) {
+                                            for (const structRef of proteinCluster.properties['folds_to']) {
+                                                if (!structRef.is_literal) {
+                                                    const structSubject = getSubject(structRef.value);
+                                                    const structName = structSubject ? structSubject.label : structRef.value;
+
+                                                    // Check if structure has a cluster to show the button
+                                                    let hasStructCluster = false;
+                                                    let structViewerId = '';
+                                                    let structClusterRef = null;
+
+                                                    if (structSubject && structSubject.properties['member_of']) {
+                                                        for (const ref of structSubject.properties['member_of']) {
+                                                            if (!ref.is_literal && ref.value.match(/^PANCL\d+_struct$/)) {
+                                                                hasStructCluster = true;
+                                                                structViewerId = `pdb-viewer-struct-cluster-${ref.value}`;
+                                                                structClusterRef = ref;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    html += `
+                                                        <div class="text-xs text-gray-600 ml-4 mb-1">
+                                                            <div class="flex items-center gap-2 mb-1">
+                                                                <span>↳ Folds to</span>
+                                                                <a href="#" onclick="showDetails('${structRef.value}'); return false;"
+                                                                   class="text-primary hover:underline">
+                                                                    ${structName}
+                                                                </a>
+                                                    `;
+
+                                                    if (hasStructCluster) {
+                                                        html += `
+                                                                <button class="text-sm bg-teal-600 hover:bg-teal-700 text-white px-3 py-1 rounded"
+                                                                        onclick="togglePDBViewer('${structViewerId}', '${proteinClusterId}')">
+                                                                    <span class="rotate-icon" id="icon-${structViewerId}">▶</span> View 3D Structure
+                                                                </button>
+                                                        `;
+                                                    }
+
+                                                    html += `</div>`;
+
+                                                    // Show structure cluster info
+                                                    if (hasStructCluster && structClusterRef) {
+                                                        const structCluster = getSubject(structClusterRef.value);
+                                                        const structClusterName = structCluster ? structCluster.label : structClusterRef.value;
+                                                        const memberCount = structCluster && structCluster.properties['has_members']
+                                                            ? structCluster.properties['has_members'][0].value
+                                                            : '?';
+
+                                                        html += `
+                                                            <div class="text-xs text-gray-600 ml-2 mb-2">
+                                                                ↳ Member of <a href="#" onclick="showDetails('${structClusterRef.value}'); return false;"
+                                                                   class="text-primary hover:underline">${structClusterName}</a>
+                                                                (${memberCount} members)
+                                                            </div>
+                                                            <div id="${structViewerId}" class="pdb-viewer-container mb-2"></div>
+                                                        `;
+                                                    }
+
+                                                    html += `</div>`;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
+
+                            html += `</div>`;
                         }
                     }
 
@@ -2228,7 +2481,7 @@
                 }
 
                 html += `
-                    <div class="py-3">
+                    <div class="py-2">
                         <dt class="text-sm font-medium text-gray-600 mb-1">${predDisplay}</dt>
                         <dd class="text-sm text-gray-800">
                 `;
@@ -2679,6 +2932,29 @@
             return members;
         }
 
+        // Find structure cluster members (all structures that are member_of a structure cluster)
+        function findStructureClusterMembers(structClusterId) {
+            const members = [];
+            // Search through all subjects to find structures
+            for (const subjectId in panresData.subjects) {
+                const subject = panresData.subjects[subjectId];
+
+                // Check if this is a PanStructure type
+                if (!subject.types || !subject.types.includes('PanStructure')) continue;
+                if (!subject.properties['member_of']) continue;
+
+                // Check if this structure is a member of the cluster
+                const isMember = subject.properties['member_of'].some(val =>
+                    !val.is_literal && val.value === structClusterId
+                );
+
+                if (isMember) {
+                    members.push(subjectId);
+                }
+            }
+            return members;
+        }
+
         // Find all unique protein clusters associated with genes in a gene cluster
         function findProteinClustersForGeneCluster(geneClusterId) {
             const proteinClusters = new Set();
@@ -2850,6 +3126,17 @@
                         }
                     }
 
+                    // Check if this protein is an E. coli homolog
+                    let homologBadge = '';
+                    if (isProteinCluster && member && member.properties['is_ecoli_homolog']) {
+                        const isHomolog = member.properties['is_ecoli_homolog'].some(val =>
+                            val.is_literal && val.value.toLowerCase() === 'true'
+                        );
+                        if (isHomolog) {
+                            homologBadge = ' <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300"><svg class="w-2.5 h-2.5 mr-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>E. coli homolog</span>';
+                        }
+                    }
+
                     return `
                         <div class="py-1 ${isCentroid ? 'font-semibold text-primary' : ''}">
                             <a href="#" onclick="showDetails('${memberId}'); return false;"
@@ -2857,6 +3144,7 @@
                                 ${member ? member.label : memberId}
                             </a>
                             ${isCentroid ? ' <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">Centroid - 3D structure</span>' : ''}
+                            ${homologBadge}
                             ${extraInfo}
                         </div>
                     `;
