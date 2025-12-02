@@ -1291,12 +1291,14 @@
                     }
                 } else if (groupBy === 'mechanism') {
                     if (gene.properties['has_mechanism_of_resistance']) {
+                        const uniqueMechanisms = new Set();
                         gene.properties['has_mechanism_of_resistance'].forEach(val => {
                             if (!val.is_literal) {
                                 const mech = getSubject(val.value);
-                                if (mech) groupKeys.push(mech.label);
+                                if (mech) uniqueMechanisms.add(mech.label);
                             }
                         });
+                        groupKeys.push(...Array.from(uniqueMechanisms));
                     }
                 }
 
@@ -1467,12 +1469,14 @@
 
                 const mechanisms = [];
                 if (gene.properties['has_mechanism_of_resistance']) {
+                    const uniqueMechanisms = new Set();
                     gene.properties['has_mechanism_of_resistance'].forEach(val => {
                         if (!val.is_literal) {
                             const mech = getSubject(val.value);
-                            if (mech) mechanisms.push(mech.label);
+                            if (mech) uniqueMechanisms.add(mech.label);
                         }
                     });
+                    mechanisms.push(...Array.from(uniqueMechanisms));
                 }
 
                 html += `

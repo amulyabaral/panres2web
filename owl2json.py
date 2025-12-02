@@ -199,13 +199,18 @@ def convert_owl_to_json(owl_file, json_file):
                 del subject_props[alias]
                 print(f"  Merged {alias} into {canonical}")
 
-        # Update all references to aliases to point to canonical
-        print("Updating references to equivalent classes...")
+        # Update references to aliases to point to canonical (only for PanGenes)
+        print("Updating references to equivalent classes in PanGenes...")
         for subj_id, props in subject_props.items():
-            for pred, values in props['properties'].items():
-                for value in values:
-                    if not value['is_literal'] and value['value'] in equivalences:
-                        value['value'] = equivalences[value['value']]
+            # Only update references for PanGenes, not OriginalGenes
+            is_pangene = 'PanGene' in props['types'] or any(t in {'AntimicrobialResistanceGene', 'BiocideResistanceGene', 'MetalResistanceGene'} for t in props['types'])
+            is_original_gene = 'OriginalGene' in props['types']
+
+            if is_pangene and not is_original_gene:
+                for pred, values in props['properties'].items():
+                    for value in values:
+                        if not value['is_literal'] and value['value'] in equivalences:
+                            value['value'] = equivalences[value['value']]
 
     # Second pass: build categorized structure (OPTIMIZED)
     print("Categorizing subjects...")
@@ -265,8 +270,29 @@ def convert_owl_to_json(owl_file, json_file):
         }
 
         # Convert properties to simple format
+        # For PanGenes, deduplicate property values (especially after equivalence mapping)
+        is_pangene = 'PanGene' in props['types'] or any(t in {'AntimicrobialResistanceGene', 'BiocideResistanceGene', 'MetalResistanceGene'} for t in props['types'])
+
         for pred, values in props['properties'].items():
-            subject_entry['properties'][pred] = values
+            if is_pangene:
+                # Deduplicate values based on their content
+                seen = set()
+                deduped_values = []
+                for val in values:
+                    # Create a key that represents this value uniquely
+                    if val['is_literal']:
+                        key = ('literal', val['value'])
+                    else:
+                        key = ('ref', val['value'])
+
+                    if key not in seen:
+                        seen.add(key)
+                        deduped_values.append(val)
+
+                subject_entry['properties'][pred] = deduped_values
+            else:
+                # For non-PanGenes (like OriginalGenes), keep all values
+                subject_entry['properties'][pred] = values
 
         # Add sequences if this is a gene or protein
         # Genes are in original format (various patterns from databases)
