@@ -135,6 +135,9 @@ def convert_owl_to_json(owl_file, json_file):
     print("Processing triples...")
     subject_props = defaultdict(lambda: {'types': [], 'properties': defaultdict(list)})
 
+    # Track equivalent classes
+    equivalences = {}  # Maps class -> canonical class
+
     for subj, pred, obj in graph:
         if not isinstance(subj, URIRef):
             continue  # Skip blank nodes
@@ -151,6 +154,15 @@ def convert_owl_to_json(owl_file, json_file):
         else:
             continue  # Skip blank nodes
 
+        # Track equivalentClass relationships
+        if pred_id == 'owl:equivalentClass':
+            # The object of the equivalentClass property is the canonical name
+            # Pattern: Antibiotic_X equivalentClass Y -> Y is canonical
+            canonical = obj_id
+            alias = subj_id
+            equivalences[alias] = canonical
+            print(f"  Found equivalence: {alias} = {canonical}")
+
         # Store property
         subject_props[subj_id]['properties'][pred_id].append(obj_data)
 
@@ -159,6 +171,41 @@ def convert_owl_to_json(owl_file, json_file):
             subject_props[subj_id]['types'].append(obj_data['value'])
 
     print(f"Found {len(subject_props)} subjects")
+    print(f"Found {len(equivalences)} equivalence relationships")
+
+    # Merge equivalent classes
+    if equivalences:
+        print("Merging equivalent classes...")
+        for alias, canonical in equivalences.items():
+            if alias in subject_props and canonical in subject_props:
+                # Merge properties from alias into canonical
+                for pred, values in subject_props[alias]['properties'].items():
+                    if pred != 'owl:equivalentClass':  # Don't copy equivalence relationships
+                        subject_props[canonical]['properties'][pred].extend(values)
+
+                # Merge types
+                for type_val in subject_props[alias]['types']:
+                    if type_val not in subject_props[canonical]['types']:
+                        subject_props[canonical]['types'].append(type_val)
+
+                # Add alias as alternative label
+                if 'rdfs:label' in subject_props[alias]['properties']:
+                    alias_label = subject_props[alias]['properties']['rdfs:label'][0]['value']
+                    subject_props[canonical]['properties']['alternative_labels'] = [
+                        {'value': alias_label, 'is_literal': True}
+                    ]
+
+                # Remove the alias from subject_props
+                del subject_props[alias]
+                print(f"  Merged {alias} into {canonical}")
+
+        # Update all references to aliases to point to canonical
+        print("Updating references to equivalent classes...")
+        for subj_id, props in subject_props.items():
+            for pred, values in props['properties'].items():
+                for value in values:
+                    if not value['is_literal'] and value['value'] in equivalences:
+                        value['value'] = equivalences[value['value']]
 
     # Second pass: build categorized structure (OPTIMIZED)
     print("Categorizing subjects...")
