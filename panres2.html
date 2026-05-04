@@ -533,11 +533,11 @@
                 </button>
                 <div class="flex gap-2">
                     <button onclick="toggleViewMode('table')" id="btnTableView"
-                            class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium">
+                            class="bg-primary text-white px-4 py-2 rounded text-sm font-medium">
                         Table View
                     </button>
                     <button onclick="toggleViewMode('list')" id="btnListView"
-                            class="bg-primary text-white px-4 py-2 rounded text-sm font-medium">
+                            class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium">
                         List View
                     </button>
                 </div>
@@ -553,47 +553,115 @@
                     <!-- Database Filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Source Database</label>
-                        <select id="filterDatabase" onchange="applyFilters()"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
-                            <option value="">All Databases</option>
-                        </select>
+                        <details class="relative">
+                            <summary class="list-none cursor-pointer w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm bg-white text-gray-700">
+                                Select databases
+                            </summary>
+                            <div class="absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3">
+                                <div id="filterDatabaseOptions" class="max-h-48 overflow-y-auto text-sm space-y-1">
+                                    <div class="text-gray-400">Loading databases...</div>
+                                </div>
+                                <div class="mt-2 flex gap-2 text-xs border-t pt-2">
+                                    <button type="button" onclick="setAllCheckboxes('filterDatabaseOptions', true); applyFilters();" class="text-primary hover:underline">Select all</button>
+                                    <button type="button" onclick="setAllCheckboxes('filterDatabaseOptions', false); applyFilters();" class="text-primary hover:underline">Clear</button>
+                                </div>
+                            </div>
+                        </details>
                     </div>
 
                     <!-- Phenotype Filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Phenotype</label>
-                        <select id="filterPhenotype" onchange="applyFilters()"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
-                            <option value="">All Phenotypes</option>
-                        </select>
+                        <details class="relative">
+                            <summary class="list-none cursor-pointer w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm bg-white text-gray-700">
+                                Select phenotypes
+                            </summary>
+                            <div class="absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3">
+                                <div id="filterPhenotypeOptions" class="max-h-48 overflow-y-auto text-sm space-y-1">
+                                    <div class="text-gray-400">Loading phenotypes...</div>
+                                </div>
+                                <div class="mt-2 flex gap-2 text-xs border-t pt-2">
+                                    <button type="button" onclick="setAllCheckboxes('filterPhenotypeOptions', true); applyFilters();" class="text-primary hover:underline">Select all</button>
+                                    <button type="button" onclick="setAllCheckboxes('filterPhenotypeOptions', false); applyFilters();" class="text-primary hover:underline">Clear</button>
+                                </div>
+                            </div>
+                        </details>
                     </div>
 
                     <!-- Resistance Class Filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Resistance Class</label>
-                        <select id="filterClass" onchange="applyFilters()"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
-                            <option value="">All Classes</option>
-                        </select>
+                        <details class="relative">
+                            <summary class="list-none cursor-pointer w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm bg-white text-gray-700">
+                                Select classes
+                            </summary>
+                            <div class="absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3">
+                                <div id="filterClassOptions" class="max-h-48 overflow-y-auto text-sm space-y-1">
+                                    <div class="text-gray-400">Loading classes...</div>
+                                </div>
+                                <div class="mt-2 flex gap-2 text-xs border-t pt-2">
+                                    <button type="button" onclick="setAllCheckboxes('filterClassOptions', true); applyFilters();" class="text-primary hover:underline">Select all</button>
+                                    <button type="button" onclick="setAllCheckboxes('filterClassOptions', false); applyFilters();" class="text-primary hover:underline">Clear</button>
+                                </div>
+                            </div>
+                        </details>
                     </div>
 
                     <!-- Mechanism Filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Mechanism</label>
-                        <select id="filterMechanism" onchange="applyFilters()"
+                        <details class="relative">
+                            <summary class="list-none cursor-pointer w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm bg-white text-gray-700">
+                                Select mechanisms
+                            </summary>
+                            <div class="absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3">
+                                <div id="filterMechanismOptions" class="max-h-48 overflow-y-auto text-sm space-y-1">
+                                    <div class="text-gray-400">Loading mechanisms...</div>
+                                </div>
+                                <div class="mt-2 flex gap-2 text-xs border-t pt-2">
+                                    <button type="button" onclick="setAllCheckboxes('filterMechanismOptions', true); applyFilters();" class="text-primary hover:underline">Select all</button>
+                                    <button type="button" onclick="setAllCheckboxes('filterMechanismOptions', false); applyFilters();" class="text-primary hover:underline">Clear</button>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- E. coli homolog filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">E. coli core homolog</label>
+                        <select id="filterHomolog" onchange="applyFilters()"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
-                            <option value="">All Mechanisms</option>
+                            <option value="">All</option>
+                            <option value="yes">Only homologs</option>
+                            <option value="no">Exclude homologs</option>
                         </select>
+                    </div>
+
+                    <!-- Gene cluster filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Gene Cluster</label>
+                        <input type="text" id="filterGeneCluster" onkeyup="applyFilters()"
+                               placeholder="e.g. pan_cl123"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
+                    </div>
+
+                    <!-- Protein cluster filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Protein Cluster</label>
+                        <input type="text" id="filterProteinCluster" onkeyup="applyFilters()"
+                               placeholder="e.g. PANCL123"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
+                    </div>
+
+                    <!-- Structure cluster filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Structure Cluster</label>
+                        <input type="text" id="filterStructureCluster" onkeyup="applyFilters()"
+                               placeholder="e.g. PANCL123_struct"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
                     </div>
                 </div>
 
-                <!-- Search within results -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Search in Results</label>
-                    <input type="text" id="filterSearch" onkeyup="applyFilters()"
-                           placeholder="Search gene names..."
-                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
-                </div>
 
                 <!-- Active Filters Display -->
                 <div id="activeFilters" class="mb-4 flex flex-wrap gap-2 hidden"></div>
@@ -608,6 +676,10 @@
                         <option value="phenotype">Phenotype</option>
                         <option value="class">Resistance Class</option>
                         <option value="mechanism">Mechanism</option>
+                        <option value="homolog">E. coli core homolog</option>
+                        <option value="geneCluster">Gene Cluster</option>
+                        <option value="proteinCluster">Protein Cluster</option>
+                        <option value="structureCluster">Structure Cluster</option>
                     </select>
 
                     <button onclick="clearFilters()"
@@ -621,6 +693,34 @@
                     <div class="text-sm text-gray-600">
                         Showing <span id="filteredCount" class="font-bold text-primary">0</span> of
                         <span id="totalCount" class="font-bold">0</span> genes
+                    </div>
+                </div>
+                <!-- Bulk downloads -->
+                <div class="mt-4 pt-4 border-t border-gray-200 bg-green-50 p-3 rounded-lg">
+                    <div class="flex flex-wrap items-end gap-3">
+                        <div class="min-w-56">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Bulk download</label>
+                            <select id="bulkDownloadType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm bg-white text-gray-700">
+                                <option value="gene">Genes FASTA</option>
+                                <option value="protein">Proteins FASTA</option>
+                                <option value="metadata">Metadata table</option>
+                            </select>
+                        </div>
+                        <div class="min-w-56">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Rows</label>
+                            <select id="bulkDownloadMode" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm bg-white text-gray-700">
+                                <option value="filtered">All filtered rows</option>
+                                <option value="selected">Selected rows only</option>
+                            </select>
+                        </div>
+                        <button onclick="runBulkDownload()"
+                                class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
+                            Download
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-600 mt-2">
+                        Filtered set: <span id="bulkFilteredCount" class="font-semibold">0</span> genes ·
+                        Selected rows: <span id="bulkSelectedCount" class="font-semibold">0</span>
                     </div>
                 </div>
             </div>
@@ -655,16 +755,20 @@
         let filteredItems = [];
         let currentPage = 1;
         let itemsPerPage = 100;
-        let currentViewMode = 'list';
+        let currentViewMode = 'table';
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
         let activeFilters = {
-            database: '',
-            phenotype: '',
-            class: '',
-            mechanism: '',
-            search: ''
+            database: [],
+            phenotype: [],
+            class: [],
+            mechanism: [],
+            homolog: '',
+            geneCluster: '',
+            proteinCluster: '',
+            structureCluster: ''
         };
+        let selectedGeneIds = new Set();
 
         // Navigation history stack
         let navigationHistory = [];
@@ -886,6 +990,22 @@
             return PREDICATE_NAMES[pred] || pred;
         }
 
+        // Natural sorting: pan_2 before pan_10, PANCL2 before PANCL10.
+        const NATURAL_COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
+        function naturalCompare(a, b) {
+            return NATURAL_COLLATOR.compare(String(a || ''), String(b || ''));
+        }
+
+        function firstNaturalValue(values) {
+            if (!values || values.length === 0) return '';
+            return [...values].sort(naturalCompare)[0] || '';
+        }
+
+        function sortIndicator(column) {
+            return currentSortColumn === column ? (currentSortDirection === 'asc' ? '↑' : '↓') : '';
+        }
+
         // View functions
         function showHome() {
             navigationHistory = []; // Clear history when going home
@@ -910,28 +1030,33 @@
                     currentPage = previousView.page || 1;
                     currentViewMode = previousView.viewMode || 'list';
                     activeFilters = previousView.filters || {
-                        database: '',
-                        phenotype: '',
-                        class: '',
-                        mechanism: '',
+                        database: [],
+                        phenotype: [],
+                        class: [],
+                        mechanism: [],
+                        homolog: '',
+                        geneCluster: '',
+                        proteinCluster: '',
+                        structureCluster: '',
                         search: ''
                     };
 
                     // Restore filter UI
-                    if (document.getElementById('filterDatabase')) {
-                        document.getElementById('filterDatabase').value = activeFilters.database;
+                    setCheckedValues('filterDatabaseOptions', activeFilters.database || []);
+                    setCheckedValues('filterPhenotypeOptions', activeFilters.phenotype || []);
+                    setCheckedValues('filterClassOptions', activeFilters.class || []);
+                    setCheckedValues('filterMechanismOptions', activeFilters.mechanism || []);
+                    if (document.getElementById('filterHomolog')) {
+                        document.getElementById('filterHomolog').value = activeFilters.homolog || '';
                     }
-                    if (document.getElementById('filterPhenotype')) {
-                        document.getElementById('filterPhenotype').value = activeFilters.phenotype;
+                    if (document.getElementById('filterGeneCluster')) {
+                        document.getElementById('filterGeneCluster').value = activeFilters.geneCluster || '';
                     }
-                    if (document.getElementById('filterClass')) {
-                        document.getElementById('filterClass').value = activeFilters.class;
+                    if (document.getElementById('filterProteinCluster')) {
+                        document.getElementById('filterProteinCluster').value = activeFilters.proteinCluster || '';
                     }
-                    if (document.getElementById('filterMechanism')) {
-                        document.getElementById('filterMechanism').value = activeFilters.mechanism;
-                    }
-                    if (document.getElementById('filterSearch')) {
-                        document.getElementById('filterSearch').value = activeFilters.search;
+                    if (document.getElementById('filterStructureCluster')) {
+                        document.getElementById('filterStructureCluster').value = activeFilters.structureCluster || '';
                     }
                     if (document.getElementById('groupBy')) {
                         document.getElementById('groupBy').value = previousView.groupBy || '';
@@ -953,7 +1078,7 @@
                     currentItems = itemIds
                         .map(id => getSubject(id))
                         .filter(item => item && item.label !== '+')
-                        .sort((a, b) => a.label.localeCompare(b.label));
+                        .sort((a, b) => naturalCompare(a.label, b.label));
 
                     if (currentCategory === 'PanGene') {
                         document.getElementById('advancedFilters').classList.remove('hidden');
@@ -989,7 +1114,7 @@
         function showCategory(category) {
             currentCategory = category;
             currentPage = 1;
-            currentViewMode = 'list';
+            currentViewMode = 'table';
 
             const titles = {
                 PanGene: 'PanRes Genes',
@@ -1007,7 +1132,7 @@
             currentItems = itemIds
                 .map(id => getSubject(id))
                 .filter(item => item && item.label !== '+')  // Filter out the "+" phenotype marker
-                .sort((a, b) => a.label.localeCompare(b.label));
+                .sort((a, b) => naturalCompare(a.label, b.label));
 
             // Show advanced filters only for PanGene category
             if (category === 'PanGene') {
@@ -1035,6 +1160,83 @@
             document.getElementById('detailsView').classList.add('hidden');
         }
 
+        function getPropertyRefs(subject, propertyName) {
+            if (!subject || !subject.properties || !subject.properties[propertyName]) return [];
+            return subject.properties[propertyName]
+                .filter(val => !val.is_literal)
+                .map(val => val.value);
+        }
+
+        function getLiteralBool(subject, propertyName) {
+            if (!subject || !subject.properties || !subject.properties[propertyName]) return false;
+            return subject.properties[propertyName].some(val => val.is_literal && String(val.value).toLowerCase() === 'true');
+        }
+
+        function getGeneProtein(gene) {
+            const proteinId = getPropertyRefs(gene, 'translates_to')[0];
+            return proteinId ? getSubject(proteinId) : null;
+        }
+
+        function getGeneClusterIds(gene) {
+            return getPropertyRefs(gene, 'member_of').filter(id => /^pan_cl\d+$/.test(id));
+        }
+
+        function getProteinClusterIdsForGene(gene) {
+            const protein = getGeneProtein(gene);
+            if (!protein) return [];
+            return getPropertyRefs(protein, 'member_of').filter(id => /^PANCL\d+$/.test(id));
+        }
+
+        function getStructureClusterIdsForGene(gene) {
+            const structureClusters = new Set();
+            getProteinClusterIdsForGene(gene).forEach(proteinClusterId => {
+                const proteinCluster = getSubject(proteinClusterId);
+                getPropertyRefs(proteinCluster, 'folds_to').forEach(structureId => {
+                    const structure = getSubject(structureId);
+                    getPropertyRefs(structure, 'member_of')
+                        .filter(id => /^PANCL\d+_struct$/.test(id))
+                        .forEach(id => structureClusters.add(id));
+                });
+            });
+            return Array.from(structureClusters);
+        }
+
+        function isGeneEcoliHomolog(gene) {
+            const protein = getGeneProtein(gene);
+            return getLiteralBool(protein, 'is_ecoli_homolog');
+        }
+
+        function getSubjectLabelOrId(id) {
+            const subject = getSubject(id);
+            return subject ? subject.label : id;
+        }
+
+        function addOptionsFromSet(selectId, placeholder, optionSet) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            select.innerHTML = `<option value="">${placeholder}</option>`;
+            Array.from(optionSet).map(JSON.parse).sort((a, b) => naturalCompare(a.label, b.label)).forEach(item => {
+                select.innerHTML += `<option value="${item.id}">${item.label}</option>`;
+            });
+        }
+
+        function getCheckedValues(containerId) {
+            return Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`)).map(cb => cb.value);
+        }
+
+        function setCheckedValues(containerId, values) {
+            const valueSet = new Set(values || []);
+            document.querySelectorAll(`#${containerId} input[type="checkbox"]`).forEach(cb => {
+                cb.checked = valueSet.has(cb.value);
+            });
+        }
+
+        function setAllCheckboxes(containerId, checked) {
+            document.querySelectorAll(`#${containerId} input[type="checkbox"]`).forEach(cb => {
+                cb.checked = checked;
+            });
+        }
+
         function populateFilterDropdowns() {
             // Populate database filter
             const databases = new Set();
@@ -1054,11 +1256,13 @@
                 }
             });
 
-            const dbSelect = document.getElementById('filterDatabase');
-            dbSelect.innerHTML = '<option value="">All Databases</option>';
-            Array.from(databases).map(JSON.parse).sort((a, b) => a.label.localeCompare(b.label)).forEach(db => {
-                dbSelect.innerHTML += `<option value="${db.id}">${db.label}</option>`;
-            });
+            const dbContainer = document.getElementById('filterDatabaseOptions');
+            dbContainer.innerHTML = Array.from(databases).map(JSON.parse).sort((a, b) => naturalCompare(a.label, b.label)).map(db => `
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" value="${db.id}" onchange="applyFilters()" class="mt-0.5">
+                    <span>${db.label}</span>
+                </label>
+            `).join('') || '<div class="text-gray-400">No databases found</div>';
 
             // Populate phenotype filter
             const phenotypes = new Set();
@@ -1075,11 +1279,13 @@
                 }
             });
 
-            const phenoSelect = document.getElementById('filterPhenotype');
-            phenoSelect.innerHTML = '<option value="">All Phenotypes</option>';
-            Array.from(phenotypes).map(JSON.parse).sort((a, b) => a.label.localeCompare(b.label)).forEach(p => {
-                phenoSelect.innerHTML += `<option value="${p.id}">${p.label}</option>`;
-            });
+            const phenoContainer = document.getElementById('filterPhenotypeOptions');
+            phenoContainer.innerHTML = Array.from(phenotypes).map(JSON.parse).sort((a, b) => naturalCompare(a.label, b.label)).map(p => `
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" value="${p.id}" onchange="applyFilters()" class="mt-0.5">
+                    <span>${p.label}</span>
+                </label>
+            `).join('') || '<div class="text-gray-400">No phenotypes found</div>';
 
             // Populate resistance class filter
             const classes = new Set();
@@ -1094,11 +1300,13 @@
                 }
             });
 
-            const classSelect = document.getElementById('filterClass');
-            classSelect.innerHTML = '<option value="">All Classes</option>';
-            Array.from(classes).map(JSON.parse).sort((a, b) => a.label.localeCompare(b.label)).forEach(c => {
-                classSelect.innerHTML += `<option value="${c.id}">${c.label}</option>`;
-            });
+            const classContainer = document.getElementById('filterClassOptions');
+            classContainer.innerHTML = Array.from(classes).map(JSON.parse).sort((a, b) => naturalCompare(a.label, b.label)).map(c => `
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" value="${c.id}" onchange="applyFilters()" class="mt-0.5">
+                    <span>${c.label}</span>
+                </label>
+            `).join('') || '<div class="text-gray-400">No classes found</div>';
 
             // Populate mechanism filter
             const mechanisms = new Set();
@@ -1113,23 +1321,31 @@
                 }
             });
 
-            const mechSelect = document.getElementById('filterMechanism');
-            mechSelect.innerHTML = '<option value="">All Mechanisms</option>';
-            Array.from(mechanisms).map(JSON.parse).sort((a, b) => a.label.localeCompare(b.label)).forEach(m => {
-                mechSelect.innerHTML += `<option value="${m.id}">${m.label}</option>`;
-            });
+            const mechContainer = document.getElementById('filterMechanismOptions');
+            mechContainer.innerHTML = Array.from(mechanisms).map(JSON.parse).sort((a, b) => naturalCompare(a.label, b.label)).map(m => `
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" value="${m.id}" onchange="applyFilters()" class="mt-0.5">
+                    <span>${m.label}</span>
+                </label>
+            `).join('') || '<div class="text-gray-400">No mechanisms found</div>';
+
+            // Cluster filters are free-text inputs. Do not pre-populate every cluster here,
+            // because scanning all genes/proteins/structures before rendering made the browser freeze.
         }
 
         function applyFilters() {
-            activeFilters.database = document.getElementById('filterDatabase')?.value || '';
-            activeFilters.phenotype = document.getElementById('filterPhenotype')?.value || '';
-            activeFilters.class = document.getElementById('filterClass')?.value || '';
-            activeFilters.mechanism = document.getElementById('filterMechanism')?.value || '';
-            activeFilters.search = document.getElementById('filterSearch')?.value.toLowerCase() || '';
+            activeFilters.database = getCheckedValues('filterDatabaseOptions');
+            activeFilters.phenotype = getCheckedValues('filterPhenotypeOptions');
+            activeFilters.class = getCheckedValues('filterClassOptions');
+            activeFilters.mechanism = getCheckedValues('filterMechanismOptions');
+            activeFilters.homolog = document.getElementById('filterHomolog')?.value || '';
+            activeFilters.geneCluster = (document.getElementById('filterGeneCluster')?.value || '').trim().toLowerCase();
+            activeFilters.proteinCluster = (document.getElementById('filterProteinCluster')?.value || '').trim().toLowerCase();
+            activeFilters.structureCluster = (document.getElementById('filterStructureCluster')?.value || '').trim().toLowerCase();
 
             filteredItems = currentItems.filter(gene => {
                 // Database filter
-                if (activeFilters.database) {
+                if (activeFilters.database.length > 0) {
                     let hasDatabase = false;
                     if (gene.properties['same_as']) {
                         gene.properties['same_as'].forEach(val => {
@@ -1137,7 +1353,7 @@
                                 const originalGene = getSubject(val.value);
                                 if (originalGene && originalGene.properties['is_from_database']) {
                                     originalGene.properties['is_from_database'].forEach(db => {
-                                        if (db.value === activeFilters.database) hasDatabase = true;
+                                        if (activeFilters.database.includes(db.value)) hasDatabase = true;
                                     });
                                 }
                             }
@@ -1147,35 +1363,41 @@
                 }
 
                 // Phenotype filter
-                if (activeFilters.phenotype) {
+                if (activeFilters.phenotype.length > 0) {
                     if (!gene.properties['has_predicted_phenotype'] ||
-                        !gene.properties['has_predicted_phenotype'].some(v => v.value === activeFilters.phenotype)) {
+                        !gene.properties['has_predicted_phenotype'].some(v => activeFilters.phenotype.includes(v.value))) {
                         return false;
                     }
                 }
 
                 // Class filter
-                if (activeFilters.class) {
+                if (activeFilters.class.length > 0) {
                     if (!gene.properties['has_resistance_class'] ||
-                        !gene.properties['has_resistance_class'].some(v => v.value === activeFilters.class)) {
+                        !gene.properties['has_resistance_class'].some(v => activeFilters.class.includes(v.value))) {
                         return false;
                     }
                 }
 
                 // Mechanism filter
-                if (activeFilters.mechanism) {
+                if (activeFilters.mechanism.length > 0) {
                     if (!gene.properties['has_mechanism_of_resistance'] ||
-                        !gene.properties['has_mechanism_of_resistance'].some(v => v.value === activeFilters.mechanism)) {
+                        !gene.properties['has_mechanism_of_resistance'].some(v => activeFilters.mechanism.includes(v.value))) {
                         return false;
                     }
                 }
 
-                // Search filter
-                if (activeFilters.search) {
-                    if (!gene.label.toLowerCase().includes(activeFilters.search)) {
-                        return false;
-                    }
+                // E. coli core homolog filter
+                if (activeFilters.homolog) {
+                    const isHomolog = isGeneEcoliHomolog(gene);
+                    if (activeFilters.homolog === 'yes' && !isHomolog) return false;
+                    if (activeFilters.homolog === 'no' && isHomolog) return false;
                 }
+
+                // Cluster filters
+                if (activeFilters.geneCluster && !getGeneClusterIds(gene).some(id => id.toLowerCase().includes(activeFilters.geneCluster) || getSubjectLabelOrId(id).toLowerCase().includes(activeFilters.geneCluster))) return false;
+                if (activeFilters.proteinCluster && !getProteinClusterIdsForGene(gene).some(id => id.toLowerCase().includes(activeFilters.proteinCluster) || getSubjectLabelOrId(id).toLowerCase().includes(activeFilters.proteinCluster))) return false;
+                if (activeFilters.structureCluster && !getStructureClusterIdsForGene(gene).some(id => id.toLowerCase().includes(activeFilters.structureCluster) || getSubjectLabelOrId(id).toLowerCase().includes(activeFilters.structureCluster))) return false;
+
 
                 return true;
             });
@@ -1189,26 +1411,30 @@
             const container = document.getElementById('activeFilters');
             const filterPills = [];
 
-            if (activeFilters.database) {
-                const db = getSubject(activeFilters.database);
-                filterPills.push({type: 'database', label: `Database: ${db?.label || activeFilters.database}`});
+            if (activeFilters.database.length > 0) {
+                filterPills.push({type: 'database', label: `Databases selected: ${activeFilters.database.length}`});
             }
-            if (activeFilters.phenotype) {
-                const ph = getSubject(activeFilters.phenotype);
-                filterPills.push({type: 'phenotype', label: `Phenotype: ${ph?.label || activeFilters.phenotype}`});
+            if (activeFilters.phenotype.length > 0) {
+                filterPills.push({type: 'phenotype', label: `Phenotypes selected: ${activeFilters.phenotype.length}`});
             }
-            if (activeFilters.class) {
-                const cl = getSubject(activeFilters.class);
-                filterPills.push({type: 'class', label: `Class: ${cl?.label || activeFilters.class}`});
+            if (activeFilters.class.length > 0) {
+                filterPills.push({type: 'class', label: `Classes selected: ${activeFilters.class.length}`});
             }
-            if (activeFilters.mechanism) {
-                const mech = getSubject(activeFilters.mechanism);
-                filterPills.push({type: 'mechanism', label: `Mechanism: ${mech?.label || activeFilters.mechanism}`});
+            if (activeFilters.mechanism.length > 0) {
+                filterPills.push({type: 'mechanism', label: `Mechanisms selected: ${activeFilters.mechanism.length}`});
             }
-            if (activeFilters.search) {
-                filterPills.push({type: 'search', label: `Search: "${activeFilters.search}"`});
+            if (activeFilters.homolog) {
+                filterPills.push({type: 'homolog', label: activeFilters.homolog === 'yes' ? 'E. coli core homolog: yes' : 'E. coli core homolog: no'});
             }
-
+            if (activeFilters.geneCluster) {
+                filterPills.push({type: 'geneCluster', label: 'Gene cluster contains: ' + activeFilters.geneCluster});
+            }
+            if (activeFilters.proteinCluster) {
+                filterPills.push({type: 'proteinCluster', label: 'Protein cluster contains: ' + activeFilters.proteinCluster});
+            }
+            if (activeFilters.structureCluster) {
+                filterPills.push({type: 'structureCluster', label: 'Structure cluster contains: ' + activeFilters.structureCluster});
+            }
             if (filterPills.length > 0) {
                 container.classList.remove('hidden');
                 container.innerHTML = filterPills.map(pill => `
@@ -1223,22 +1449,29 @@
         }
 
         function removeFilter(type) {
-            if (type === 'database') document.getElementById('filterDatabase').value = '';
-            if (type === 'phenotype') document.getElementById('filterPhenotype').value = '';
-            if (type === 'class') document.getElementById('filterClass').value = '';
-            if (type === 'mechanism') document.getElementById('filterMechanism').value = '';
-            if (type === 'search') document.getElementById('filterSearch').value = '';
+            if (type === 'database') setAllCheckboxes('filterDatabaseOptions', false);
+            if (type === 'phenotype') setAllCheckboxes('filterPhenotypeOptions', false);
+            if (type === 'class') setAllCheckboxes('filterClassOptions', false);
+            if (type === 'mechanism') setAllCheckboxes('filterMechanismOptions', false);
+            if (type === 'homolog') document.getElementById('filterHomolog').value = '';
+            if (type === 'geneCluster') document.getElementById('filterGeneCluster').value = '';
+            if (type === 'proteinCluster') document.getElementById('filterProteinCluster').value = '';
+            if (type === 'structureCluster') document.getElementById('filterStructureCluster').value = '';
             applyFilters();
         }
 
         function clearFilters() {
-            document.getElementById('filterDatabase').value = '';
-            document.getElementById('filterPhenotype').value = '';
-            document.getElementById('filterClass').value = '';
-            document.getElementById('filterMechanism').value = '';
-            document.getElementById('filterSearch').value = '';
+            setAllCheckboxes('filterDatabaseOptions', false);
+            setAllCheckboxes('filterPhenotypeOptions', false);
+            setAllCheckboxes('filterClassOptions', false);
+            setAllCheckboxes('filterMechanismOptions', false);
+            document.getElementById('filterHomolog').value = '';
+            document.getElementById('filterGeneCluster').value = '';
+            document.getElementById('filterProteinCluster').value = '';
+            document.getElementById('filterStructureCluster').value = '';
             document.getElementById('groupBy').value = '';
-            activeFilters = {database: '', phenotype: '', class: '', mechanism: '', search: ''};
+            activeFilters = {database: [], phenotype: [], class: [], mechanism: [], homolog: '', geneCluster: '', proteinCluster: '', structureCluster: ''};
+            selectedGeneIds.clear();
             filteredItems = currentItems;
             updateActiveFiltersDisplay();
             currentPage = 1;
@@ -1300,6 +1533,14 @@
                         });
                         groupKeys.push(...Array.from(uniqueMechanisms));
                     }
+                } else if (groupBy === 'homolog') {
+                    groupKeys.push(isGeneEcoliHomolog(gene) ? 'E. coli core homolog' : 'Not E. coli core homolog');
+                } else if (groupBy === 'geneCluster') {
+                    groupKeys.push(...getGeneClusterIds(gene).map(getSubjectLabelOrId));
+                } else if (groupBy === 'proteinCluster') {
+                    groupKeys.push(...getProteinClusterIdsForGene(gene).map(getSubjectLabelOrId));
+                } else if (groupBy === 'structureCluster') {
+                    groupKeys.push(...getStructureClusterIdsForGene(gene).map(getSubjectLabelOrId));
                 }
 
                 if (groupKeys.length === 0) groupKeys = ['Uncategorized'];
@@ -1316,11 +1557,11 @@
         }
 
         function renderGroupedList(grouped) {
-            const sortedGroups = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
+            const sortedGroups = Object.keys(grouped).sort((a, b) => naturalCompare(a, b));
 
             let html = '';
             sortedGroups.forEach(groupName => {
-                const items = grouped[groupName].sort((a, b) => a.label.localeCompare(b.label));
+                const items = grouped[groupName].sort((a, b) => naturalCompare(a.label, b.label));
                 html += `
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b-2 border-primary">
@@ -1408,21 +1649,28 @@
                     <table class="gene-table w-full text-sm">
                         <thead class="bg-gray-100 border-b-2 border-gray-300">
                             <tr>
+                                <th class="text-left p-3 font-semibold w-10">
+                                    <input type="checkbox" id="selectVisibleRows" onchange="toggleSelectVisibleRows(this.checked)" title="Select all rows on this page">
+                                </th>
                                 <th class="text-left p-3 font-semibold" onclick="sortTable('label')">
-                                    Gene Name ${currentSortColumn === 'label' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                    Gene Name ${sortIndicator('label')}
                                 </th>
                                 <th class="text-left p-3 font-semibold" onclick="sortTable('database')">
-                                    Database ${currentSortColumn === 'database' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                    Database ${sortIndicator('database')}
                                 </th>
                                 <th class="text-left p-3 font-semibold" onclick="sortTable('class')">
-                                    Resistance Class ${currentSortColumn === 'class' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                    Resistance Class ${sortIndicator('class')}
                                 </th>
                                 <th class="text-left p-3 font-semibold" onclick="sortTable('phenotype')">
-                                    Phenotype ${currentSortColumn === 'phenotype' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                    Phenotype ${sortIndicator('phenotype')}
                                 </th>
                                 <th class="text-left p-3 font-semibold" onclick="sortTable('mechanism')">
-                                    Mechanism ${currentSortColumn === 'mechanism' ? (currentSortDirection === 'asc' ? '↑' : '↓') : ''}
+                                    Mechanism ${sortIndicator('mechanism')}
                                 </th>
+                                <th class="text-left p-3 font-semibold" onclick="sortTable('homolog')">E. coli homolog ${sortIndicator('homolog')}</th>
+                                <th class="text-left p-3 font-semibold" onclick="sortTable('geneCluster')">Gene Cluster ${sortIndicator('geneCluster')}</th>
+                                <th class="text-left p-3 font-semibold" onclick="sortTable('proteinCluster')">Protein Cluster ${sortIndicator('proteinCluster')}</th>
+                                <th class="text-left p-3 font-semibold" onclick="sortTable('structureCluster')">Structure Cluster ${sortIndicator('structureCluster')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1479,8 +1727,25 @@
                     mechanisms.push(...Array.from(uniqueMechanisms));
                 }
 
+                databases.sort(naturalCompare);
+                classes.sort(naturalCompare);
+                phenotypes.sort(naturalCompare);
+                mechanisms.sort(naturalCompare);
+
+                const homologLabel = isGeneEcoliHomolog(gene)
+                    ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300">Yes</span>'
+                    : '<span class="text-gray-400">No</span>';
+                const geneClusters = getGeneClusterIds(gene).map(getSubjectLabelOrId).sort(naturalCompare);
+                const proteinClusters = getProteinClusterIdsForGene(gene).map(getSubjectLabelOrId).sort(naturalCompare);
+                const structureClusters = getStructureClusterIdsForGene(gene).map(getSubjectLabelOrId).sort(naturalCompare);
+
                 html += `
                     <tr class="border-b border-gray-200">
+                        <td class="p-3">
+                            <input type="checkbox" class="gene-row-checkbox" value="${gene.id}"
+                                   ${selectedGeneIds.has(gene.id) ? 'checked' : ''}
+                                   onchange="toggleGeneSelection('${gene.id}', this.checked)">
+                        </td>
                         <td class="p-3">
                             <a href="#" onclick="showDetails('${gene.id}'); return false;"
                                class="text-primary hover:underline font-medium">
@@ -1491,6 +1756,10 @@
                         <td class="p-3 text-gray-700">${classes.slice(0, 2).join(', ')}${classes.length > 2 ? ` +${classes.length - 2}` : ''}</td>
                         <td class="p-3 text-gray-700">${phenotypes.slice(0, 2).join(', ')}${phenotypes.length > 2 ? ` +${phenotypes.length - 2}` : ''}</td>
                         <td class="p-3 text-gray-700">${mechanisms.slice(0, 2).join(', ')}${mechanisms.length > 2 ? ` +${mechanisms.length - 2}` : ''}</td>
+                        <td class="p-3 text-gray-700">${homologLabel}</td>
+                        <td class="p-3 text-gray-700">${geneClusters.slice(0, 1).join(', ')}${geneClusters.length > 1 ? ` +${geneClusters.length - 1}` : ''}</td>
+                        <td class="p-3 text-gray-700">${proteinClusters.slice(0, 1).join(', ')}${proteinClusters.length > 1 ? ` +${proteinClusters.length - 1}` : ''}</td>
+                        <td class="p-3 text-gray-700">${structureClusters.slice(0, 1).join(', ')}${structureClusters.length > 1 ? ` +${structureClusters.length - 1}` : ''}</td>
                     </tr>
                 `;
             });
@@ -1503,6 +1772,85 @@
 
             document.getElementById('listContent').innerHTML = html;
             renderPagination();
+            updateBulkSelectionUI();
+        }
+
+        function toggleGeneSelection(geneId, checked) {
+            if (checked) {
+                selectedGeneIds.add(geneId);
+            } else {
+                selectedGeneIds.delete(geneId);
+            }
+            updateBulkSelectionUI();
+        }
+
+        function toggleSelectVisibleRows(checked) {
+            document.querySelectorAll('.gene-row-checkbox').forEach(cb => {
+                cb.checked = checked;
+                if (checked) {
+                    selectedGeneIds.add(cb.value);
+                } else {
+                    selectedGeneIds.delete(cb.value);
+                }
+            });
+            updateBulkSelectionUI();
+        }
+
+        function updateBulkSelectionUI() {
+            const filteredCount = document.getElementById('bulkFilteredCount');
+            const selectedCount = document.getElementById('bulkSelectedCount');
+            if (filteredCount) filteredCount.textContent = filteredItems.length;
+            if (selectedCount) selectedCount.textContent = selectedGeneIds.size;
+
+            const visibleCheckboxes = Array.from(document.querySelectorAll('.gene-row-checkbox'));
+            const selectVisible = document.getElementById('selectVisibleRows');
+            if (selectVisible && visibleCheckboxes.length > 0) {
+                const checkedCount = visibleCheckboxes.filter(cb => cb.checked).length;
+                selectVisible.checked = checkedCount === visibleCheckboxes.length;
+                selectVisible.indeterminate = checkedCount > 0 && checkedCount < visibleCheckboxes.length;
+            }
+        }
+
+        function getSortValueForGene(gene, column) {
+            if (!gene) return '';
+
+            if (column === 'label') {
+                return gene.label || gene.id || '';
+            }
+
+            if (column === 'database') {
+                return firstNaturalValue(getDatabaseLabelsForGene(gene));
+            }
+
+            if (column === 'class') {
+                return firstNaturalValue(getUniqueLabelsFromRefs(gene.properties['has_resistance_class']));
+            }
+
+            if (column === 'phenotype') {
+                return firstNaturalValue(getUniqueLabelsFromRefs(gene.properties['has_predicted_phenotype']).filter(x => x !== '+'));
+            }
+
+            if (column === 'mechanism') {
+                return firstNaturalValue(getUniqueLabelsFromRefs(gene.properties['has_mechanism_of_resistance']));
+            }
+
+            if (column === 'homolog') {
+                return isGeneEcoliHomolog(gene) ? 'yes' : 'no';
+            }
+
+            if (column === 'geneCluster') {
+                return firstNaturalValue(getGeneClusterIds(gene).map(getSubjectLabelOrId));
+            }
+
+            if (column === 'proteinCluster') {
+                return firstNaturalValue(getProteinClusterIdsForGene(gene).map(getSubjectLabelOrId));
+            }
+
+            if (column === 'structureCluster') {
+                return firstNaturalValue(getStructureClusterIdsForGene(gene).map(getSubjectLabelOrId));
+            }
+
+            return '';
         }
 
         function sortTable(column) {
@@ -1514,54 +1862,9 @@
             }
 
             filteredItems.sort((a, b) => {
-                let aVal = '';
-                let bVal = '';
-
-                if (column === 'label') {
-                    aVal = a.label;
-                    bVal = b.label;
-                } else if (column === 'database') {
-                    // Get first database
-                    if (a.properties['same_as']) {
-                        a.properties['same_as'].forEach(val => {
-                            if (!val.is_literal && !aVal) {
-                                const originalGene = getSubject(val.value);
-                                if (originalGene && originalGene.properties['is_from_database']) {
-                                    const db = getSubject(originalGene.properties['is_from_database'][0].value);
-                                    if (db) aVal = db.label;
-                                }
-                            }
-                        });
-                    }
-                    if (b.properties['same_as']) {
-                        b.properties['same_as'].forEach(val => {
-                            if (!val.is_literal && !bVal) {
-                                const originalGene = getSubject(val.value);
-                                if (originalGene && originalGene.properties['is_from_database']) {
-                                    const db = getSubject(originalGene.properties['is_from_database'][0].value);
-                                    if (db) bVal = db.label;
-                                }
-                            }
-                        });
-                    }
-                } else {
-                    const propMap = {
-                        'class': 'has_resistance_class',
-                        'phenotype': 'has_predicted_phenotype',
-                        'mechanism': 'has_mechanism_of_resistance'
-                    };
-                    const prop = propMap[column];
-                    if (a.properties[prop] && a.properties[prop][0]) {
-                        const subject = getSubject(a.properties[prop][0].value);
-                        if (subject) aVal = subject.label;
-                    }
-                    if (b.properties[prop] && b.properties[prop][0]) {
-                        const subject = getSubject(b.properties[prop][0].value);
-                        if (subject) bVal = subject.label;
-                    }
-                }
-
-                const result = aVal.localeCompare(bVal);
+                const aVal = getSortValueForGene(a, column);
+                const bVal = getSortValueForGene(b, column);
+                const result = naturalCompare(aVal, bVal);
                 return currentSortDirection === 'asc' ? result : -result;
             });
 
@@ -1662,6 +1965,7 @@
             if (document.getElementById('totalCount')) {
                 document.getElementById('totalCount').textContent = currentItems.length;
             }
+            updateBulkSelectionUI();
         }
 
         function showDetails(id) {
@@ -2565,7 +2869,7 @@
             const items = relatedGenes
                 .map(id => getSubject(id))
                 .filter(item => item)
-                .sort((a, b) => a.label.localeCompare(b.label));
+                .sort((a, b) => naturalCompare(a.label, b.label));
 
             const listHtml = items
                 .map(item => `
@@ -2737,6 +3041,202 @@
             });
         });
 
+        function getSequenceSubject(id) {
+            let subject = getSubject(id);
+            if (!subject) return null;
+
+            // If this is a protein without direct sequence fields, recover the gene carrying the sequences.
+            if (subject.id.startsWith('PAN') && !subject.id.includes('_struct') && !subject.id.startsWith('PANCL') && !subject.gene_sequence && !subject.protein_sequence) {
+                const correspondingGene = findGeneForProtein(subject.id);
+                if (correspondingGene) subject = correspondingGene;
+            }
+            return subject;
+        }
+
+        function wrapSequence(sequence, charsPerLine = 60) {
+            return sequence.match(new RegExp(`.{1,${charsPerLine}}`, 'g')).join('\n');
+        }
+
+        function getFastaEntry(id, type) {
+            const subject = getSequenceSubject(id);
+            if (!subject) return '';
+
+            const entries = [];
+
+            if ((type === 'gene' || type === 'both') && subject.gene_sequence) {
+                entries.push(`>${subject.id}\n${wrapSequence(subject.gene_sequence)}`);
+            }
+
+            if ((type === 'protein' || type === 'both') && subject.protein_sequence) {
+                let proteinId = subject.id;
+                if (subject.properties && subject.properties['translates_to']) {
+                    const translatesTo = subject.properties['translates_to'][0];
+                    if (translatesTo && !translatesTo.is_literal) proteinId = translatesTo.value;
+                }
+                entries.push(`>${proteinId}\n${wrapSequence(subject.protein_sequence)}`);
+            }
+
+            return entries.join('\n');
+        }
+
+        function downloadTextFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        function getBulkIds(mode = 'filtered') {
+            return mode === 'selected'
+                ? Array.from(selectedGeneIds)
+                : filteredItems.map(item => item.id);
+        }
+
+        function downloadBulkSequences(type, mode = 'filtered') {
+            const ids = getBulkIds(mode);
+
+            if (ids.length === 0) {
+                alert(mode === 'selected' ? 'No rows selected' : 'No genes in the filtered table');
+                return;
+            }
+
+            const label = mode === 'selected' ? 'selected' : 'filtered';
+
+            if (type === 'both') {
+                const geneFasta = ids
+                    .map(id => getFastaEntry(id, 'gene'))
+                    .filter(entry => entry.length > 0)
+                    .join('\n');
+
+                const proteinFasta = ids
+                    .map(id => getFastaEntry(id, 'protein'))
+                    .filter(entry => entry.length > 0)
+                    .join('\n');
+
+                if (!geneFasta && !proteinFasta) {
+                    alert('No gene or protein sequences available for this selection');
+                    return;
+                }
+
+                if (geneFasta) downloadTextFile(geneFasta, `panres2_${label}_gene_sequences.fasta`);
+                if (proteinFasta) downloadTextFile(proteinFasta, `panres2_${label}_protein_sequences.fasta`);
+                return;
+            }
+
+            const fastaContent = ids
+                .map(id => getFastaEntry(id, type))
+                .filter(entry => entry.length > 0)
+                .join('\n');
+
+            if (!fastaContent) {
+                alert('No sequences available for this selection');
+                return;
+            }
+
+            const filename = `panres2_${label}_${type}_sequences.fasta`;
+            downloadTextFile(fastaContent, filename);
+        }
+
+
+        function getUniqueLabelsFromRefs(refs) {
+            const labels = [];
+            (refs || []).forEach(ref => {
+                if (!ref.is_literal) {
+                    const label = getSubjectLabelOrId(ref.value);
+                    if (!labels.includes(label)) labels.push(label);
+                }
+            });
+            return labels;
+        }
+
+        function getDatabaseLabelsForGene(gene) {
+            const labels = [];
+            if (gene.properties['same_as']) {
+                gene.properties['same_as'].forEach(val => {
+                    if (!val.is_literal) {
+                        const originalGene = getSubject(val.value);
+                        if (originalGene && originalGene.properties['is_from_database']) {
+                            originalGene.properties['is_from_database'].forEach(db => {
+                                const dbLabel = getSubjectLabelOrId(db.value);
+                                if (!labels.includes(dbLabel)) labels.push(dbLabel);
+                            });
+                        }
+                    }
+                });
+            }
+            return labels;
+        }
+
+        function getSourceDatabaseNamesForGene(gene) {
+            const names = [];
+            if (gene.properties['same_as']) {
+                gene.properties['same_as'].forEach(val => {
+                    if (!val.is_literal) {
+                        const originalGene = getSubject(val.value);
+                        if (originalGene && originalGene.properties['is_from_database']) {
+                            const databases = originalGene.properties['is_from_database']
+                                .map(db => getSubjectLabelOrId(db.value))
+                                .filter(Boolean)
+                                .join('/');
+                            const label = databases ? `${databases}:${originalGene.label}` : originalGene.label;
+                            if (!names.includes(label)) names.push(label);
+                        }
+                    }
+                });
+            }
+            return names;
+        }
+
+        function tsvEscape(value) {
+            return String(value ?? '').replace(/\t/g, ' ').replace(/\r?\n/g, ' ');
+        }
+
+        function getMetadataTable(ids) {
+            const header = [
+                'Gene_Name', 'Database', 'Name_in_Source_Databases', 'Resistance_Class', 'Phenotype', 'Mechanism',
+                'E._coli_homolog', 'Gene_Cluster', 'Protein_Cluster', 'Structure_Cluster'
+            ];
+            const rows = ids.map(id => {
+                const gene = getSubject(id);
+                if (!gene) return null;
+                return [
+                    gene.label,
+                    getDatabaseLabelsForGene(gene).join('|'),
+                    getSourceDatabaseNamesForGene(gene).join('|'),
+                    getUniqueLabelsFromRefs(gene.properties['has_resistance_class']).join('|'),
+                    getUniqueLabelsFromRefs(gene.properties['has_predicted_phenotype']).filter(x => x !== '+').join('|'),
+                    getUniqueLabelsFromRefs(gene.properties['has_mechanism_of_resistance']).join('|'),
+                    isGeneEcoliHomolog(gene) ? 'yes' : 'no',
+                    getGeneClusterIds(gene).join('|'),
+                    getProteinClusterIdsForGene(gene).join('|'),
+                    getStructureClusterIdsForGene(gene).join('|')
+                ];
+            }).filter(Boolean);
+            return [header, ...rows].map(row => row.map(tsvEscape).join('\t')).join('\n');
+        }
+
+        function downloadBulkMetadata(mode = 'filtered') {
+            const ids = getBulkIds(mode);
+            if (ids.length === 0) {
+                alert(mode === 'selected' ? 'No rows selected' : 'No genes in the filtered table');
+                return;
+            }
+            const label = mode === 'selected' ? 'selected' : 'filtered';
+            downloadTextFile(getMetadataTable(ids), `panres2_${label}_metadata.tsv`);
+        }
+        function runBulkDownload() {
+            const type = document.getElementById('bulkDownloadType')?.value || 'gene';
+            const mode = document.getElementById('bulkDownloadMode')?.value || 'filtered';
+            if (type === 'metadata') {
+                downloadBulkMetadata(mode);
+                return;
+            }
+            downloadBulkSequences(type, mode);
+        }
         function downloadFasta(id, type) {
             let subject = getSubject(id);
             if (!subject) return;
@@ -2754,7 +3254,7 @@
 
             if (subject.gene_sequence) {
                 const formattedSeq = subject.gene_sequence.match(/.{1,60}/g).join('\n');
-                fastaContent += `>${subject.id}\n${formattedSeq}\n\n`;
+                fastaContent += `>${subject.id}\n${formattedSeq}`;
             }
 
             if (subject.protein_sequence) {
@@ -2767,7 +3267,8 @@
                     }
                 }
                 const formattedSeq = subject.protein_sequence.match(/.{1,60}/g).join('\n');
-                fastaContent += `>${proteinId}\n${formattedSeq}\n`;
+                if (fastaContent) fastaContent += '\n';
+                fastaContent += `>${proteinId}\n${formattedSeq}`;
             }
 
             if (!fastaContent) {
@@ -3115,7 +3616,7 @@
             // Build viewer HTML
             const viewportId = `viewport-${viewerId}`;
             const membersHtml = members
-                .sort((a, b) => a.localeCompare(b))
+                .sort((a, b) => naturalCompare(a, b))
                 .map(memberId => {
                     const member = getSubject(memberId);
                     const isCentroid = memberId === clusterId || memberId === repGene;
@@ -3571,7 +4072,7 @@
                     if (a.subject.label.length !== b.subject.label.length) {
                         return a.subject.label.length - b.subject.label.length;
                     }
-                    return a.subject.label.localeCompare(b.subject.label);
+                    return naturalCompare(a.subject.label, b.subject.label);
                 });
 
                 // Take top 20 results
