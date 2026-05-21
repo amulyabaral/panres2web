@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PanRes 2.0 Database</title>
+    <link rel="icon" type="image/png" href="assets/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ngl@2.0.0-dev.37/dist/ngl.js"></script>
@@ -46,6 +47,7 @@
         .gene-table th { cursor: pointer; user-select: none; }
         .gene-table th:hover { background: #f9fafb; }
         .gene-table tbody tr:hover { background: #f9fafb; }
+
 
         /* Quirky Loading Animation */
         .dna-helix {
@@ -470,7 +472,7 @@
     <main id="mainContent" class="hidden container mx-auto px-6 py-8">
         <!-- Home View -->
         <div id="homeView">
-            <section class="mb-8 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <section class="mb-10 bg-white p-6 rounded-lg shadow-md border border-gray-200">
                 <h2 class="text-3xl font-semibold text-gray-800 mb-3">PanRes 2.0</h2>
                 <p class="text-gray-600 text-sm mb-4">
                     PanRes (Pan Resistance) is a curated collection of genes conferring resistance to antibiotics,
@@ -479,11 +481,11 @@
 
                 <!-- Statistics Charts -->
                 <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                        <canvas id="mechanismsChart" width="200" height="200"></canvas>
-                    </div>
                     <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
                         <canvas id="databasesChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                        <canvas id="mechanismsChart" width="200" height="200"></canvas>
                     </div>
                     <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
                         <canvas id="phenotypesChart" width="200" height="200"></canvas>
@@ -499,7 +501,7 @@
                 </div>
 
                 <!-- Category Buttons -->
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 mb-4">
                     <button onclick="showCategory('PanGene')"
                             class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
                         PanRes Genes (<span id="countPanGene">0</span>)
@@ -522,6 +524,41 @@
                     </button>
                 </div>
             </section>
+
+            <footer class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 text-sm text-gray-700">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="bg-gray-50 border border-gray-100 rounded-lg p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-shrink-0 w-16 h-16 flex items-center justify-center overflow-visible">
+                                <img
+                                    src="assets/dtu_logo.png"
+                                    alt="Technical University of Denmark logo"
+                                    class="max-h-14 max-w-14 object-contain"
+                                />
+                            </div>
+
+                            <div>
+                                <div class="font-semibold text-gray-800 mb-1">Technical University of Denmark</div>
+                                <div>DTU National Food Institute</div>
+                                <div>The Research Group for Genomic Epidemiology (RaMBio)</div>
+                                <a href="https://www.rambio.dk" target="_blank" rel="noopener" class="text-primary hover:underline">
+                                    www.rambio.dk
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 border border-gray-100 rounded-lg p-4">
+                        <div class="font-semibold text-gray-800 mb-1">PanRes resources</div>
+                        <div class="mb-1">
+                            The complete PanRes resource collection, including HMM profiles and related files, is available through Zenodo.
+                        </div>
+                        <a href="https://zenodo.org/records/18606078" target="_blank" rel="noopener" class="text-primary hover:underline break-all">
+                            https://zenodo.org/records/18606078
+                        </a>
+                    </div>
+                </div>
+            </footer>
         </div>
 
         <!-- List View -->
@@ -531,7 +568,7 @@
                         class="bg-primary hover:bg-opacity-80 text-white px-4 py-2 rounded text-sm font-medium">
                     ← Back to Home
                 </button>
-                <div class="flex gap-2">
+                <div id="viewToggleButtons" class="flex gap-2">
                     <button onclick="toggleViewMode('table')" id="btnTableView"
                             class="bg-primary text-white px-4 py-2 rounded text-sm font-medium">
                         Table View
@@ -633,7 +670,7 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
                             <option value="">All</option>
                             <option value="yes">Only homologs</option>
-                            <option value="no">Exclude homologs</option>
+                            <option value="no" selected>Exclude homologs</option>
                         </select>
                     </div>
 
@@ -700,11 +737,27 @@
                     <div class="flex flex-wrap items-end gap-3">
                         <div class="min-w-56">
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Bulk download</label>
-                            <select id="bulkDownloadType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm bg-white text-gray-700">
-                                <option value="gene">Genes FASTA</option>
-                                <option value="protein">Proteins FASTA</option>
-                                <option value="metadata">Metadata table</option>
-                            </select>
+                            <details id="bulkDownloadDetails" class="relative">
+                                <summary id="bulkDownloadSummary" class="list-none cursor-pointer w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm bg-white text-gray-700">
+                                    Genes FASTA
+                                </summary>
+                                <div class="absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3">
+                                    <div id="bulkDownloadOptions" class="text-sm space-y-1">
+                                        <label class="flex items-start gap-2 cursor-pointer">
+                                            <input type="checkbox" value="gene" checked onchange="updateBulkDownloadSummary()" class="mt-0.5">
+                                            <span>Genes FASTA</span>
+                                        </label>
+                                        <label class="flex items-start gap-2 cursor-pointer">
+                                            <input type="checkbox" value="protein" onchange="updateBulkDownloadSummary()" class="mt-0.5">
+                                            <span>Proteins FASTA</span>
+                                        </label>
+                                        <label class="flex items-start gap-2 cursor-pointer">
+                                            <input type="checkbox" value="metadata" onchange="updateBulkDownloadSummary()" class="mt-0.5">
+                                            <span>Metadata table</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </details>
                         </div>
                         <div class="min-w-56">
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Rows</label>
@@ -763,7 +816,7 @@
             phenotype: [],
             class: [],
             mechanism: [],
-            homolog: '',
+            homolog: 'no',
             geneCluster: '',
             proteinCluster: '',
             structureCluster: ''
@@ -840,6 +893,7 @@
                 clearInterval(messageInterval);
                 document.getElementById('loading').classList.remove('active');
                 document.getElementById('mainContent').classList.remove('hidden');
+                handleRoute();
             } catch (error) {
                 console.error('Error loading data:', error);
                 clearInterval(messageInterval);
@@ -863,9 +917,7 @@
         function createCharts() {
             // Chart colors
             const primaryColor = '#1b7f58';
-            const accentColors = ['#e6aeb9', '#f2b4c0', '#9ed4c5', '#f0c987', '#b8a9d4', '#f7a8a4', '#a8d8ea', '#ffd79d'];
-
-            // Mechanisms Chart - count genes per resistance mechanism
+            const accentColors = ['#e6aeb9', '#f2b4c0', '#9ed4c5', '#f0c987', '#b8a9d4', '#f7a8a4', '#a8d8ea', '#ffd79d', '#c7d9b7', '#d9c2e9', '#f6d6c1'];            // Mechanisms Chart - count genes per resistance mechanism
             const mechanismCounts = {};
             panresData.categories.Mechanism.forEach(mechId => {
                 const relatedGenes = findRelatedGenes(mechId);
@@ -1007,7 +1059,14 @@
         }
 
         // View functions
-        function showHome() {
+        function showHome(updateUrl = true) {
+            if (updateUrl) {
+                const targetHash = '#home';
+                if (window.location.hash !== targetHash) {
+                    window.location.hash = targetHash;
+                    return;
+                }
+            }
             navigationHistory = []; // Clear history when going home
             document.getElementById('homeView').classList.remove('hidden');
             document.getElementById('listView').classList.add('hidden');
@@ -1047,7 +1106,7 @@
                     setCheckedValues('filterClassOptions', activeFilters.class || []);
                     setCheckedValues('filterMechanismOptions', activeFilters.mechanism || []);
                     if (document.getElementById('filterHomolog')) {
-                        document.getElementById('filterHomolog').value = activeFilters.homolog || '';
+                        document.getElementById('filterHomolog').value = activeFilters.homolog || 'no';
                     }
                     if (document.getElementById('filterGeneCluster')) {
                         document.getElementById('filterGeneCluster').value = activeFilters.geneCluster || '';
@@ -1111,10 +1170,19 @@
             }
         }
 
-        function showCategory(category) {
+        function showCategory(category, updateUrl = true) {
+            if (updateUrl) {
+                const targetHash = '#category/' + encodeURIComponent(category);
+                if (window.location.hash !== targetHash) {
+                    window.location.hash = targetHash;
+                    return;
+                }
+            }
             currentCategory = category;
             currentPage = 1;
-            currentViewMode = 'table';
+
+            // Table view only makes sense for PanGene
+            currentViewMode = category === 'PanGene' ? 'table' : 'list';
 
             const titles = {
                 PanGene: 'PanRes Genes',
@@ -1131,15 +1199,28 @@
 
             currentItems = itemIds
                 .map(id => getSubject(id))
-                .filter(item => item && item.label !== '+')  // Filter out the "+" phenotype marker
+                .filter(item => item && item.label !== '+')
                 .sort((a, b) => naturalCompare(a.label, b.label));
 
-            // Show advanced filters only for PanGene category
+            const viewToggle = document.getElementById('viewToggleButtons');
+
+            // Show advanced filters and table/list toggle only for PanGene
             if (category === 'PanGene') {
+                if (viewToggle) viewToggle.classList.remove('hidden');
+
                 document.getElementById('advancedFilters').classList.remove('hidden');
                 populateFilterDropdowns();
                 clearFilters();
+
+                // Make sure the buttons visually match table default
+                document.getElementById('btnTableView').className =
+                    'bg-primary text-white px-4 py-2 rounded text-sm font-medium';
+                document.getElementById('btnListView').className =
+                    'bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium';
+
             } else {
+                if (viewToggle) viewToggle.classList.add('hidden');
+
                 document.getElementById('advancedFilters').classList.add('hidden');
                 filteredItems = currentItems;
                 renderList();
@@ -1465,17 +1546,15 @@
             setAllCheckboxes('filterPhenotypeOptions', false);
             setAllCheckboxes('filterClassOptions', false);
             setAllCheckboxes('filterMechanismOptions', false);
-            document.getElementById('filterHomolog').value = '';
+            document.getElementById('filterHomolog').value = 'no';
             document.getElementById('filterGeneCluster').value = '';
             document.getElementById('filterProteinCluster').value = '';
             document.getElementById('filterStructureCluster').value = '';
             document.getElementById('groupBy').value = '';
-            activeFilters = {database: [], phenotype: [], class: [], mechanism: [], homolog: '', geneCluster: '', proteinCluster: '', structureCluster: ''};
+            activeFilters = {database: [], phenotype: [], class: [], mechanism: [], homolog: 'no', geneCluster: '', proteinCluster: '', structureCluster: ''};
             selectedGeneIds.clear();
-            filteredItems = currentItems;
-            updateActiveFiltersDisplay();
             currentPage = 1;
-            renderList();
+            applyFilters();
         }
 
         function applyGrouping() {
@@ -1968,7 +2047,14 @@
             updateBulkSelectionUI();
         }
 
-        function showDetails(id) {
+        function showDetails(id, updateUrl = true) {
+            if (updateUrl) {
+                const targetHash = '#details/' + encodeURIComponent(id);
+                if (window.location.hash !== targetHash) {
+                    window.location.hash = targetHash;
+                    return;
+                }
+            }
             const subject = getSubject(id);
             if (!subject) {
                 alert('Item not found');
@@ -2039,6 +2125,7 @@
                         ${entityType ? `<div class="text-sm font-medium text-primary mb-1">${entityType}${isDrugCombination ? ' (Drug Combination)' : ''}</div>` : ''}
                         <div class="flex items-center gap-3 mb-1">
                             <h2 class="text-2xl font-semibold text-gray-800">${subject.label}</h2>
+                            <button onclick="copySubjectLink('${subject.id}')" class="sequence-btn">Copy Link</button>
                             ${hasSequences ? `
                                 <button onclick="viewSequence('${subject.id}')" class="sequence-btn">View Sequence</button>
                                 <button onclick="downloadFasta('${subject.id}', 'gene')" class="sequence-btn">Download FASTA</button>
@@ -3039,6 +3126,24 @@
                     closeSequenceModal();
                 }
             });
+
+            document.addEventListener('click', (e) => {
+                document.querySelectorAll('#advancedFilters details[open]').forEach(details => {
+                    if (!details.contains(e.target)) details.removeAttribute('open');
+                });
+            });
+
+            document.querySelectorAll('#advancedFilters details').forEach(details => {
+                details.addEventListener('toggle', () => {
+                    if (details.open) {
+                        document.querySelectorAll('#advancedFilters details[open]').forEach(other => {
+                            if (other !== details) other.removeAttribute('open');
+                        });
+                    }
+                });
+            });
+
+            updateBulkDownloadSummary();
         });
 
         function getSequenceSubject(id) {
@@ -3228,14 +3333,34 @@
             const label = mode === 'selected' ? 'selected' : 'filtered';
             downloadTextFile(getMetadataTable(ids), `panres2_${label}_metadata.tsv`);
         }
+        function getBulkDownloadTypes() {
+            return getCheckedValues('bulkDownloadOptions');
+        }
+
+        function updateBulkDownloadSummary() {
+            const labels = {
+                gene: 'Genes FASTA',
+                protein: 'Proteins FASTA',
+                metadata: 'Metadata table'
+            };
+            const selected = getBulkDownloadTypes();
+            const summary = document.getElementById('bulkDownloadSummary');
+            if (!summary) return;
+            summary.textContent = selected.length > 0
+                ? selected.map(type => labels[type] || type).join(', ')
+                : 'Select downloads';
+        }
+
         function runBulkDownload() {
-            const type = document.getElementById('bulkDownloadType')?.value || 'gene';
+            const types = getBulkDownloadTypes();
             const mode = document.getElementById('bulkDownloadMode')?.value || 'filtered';
-            if (type === 'metadata') {
-                downloadBulkMetadata(mode);
+            if (types.length === 0) {
+                alert('Select at least one download type');
                 return;
             }
-            downloadBulkSequences(type, mode);
+            if (types.includes('gene')) downloadBulkSequences('gene', mode);
+            if (types.includes('protein')) downloadBulkSequences('protein', mode);
+            if (types.includes('metadata')) downloadBulkMetadata(mode);
         }
         function downloadFasta(id, type) {
             let subject = getSubject(id);
@@ -4004,6 +4129,53 @@
                 viewport.innerHTML = '<div class="flex items-center justify-center h-full text-white">Failed to load PDB structure</div>';
             });
         }
+
+        // URL hash routing for shareable links
+        function handleRoute() {
+            if (!panresData) return;
+
+            const hash = window.location.hash.replace(/^#/, '');
+
+            if (!hash || hash === 'home') {
+                showHome(false);
+                return;
+            }
+
+            const [view, ...rest] = hash.split('/');
+            const id = decodeURIComponent(rest.join('/'));
+
+            if (view === 'category' && id && panresData.categories[id]) {
+                showCategory(id, false);
+                return;
+            }
+
+            if (view === 'details' && id && panresData.subjects[id]) {
+                showDetails(id, false);
+                return;
+            }
+
+            showHome(false);
+        }
+
+        function subjectLink(id) {
+            const base = window.location.href.split('#')[0];
+            return base + '#details/' + encodeURIComponent(id);
+        }
+
+        function copySubjectLink(id) {
+            const link = subjectLink(id);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(() => {
+                    alert('Link copied to clipboard');
+                }).catch(() => {
+                    prompt('Copy this link:', link);
+                });
+            } else {
+                prompt('Copy this link:', link);
+            }
+        }
+
+        window.addEventListener('hashchange', handleRoute);
 
         // Search functionality
         let searchTimeout;
