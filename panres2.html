@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ngl@2.0.0-dev.37/dist/ngl.js"></script>
+    <script src="https://cdn.bio.sh/msa/1.0/msa.min.gz.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -48,144 +49,40 @@
         .gene-table th:hover { background: #f9fafb; }
         .gene-table tbody tr:hover { background: #f9fafb; }
 
-
-        /* Quirky Loading Animation */
-        .dna-helix {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            margin: 0 auto;
-        }
-
-        .dna-strand {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            animation: rotate 3s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
-
-        .dna-ball {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1b7f58, #2ea574);
-            box-shadow: 0 0 20px rgba(27, 127, 88, 0.5);
-        }
-
-        .dna-ball:nth-child(1) { left: 0; top: 10%; animation: pulse 1s ease-in-out infinite; }
-        .dna-ball:nth-child(2) { right: 0; top: 30%; animation: pulse 1s ease-in-out 0.2s infinite; }
-        .dna-ball:nth-child(3) { left: 0; top: 50%; animation: pulse 1s ease-in-out 0.4s infinite; }
-        .dna-ball:nth-child(4) { right: 0; top: 70%; animation: pulse 1s ease-in-out 0.6s infinite; }
-        .dna-ball:nth-child(5) { left: 0; top: 90%; animation: pulse 1s ease-in-out 0.8s infinite; }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.7; }
-        }
-
-        .bacteria {
-            font-size: 60px;
-            display: inline-block;
-            animation: wiggle 1.5s ease-in-out infinite;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-        }
-
-        @keyframes wiggle {
-            0%, 100% { transform: rotate(-5deg); }
-            50% { transform: rotate(5deg); }
-        }
-
-        .loading-text {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1b7f58;
-            margin-top: 30px;
-            animation: colorCycle 3s ease-in-out infinite;
-        }
-
-        @keyframes colorCycle {
-            0%, 100% { color: #1b7f58; }
-            33% { color: #e6aeb9; }
-            66% { color: #f2b4c0; }
-        }
-
-        .loading-dots {
-            display: inline-block;
-        }
-
-        .loading-dots span {
-            animation: blink 1.4s infinite;
-            opacity: 0;
-        }
-
-        .loading-dots span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .loading-dots span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-
+        /* Loading animation: simple petri dish with moving spheres. */
         .petri-dish {
             width: 300px;
             height: 300px;
             border: 4px solid #1b7f58;
             border-radius: 50%;
-            margin: 20px auto;
+            margin: 20px auto 18px;
             position: relative;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), transparent);
-            box-shadow: inset 0 0 50px rgba(27, 127, 88, 0.1), 0 0 20px rgba(27, 127, 88, 0.2);
+            overflow: hidden;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), rgba(27,127,88,0.05) 45%, rgba(27,127,88,0.10));
+            box-shadow: inset 0 0 50px rgba(27, 127, 88, 0.13), 0 0 20px rgba(27, 127, 88, 0.18);
         }
 
         .microbe {
             position: absolute;
             border-radius: 50%;
-            opacity: 0.7;
+            opacity: 0.78;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
-        .microbe1 {
-            width: 30px;
-            height: 30px;
-            background: #e6aeb9;
-            top: 20%;
-            left: 30%;
-            animation: float1 4s ease-in-out infinite;
-        }
-
-        .microbe2 {
-            width: 25px;
-            height: 25px;
-            background: #f2b4c0;
-            top: 60%;
-            right: 25%;
-            animation: float2 5s ease-in-out infinite;
-        }
-
-        .microbe3 {
-            width: 35px;
-            height: 35px;
-            background: #9ed4c5;
-            bottom: 30%;
-            left: 20%;
-            animation: float3 3.5s ease-in-out infinite;
-        }
+        .microbe1 { width: 30px; height: 30px; background: #e6aeb9; top: 20%; left: 30%; animation: float1 4s ease-in-out infinite; }
+        .microbe2 { width: 25px; height: 25px; background: #f2b4c0; top: 60%; right: 25%; animation: float2 5s ease-in-out infinite; }
+        .microbe3 { width: 35px; height: 35px; background: #9ed4c5; bottom: 30%; left: 20%; animation: float3 3.5s ease-in-out infinite; }
+        .microbe4 { width: 18px; height: 18px; background: #f0c987; top: 34%; right: 34%; animation: float4 4.6s ease-in-out infinite; }
+        .microbe5 { width: 22px; height: 22px; background: #a8d8ea; bottom: 18%; right: 42%; animation: float5 5.4s ease-in-out infinite; }
+        .microbe6 { width: 16px; height: 16px; background: #b8a9d4; top: 48%; left: 45%; animation: float6 3.9s ease-in-out infinite; }
+        .microbe7 { width: 20px; height: 20px; background: #c7d9b7; top: 72%; left: 34%; animation: float7 4.8s ease-in-out infinite; }
+        .microbe8 { width: 14px; height: 14px; background: #ffd79d; top: 18%; right: 20%; animation: float8 4.2s ease-in-out infinite; }
 
         @keyframes float1 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(20px, -10px) rotate(90deg); }
-            50% { transform: translate(10px, 20px) rotate(180deg); }
-            75% { transform: translate(-10px, 10px) rotate(270deg); }
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(20px, -10px) scale(1.08); }
+            50% { transform: translate(10px, 20px) scale(0.95); }
+            75% { transform: translate(-10px, 10px) scale(1.05); }
         }
 
         @keyframes float2 {
@@ -194,17 +91,59 @@
         }
 
         @keyframes float3 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            33% { transform: translate(15px, -15px) rotate(120deg) scale(1.1); }
-            66% { transform: translate(-15px, 15px) rotate(240deg) scale(0.9); }
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(15px, -15px) scale(1.1); }
+            66% { transform: translate(-15px, 15px) scale(0.9); }
         }
 
-        .fun-message {
-            font-size: 14px;
-            color: #666;
-            margin-top: 20px;
-            font-style: italic;
-            transition: opacity 0.3s ease-in-out;
+        @keyframes float4 {
+            0%, 100% { transform: translate(0, 0); }
+            40% { transform: translate(-22px, 18px); }
+            75% { transform: translate(16px, 24px); }
+        }
+
+        @keyframes float5 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(24px, -22px) scale(1.12); }
+        }
+
+        @keyframes float6 {
+            0%, 100% { transform: translate(0, 0); }
+            35% { transform: translate(28px, 8px); }
+            70% { transform: translate(-18px, -18px); }
+        }
+
+        @keyframes float7 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            45% { transform: translate(18px, -28px) scale(0.92); }
+        }
+
+        @keyframes float8 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-24px, 26px); }
+        }
+
+        .loading-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1b7f58;
+            margin-top: 8px;
+            letter-spacing: 0.01em;
+        }
+
+        .loading-dots span {
+            display: inline-block;
+            animation: loadingDot 1.35s infinite ease-in-out;
+            opacity: 0.15;
+            transform: translateY(0);
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.18s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.36s; }
+
+        @keyframes loadingDot {
+            0%, 70%, 100% { opacity: 0.15; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-2px); }
         }
 
         /* Fix list item alignment for long names */
@@ -231,6 +170,140 @@
             overflow-y: auto;
             margin-top: 8px;
             border-left: 3px solid #1b7f58;
+        }
+
+        .msa-viewer-wrapper {
+            margin-top: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            overflow: hidden;
+        }
+
+        .msa-viewer-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .msa-viewer-panel {
+            width: 100%;
+            height: 560px;
+            overflow: auto;
+            background: white;
+        }
+
+        /* Keep embedded MSA viewers compact. */
+        .msa-viewer-panel svg text,
+        .msa-viewer-panel .seq text,
+        .msa-viewer-panel .label text {
+            font-size: 11px !important;
+        }
+
+        .msa-viewer-panel .seq,
+        .msa-viewer-panel .sequence,
+        .msa-viewer-panel .biojs_msa_seqblock,
+        .msa-viewer-panel .biojs_msa_labelblock {
+            line-height: 13px !important;
+        }
+
+        .msa-plain-fallback {
+            display: none;
+        }
+
+        .msa-plain-fallback.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content.msa-modal {
+                width: 98%;
+                max-height: 92vh;
+            }
+
+            .msa-viewer-wrapper {
+                display: none;
+            }
+
+            .msa-plain-fallback {
+                display: block;
+            }
+
+            .msa-plain-fallback .sequence-container {
+                max-height: 65vh;
+                font-size: 10px;
+                line-height: 1.35;
+                overflow: auto;
+                white-space: pre;
+                word-break: normal;
+            }
+        }
+
+        .msa-color-grid {
+            --msa-font-size: 11px;
+            --msa-cell-width: 9px;
+            --msa-row-height: 13px;
+            font-family: 'Courier New', monospace;
+            font-size: var(--msa-font-size);
+            line-height: 1;
+            white-space: pre;
+            min-width: max-content;
+            padding: 6px 10px;
+        }
+
+        .msa-seq-row {
+            display: flex;
+            align-items: center;
+            min-height: var(--msa-row-height);
+            height: var(--msa-row-height);
+            margin-bottom: 2px;
+        }
+
+        .msa-seq-name {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: #f9fafb;
+            color: #374151;
+            border-right: 1px solid #e5e7eb;
+            padding-right: 8px;
+            margin-right: 8px;
+            width: 210px;
+            min-width: 210px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: var(--msa-row-height);
+        }
+
+        .msa-alignment-row {
+            display: inline-flex;
+            align-items: center;
+            height: var(--msa-row-height);
+        }
+
+        .msa-aa {
+            display: inline-block;
+            width: var(--msa-cell-width);
+            height: var(--msa-row-height);
+            line-height: var(--msa-row-height);
+            text-align: center;
+            border-radius: 0;
+        }
+
+        .msa-aa-gap { color: #9ca3af; }
+        .msa-aa-hydrophobic { background: #e6f4ea; color: #14532d; }
+        .msa-aa-polar { background: #eff6ff; color: #1d4ed8; }
+        .msa-aa-positive { background: #fef3c7; color: #92400e; }
+        .msa-aa-negative { background: #fee2e2; color: #991b1b; }
+        .msa-aa-special { background: #f3e8ff; color: #6b21a8; }
+
+        .modal-content.msa-modal {
+            max-width: 1200px;
+            width: 95%;
         }
 
         .sequence-stats {
@@ -353,6 +426,71 @@
             100% { transform: rotate(360deg); }
         }
 
+
+
+        .pdb-viewport {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .pdb-plddt-legend {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 8px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            font-size: 11px;
+            color: #111827;
+            pointer-events: none;
+        }
+
+        .pdb-plddt-legend.hidden {
+            display: none;
+        }
+
+        .pdb-plddt-legend-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .pdb-plddt-legend-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 3px;
+            white-space: nowrap;
+        }
+
+        .pdb-plddt-swatch {
+            width: 24px;
+            height: 10px;
+            border-radius: 2px;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 640px) {
+            .pdb-plddt-legend {
+                right: 8px;
+                bottom: 8px;
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+
+            .pdb-plddt-swatch {
+                width: 20px;
+            }
+        }
+
         #viewport {
             width: 100%;
             height: 500px;
@@ -433,27 +571,17 @@
 <body class="bg-gray-50">
     <!-- Loading Indicator -->
     <div id="loading" class="loading active container mx-auto px-6 py-12 text-center">
-        <div class="bacteria">🦠</div>
-
         <div class="petri-dish">
             <div class="microbe microbe1"></div>
             <div class="microbe microbe2"></div>
             <div class="microbe microbe3"></div>
-
-            <div class="dna-helix">
-                <div class="dna-strand">
-                    <div class="dna-ball"></div>
-                    <div class="dna-ball"></div>
-                    <div class="dna-ball"></div>
-                    <div class="dna-ball"></div>
-                    <div class="dna-ball"></div>
-                </div>
-            </div>
+            <div class="microbe microbe4"></div>
+            <div class="microbe microbe5"></div>
+            <div class="microbe microbe6"></div>
+            <div class="microbe microbe7"></div>
+            <div class="microbe microbe8"></div>
         </div>
-
-        <div class="loading-text">
-            Loading the database<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
-        </div>
+        <div class="loading-text">Loading the database<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div>
     </div>
 
     <!-- Sequence Modal -->
@@ -473,11 +601,19 @@
         <!-- Home View -->
         <div id="homeView">
             <section class="mb-10 bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <h2 class="text-3xl font-semibold text-gray-800 mb-3">PanRes 2.0</h2>
-                <p class="text-gray-600 text-sm mb-4">
-                    PanRes (Pan Resistance) is a curated collection of genes conferring resistance to antibiotics,
-                    heavy metals, and biocides from multiple databases.
-                </p>
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+                    <div>
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-3">PanRes 2.0</h2>
+                        <p class="text-gray-600 text-sm">
+                            PanRes (Pan Resistance) is a curated collection of genes conferring resistance to antibiotics,
+                            heavy metals, and biocides from multiple databases.
+                        </p>
+                    </div>
+                    <button onclick="showHowToUse()"
+                            class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap">
+                        How to use PanRes2
+                    </button>
+                </div>
 
                 <!-- Statistics Charts -->
                 <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -559,6 +695,104 @@
                     </div>
                 </div>
             </footer>
+        </div>
+
+
+        <!-- How To Use View -->
+        <div id="howToUseView" class="hidden">
+            <div class="mb-4">
+                <button onclick="showHome()"
+                        class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded text-sm font-medium">
+                    ← Back to Home
+                </button>
+            </div>
+
+            <section class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <div class="mb-6">
+                    <div class="text-sm font-medium text-primary mb-1">Guide</div>
+                    <h2 class="text-3xl font-semibold text-gray-800 mb-3">How to use PanRes2</h2>
+                    <p class="text-gray-600 text-sm max-w-4xl">
+                        PanRes2 links curated resistance genes to their translated proteins, predicted structures,
+                        sequence clusters, structure clusters, 3D-based alignments, and HMM profiles. The database can be
+                        searched directly or browsed through the main categories on the home page.
+                    </p>
+                </div>
+
+                <div class="mb-6 max-w-5xl">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">What the PanRes2 terms mean</h3>
+                    <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-700">
+                        <li><span class="font-semibold text-gray-800">PanGene</span> — a curated resistance gene entry. This is the best starting point for resistance annotations such as phenotype, resistance class, mechanism, and source database.</li>
+                        <li><span class="font-semibold text-gray-800">PanProtein</span> — the protein translation of a PanGene. Protein pages connect gene entries to protein clusters and predicted structures.</li>
+                        <li><span class="font-semibold text-gray-800">PanGeneCluster</span> — a group of closely related genes clustered at 90% sequence identity and 90% coverage.</li>
+                        <li><span class="font-semibold text-gray-800">PanProteinCluster</span> — a group of related proteins clustered at 50% sequence identity and 90% coverage.</li>
+                        <li><span class="font-semibold text-gray-800">PanStructure</span> — an AlphaFold prediction for a representative protein sequence.</li>
+                        <li><span class="font-semibold text-gray-800">PanStructureCluster</span> — a group of proteins with similar predicted structures. These clusters are used to provide 3D-based multiple sequence alignments and HMM profiles.</li>
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Search and browse</h3>
+                        <p class="text-sm text-gray-700 mb-2">
+                            Use the search box to find a specific gene, cluster, resistance class, phenotype, mechanism,
+                            or source database. Use the category buttons to browse broader groups.
+                        </p>
+                        <p class="text-sm text-gray-700">
+                            The PanRes Genes table is the most useful overview. It can be filtered by annotation,
+                            cluster membership, and E. coli core homolog status.
+                        </p>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">E. coli core homologs</h3>
+                        <p class="text-sm text-gray-700 mb-2">
+                            Some functional metagenomics entries may resemble common E. coli genes rather than specific
+                            resistance determinants. These are marked as E. coli core homologs when the protein matches
+                            the soft-core E. coli genome at 60% identity and 60% coverage.
+                        </p>
+                        <p class="text-sm text-gray-700">
+                            The gene table excludes these by default, but you can include them or show only these entries
+                            using the E. coli core homolog filter.
+                        </p>
+                    </div>
+
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Sequences and structures</h3>
+                        <p class="text-sm text-gray-700 mb-2">
+                            Gene and protein pages link the biological entry to its sequence, cluster membership, and
+                            predicted structure when available.
+                        </p>
+                        <p class="text-sm text-gray-700">
+                            Structure pages include an interactive 3D viewer, so you can rotate the model, change the
+                            representation, and download the predicted PDB file.
+                        </p>
+                    </div>
+
+                    <div class="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Structure clusters, MSAs, and HMMs</h3>
+                        <p class="text-sm text-gray-700 mb-2">
+                            Structure cluster pages are useful when you want to compare proteins that may be distant at
+                            the sequence level but similar in predicted 3D structure.
+                        </p>
+                        <p class="text-sm text-gray-700">
+                            Use <span class="font-medium">View MSA</span> to inspect the 3D-based multiple sequence
+                            alignment, or <span class="font-medium">Download HMM</span> to download the profile for the current cluster.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Downloads</h3>
+                    <p class="text-sm text-gray-700 mb-2">
+                        From the PanRes Genes table, you can download gene FASTA, protein FASTA, or metadata for the
+                        rows currently shown by your filters.
+                    </p>
+                    <p class="text-sm text-gray-700">
+                        The full PanRes2 dataset and related resources can be accessed on
+                        <a href="https://zenodo.org/records/18606078" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">Zenodo</a>.
+                    </p>
+                </div>
+            </section>
         </div>
 
         <!-- List View -->
@@ -843,39 +1077,8 @@
             'member_of': 'Member Of'
         };
 
-        // Quirky loading messages
-        const loadingMessages = [
-            "Waking up the bacteria...",
-            "Teaching genes to resist...",
-            "Consulting with the microbes...",
-            "Brewing antibiotic soup...",
-            "Counting tiny rebellious genes...",
-            "Asking bacteria nicely to cooperate...",
-            "Sequencing DNA like a boss...",
-            "Playing hide and seek with phenotypes...",
-            "Herding antimicrobial cats...",
-            "Convincing genes to share their secrets...",
-            "Downloading genetic resistance from the cloud...",
-            "Negotiating with stubborn plasmids..."
-        ];
-
-        let messageIndex = 0;
-        let messageInterval;
-
-        // Rotate funny messages
-        function startLoadingMessages() {
-            messageInterval = setInterval(() => {
-                messageIndex = (messageIndex + 1) % loadingMessages.length;
-                const msgElement = document.getElementById('funMessage');
-                if (msgElement) {
-                    msgElement.style.opacity = '0';
-                    setTimeout(() => {
-                        msgElement.textContent = loadingMessages[messageIndex];
-                        msgElement.style.opacity = '1';
-                    }, 200);
-                }
-            }, 2000);
-        }
+        let messageInterval = null;
+        function startLoadingMessages() {}
 
         // Load JSON data
         async function loadData() {
@@ -887,6 +1090,7 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 panresData = await response.json();
+                buildLookupIndexes();
 
                 initializeUI();
 
@@ -1069,9 +1273,26 @@
             }
             navigationHistory = []; // Clear history when going home
             document.getElementById('homeView').classList.remove('hidden');
+            document.getElementById('howToUseView').classList.add('hidden');
             document.getElementById('listView').classList.add('hidden');
             document.getElementById('detailsView').classList.add('hidden');
         }
+
+        function showHowToUse(updateUrl = true) {
+            if (updateUrl) {
+                const targetHash = '#how-to-use';
+                if (window.location.hash !== targetHash) {
+                    window.location.hash = targetHash;
+                    return;
+                }
+            }
+            navigationHistory = [{ view: 'home' }];
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('howToUseView').classList.remove('hidden');
+            document.getElementById('listView').classList.add('hidden');
+            document.getElementById('detailsView').classList.add('hidden');
+        }
+
 
         function goBackToPreviousView() {
             // Pop the current view from history
@@ -1237,6 +1458,7 @@
             });
 
             document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('howToUseView').classList.add('hidden');
             document.getElementById('listView').classList.remove('hidden');
             document.getElementById('detailsView').classList.add('hidden');
         }
@@ -2096,13 +2318,15 @@
             if (panresData.categories.PanGene.includes(id)) entityType = 'PanRes Gene';
             else if (subject.types && subject.types.includes('PanProtein')) entityType = 'PanRes Protein';
             else if (subject.types && subject.types.includes('PanStructure')) entityType = 'Protein Structure';
-            else if (subject.types && subject.types.includes('PanStructureCluster')) entityType = 'Protein Structure Cluster';
+            else if ((subject.types && subject.types.includes('PanStructureCluster')) || /^PANCL\d+_struct$/.test(id)) entityType = 'Protein Structure Cluster';
             else if (subject.types && subject.types.includes('PanProteinCluster')) entityType = 'Protein Cluster';
             else if (subject.types && subject.types.includes('PanGeneCluster')) entityType = 'Gene Cluster';
             else if (panresData.categories.AntibioticClass.includes(id)) entityType = 'Antibiotic Class';
             else if (panresData.categories.Phenotype.includes(id)) entityType = 'Phenotype';
             else if (panresData.categories.Mechanism.includes(id)) entityType = 'Resistance Mechanism';
             else if (panresData.categories.Database.includes(id)) entityType = 'Database';
+
+            const isStructureClusterHeader = (subject.types && subject.types.includes('PanStructureCluster')) || /^PANCL\d+_struct$/.test(id);
 
             // Check if this is a drug combination
             const isDrugCombination = subject.properties['is_drug_combination'] &&
@@ -2125,7 +2349,6 @@
                         ${entityType ? `<div class="text-sm font-medium text-primary mb-1">${entityType}${isDrugCombination ? ' (Drug Combination)' : ''}</div>` : ''}
                         <div class="flex items-center gap-3 mb-1">
                             <h2 class="text-2xl font-semibold text-gray-800">${subject.label}</h2>
-                            <button onclick="copySubjectLink('${subject.id}')" class="sequence-btn">Copy Link</button>
                             ${hasSequences ? `
                                 <button onclick="viewSequence('${subject.id}')" class="sequence-btn">View Sequence</button>
                                 <button onclick="downloadFasta('${subject.id}', 'gene')" class="sequence-btn">Download FASTA</button>
@@ -2602,11 +2825,17 @@
             }
 
             // For structure clusters (PANCL*_struct), show structure members
-            const isStructureCluster = subject.types && subject.types.includes('PanStructureCluster');
+            const isStructureCluster = (subject.types && subject.types.includes('PanStructureCluster')) || /^PANCL\d+_struct$/.test(id);
             if (isStructureCluster) {
                 html += `
                     <div class="mb-3 bg-teal-50 p-3 rounded-lg border border-teal-200">
-                        <h3 class="text-base font-semibold text-gray-800 mb-2">Structure Cluster Information</h3>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <h3 class="text-base font-semibold text-gray-800">Structure Cluster Information</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="viewMSA('${id}')" class="sequence-btn">View MSA</button>
+                                <button onclick="downloadHMM('${id}')" class="sequence-btn">Download HMM</button>
+                            </div>
+                        </div>
                 `;
 
                 // Show actual structure members
@@ -2919,6 +3148,7 @@
 
             document.getElementById('detailsContent').innerHTML = html;
             document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('howToUseView').classList.add('hidden');
             document.getElementById('listView').classList.add('hidden');
             document.getElementById('detailsView').classList.remove('hidden');
         }
@@ -2979,6 +3209,7 @@
             });
 
             document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('howToUseView').classList.add('hidden');
             document.getElementById('listView').classList.remove('hidden');
             document.getElementById('detailsView').classList.add('hidden');
         }
@@ -3068,6 +3299,8 @@
 
         function closeSequenceModal() {
             document.getElementById('sequence-modal').classList.remove('active');
+            const modalContent = document.querySelector('#sequence-modal .modal-content');
+            if (modalContent) modalContent.classList.remove('msa-modal');
         }
 
         function copySequence(id, type) {
@@ -3194,6 +3427,260 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+        function getMSAPath(structClusterId) {
+            return `MSAs/${structClusterId}.full.aln.fasta`;
+        }
+
+        function getHMMPath(structClusterId) {
+            return `HMMs/${structClusterId}.hmm`;
+        }
+
+        async function fetchTextResource(path, notFoundMessage) {
+            try {
+                const response = await fetch(path, { cache: 'no-store' });
+                if (!response.ok) {
+                    alert(notFoundMessage);
+                    return null;
+                }
+                return await response.text();
+            } catch (error) {
+                console.error(`Failed to fetch ${path}:`, error);
+                alert(notFoundMessage);
+                return null;
+            }
+        }
+
+        function parseFastaAlignment(msaText) {
+            const seqs = [];
+            let current = null;
+
+            msaText.split(/\r?\n/).forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+
+                if (trimmed.startsWith('>')) {
+                    if (current) seqs.push(current);
+                    const name = trimmed.slice(1).trim() || `sequence_${seqs.length + 1}`;
+                    current = { name, id: name, seq: '' };
+                } else if (current) {
+                    current.seq += trimmed.replace(/\s+/g, '');
+                }
+            });
+
+            if (current) seqs.push(current);
+            return seqs;
+        }
+
+        function getAlignmentStats(msaText) {
+            const seqs = parseFastaAlignment(msaText);
+            return {
+                sequenceCount: seqs.length,
+                alignmentLength: seqs.length > 0 ? seqs[0].seq.length : 0
+            };
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function msaResidueClass(residue) {
+            const aa = residue.toUpperCase();
+            if (aa === '-' || aa === '.') return 'msa-aa-gap';
+            if ('AVLIMFWY'.includes(aa)) return 'msa-aa-hydrophobic';
+            if ('STNQC'.includes(aa)) return 'msa-aa-polar';
+            if ('KRH'.includes(aa)) return 'msa-aa-positive';
+            if ('DE'.includes(aa)) return 'msa-aa-negative';
+            if ('GP'.includes(aa)) return 'msa-aa-special';
+            return '';
+        }
+
+        function renderColoredMSAFallback(containerId, seqs, maxInteractiveSequences = 500) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const visibleSeqs = seqs.slice(0, maxInteractiveSequences);
+            const rows = visibleSeqs.map(seq => {
+                const residues = seq.seq.split('').map((residue, colIndex) =>
+                    `<span class="msa-aa ${msaResidueClass(residue)}" data-col="${colIndex}" title="Column ${colIndex + 1}">${escapeHtml(residue)}</span>`
+                ).join('');
+
+                return `
+                    <div class="msa-seq-row">
+                        <span class="msa-seq-name" title="${escapeHtml(seq.name)}">${escapeHtml(seq.name)}</span>
+                        <span class="msa-alignment-row">${residues}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const truncatedNote = seqs.length > maxInteractiveSequences
+                ? `<div class="text-xs text-amber-700 bg-amber-50 border-b border-amber-200 px-3 py-2">
+                       Showing the first ${maxInteractiveSequences} of ${seqs.length} sequences to keep the browser responsive. Use Download MSA for the full alignment.
+                   </div>`
+                : '';
+
+            container.innerHTML = `${truncatedNote}<div class="msa-color-grid">${rows}</div>`;
+        }
+
+        function renderPlainMSA(containerId, msaText) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = `<div class="sequence-container">${escapeHtml(msaText)}</div>`;
+        }
+
+        function toggleMSAPlainText(panelId, fallbackId, buttonId) {
+            const panel = document.getElementById(panelId);
+            const fallback = document.getElementById(fallbackId);
+            const button = document.getElementById(buttonId);
+            if (!panel || !fallback || !button) return;
+
+            const showingPlain = fallback.classList.contains('active');
+            if (showingPlain) {
+                fallback.classList.remove('active');
+                panel.style.display = 'block';
+                button.textContent = 'Show Plain Text';
+            } else {
+                fallback.classList.add('active');
+                panel.style.display = 'none';
+                button.textContent = 'Show Interactive View';
+            }
+        }
+
+
+        const msaZoomLevels = {};
+
+        function applyMSAZoom(panelId) {
+            const panel = document.getElementById(panelId);
+            if (!panel) return;
+            const grid = panel.querySelector('.msa-color-grid');
+            if (!grid) return;
+
+            const zoom = msaZoomLevels[panelId] || 1;
+            const fontSize = Math.round(11 * zoom * 10) / 10;
+            const cellWidth = Math.round(9 * zoom * 10) / 10;
+            const rowHeight = Math.round(13 * zoom * 10) / 10;
+
+            grid.style.setProperty('--msa-font-size', `${fontSize}px`);
+            grid.style.setProperty('--msa-cell-width', `${cellWidth}px`);
+            grid.style.setProperty('--msa-row-height', `${rowHeight}px`);
+
+            const label = document.getElementById(`msa-zoom-label-${panelId}`);
+            if (label) label.textContent = `${Math.round(zoom * 100)}%`;
+        }
+
+        function adjustMSAZoom(panelId, direction) {
+            const current = msaZoomLevels[panelId] || 1;
+            const next = Math.min(2.2, Math.max(0.55, current + direction * 0.15));
+            msaZoomLevels[panelId] = Math.round(next * 100) / 100;
+            applyMSAZoom(panelId);
+        }
+
+        function resetMSAZoom(panelId) {
+            msaZoomLevels[panelId] = 1;
+            applyMSAZoom(panelId);
+        }
+
+        function renderInteractiveMSA(containerId, msaText) {
+            const seqs = parseFastaAlignment(msaText);
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // Use the built-in compact viewer so row spacing and column hover are consistent.
+            renderColoredMSAFallback(containerId, seqs);
+        }
+
+        async function viewMSA(structClusterId) {
+            const msaPath = getMSAPath(structClusterId);
+            const msaText = await fetchTextResource(msaPath, `MSA file not found: ${msaPath}`);
+            if (!msaText) return;
+
+            const stats = getAlignmentStats(msaText);
+            const panelId = `msa-viewer-${structClusterId}`;
+            const fallbackId = `msa-plain-${structClusterId}`;
+            const toggleButtonId = `msa-toggle-${structClusterId}`;
+            const isMobileMSA = window.matchMedia('(max-width: 768px)').matches;
+            const modalContent = document.querySelector('#sequence-modal .modal-content');
+            if (modalContent) modalContent.classList.add('msa-modal');
+
+            const structCluster = getSubject(structClusterId);
+            const structClusterName = structCluster ? structCluster.label : structClusterId;
+            document.getElementById('modal-title').textContent = `3D-based Multiple Sequence Alignment: ${structClusterName}`;
+            document.getElementById('modal-body').innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex flex-wrap justify-between items-center gap-2">
+                        <div class="sequence-stats">
+                            Sequences: <strong>${stats.sequenceCount}</strong> |
+                            Alignment length: <strong>${stats.alignmentLength}</strong> columns
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            ${isMobileMSA ? '' : `<button id="${toggleButtonId}" onclick="toggleMSAPlainText('${panelId}', '${fallbackId}', '${toggleButtonId}')" class="sequence-btn">Show Plain Text</button>`}
+                            <button onclick="copyMSA('${structClusterId}')" class="sequence-btn">Copy MSA</button>
+                            <button onclick="downloadMSA('${structClusterId}')" class="sequence-btn">Download MSA</button>
+                        </div>
+                    </div>
+                    ${isMobileMSA ? '' : `
+                        <div class="msa-viewer-wrapper">
+                            <div class="msa-viewer-toolbar">
+                                <span class="text-xs font-medium text-gray-600">MSA viewer</span>
+                                <button onclick="adjustMSAZoom('${panelId}', -1)" class="sequence-btn">Zoom out</button>
+                                <button onclick="adjustMSAZoom('${panelId}', 1)" class="sequence-btn">Zoom in</button>
+                                <button onclick="resetMSAZoom('${panelId}')" class="sequence-btn">Reset zoom</button>
+                                <span id="msa-zoom-label-${panelId}" class="text-xs text-gray-500">100%</span>
+                                <span class="text-xs text-gray-500">Scroll horizontally and vertically.</span>
+                            </div>
+                            <div id="${panelId}" class="msa-viewer-panel"></div>
+                        </div>
+                    `}
+                    <div id="${fallbackId}" class="msa-plain-fallback${isMobileMSA ? ' active' : ''}"></div>
+                </div>
+            `;
+            document.getElementById('sequence-modal').classList.add('active');
+
+            // Render after the modal is visible so the viewer can calculate dimensions correctly.
+            setTimeout(() => {
+                if (!isMobileMSA) {
+                    renderInteractiveMSA(panelId, msaText);
+                    applyMSAZoom(panelId);
+                }
+                renderPlainMSA(fallbackId, msaText);
+            }, 50);
+        }
+
+        async function copyMSA(structClusterId) {
+            const msaPath = getMSAPath(structClusterId);
+            const msaText = await fetchTextResource(msaPath, `MSA file not found: ${msaPath}`);
+            if (!msaText) return;
+
+            navigator.clipboard.writeText(msaText).then(() => {
+                const buttons = document.querySelectorAll(`button[onclick="copyMSA('${structClusterId}')"]`);
+                buttons.forEach(btn => {
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => { btn.textContent = originalText; }, 2000);
+                });
+            }).catch(error => {
+                console.error('Copy failed:', error);
+                alert('Failed to copy MSA to clipboard');
+            });
+        }
+
+        async function downloadMSA(structClusterId) {
+            const msaPath = getMSAPath(structClusterId);
+            const msaText = await fetchTextResource(msaPath, `MSA file not found: ${msaPath}`);
+            if (!msaText) return;
+            downloadTextFile(msaText, `${structClusterId}.full.aln.fasta`);
+        }
+
+        async function downloadHMM(structClusterId) {
+            const hmmPath = getHMMPath(structClusterId);
+            const hmmText = await fetchTextResource(hmmPath, `HMM file not found: ${hmmPath}`);
+            if (!hmmText) return;
+            downloadTextFile(hmmText, `${structClusterId}.hmm`);
         }
         function getBulkIds(mode = 'filtered') {
             return mode === 'selected'
@@ -3428,17 +3915,79 @@
         // PDB Visualization Functions
         let nglStage = null;
 
+        // Precomputed lookup maps keep structure fold-outs fast. Without these,
+        // each click repeatedly scans every subject in panres2.json.
+        const lookupIndexes = {
+            built: false,
+            geneForProtein: new Map(),
+            geneClusterMembers: new Map(),
+            proteinClusterMembers: new Map(),
+            structureClusterMembers: new Map(),
+            proteinClusterRepresentative: new Map(),
+            pdbPath: new Map()
+        };
+
+        function addToLookupList(map, key, value) {
+            if (!map.has(key)) map.set(key, []);
+            map.get(key).push(value);
+        }
+
+        function buildLookupIndexes() {
+            lookupIndexes.geneForProtein.clear();
+            lookupIndexes.geneClusterMembers.clear();
+            lookupIndexes.proteinClusterMembers.clear();
+            lookupIndexes.structureClusterMembers.clear();
+            lookupIndexes.proteinClusterRepresentative.clear();
+            lookupIndexes.pdbPath.clear();
+
+            if (!panresData || !panresData.subjects) return;
+
+            for (const [subjectId, subject] of Object.entries(panresData.subjects)) {
+                const props = subject.properties || {};
+
+                if (props['translates_to']) {
+                    props['translates_to'].forEach(ref => {
+                        if (!ref.is_literal) lookupIndexes.geneForProtein.set(ref.value, subjectId);
+                    });
+                }
+
+                if (subject.types && subject.types.includes('PanProtein') && props['member_of']) {
+                    props['member_of'].forEach(ref => {
+                        if (!ref.is_literal && /^PANCL\d+$/.test(ref.value)) {
+                            addToLookupList(lookupIndexes.proteinClusterMembers, ref.value, subjectId);
+                        }
+                    });
+                }
+
+                if (subject.types && subject.types.includes('PanStructure') && props['member_of']) {
+                    props['member_of'].forEach(ref => {
+                        if (!ref.is_literal && /^PANCL\d+_struct$/.test(ref.value)) {
+                            addToLookupList(lookupIndexes.structureClusterMembers, ref.value, subjectId);
+                        }
+                    });
+                }
+
+                if (props['member_of']) {
+                    props['member_of'].forEach(ref => {
+                        if (!ref.is_literal && /^pan_cl\d+$/.test(ref.value)) {
+                            addToLookupList(lookupIndexes.geneClusterMembers, ref.value, subjectId);
+                        }
+                    });
+                }
+
+                if (subject.types && subject.types.includes('PanProteinCluster') && props['folds_to']) {
+                    const structRef = props['folds_to'].find(ref => !ref.is_literal);
+                    if (structRef) lookupIndexes.proteinClusterRepresentative.set(subjectId, structRef.value);
+                }
+            }
+
+            lookupIndexes.built = true;
+        }
+
         // Helper function to find gene that translates to a protein
         function findGeneForProtein(proteinId) {
-            if (!panresData || !panresData.subjects) return null;
-
-            for (const [geneId, geneSub] of Object.entries(panresData.subjects)) {
-                if (geneSub.properties && geneSub.properties['translates_to']) {
-                    const translatesTo = geneSub.properties['translates_to'].find(t => t.value === proteinId);
-                    if (translatesTo) {
-                        return getSubject(geneId);
-                    }
-                }
+            if (lookupIndexes.geneForProtein.has(proteinId)) {
+                return getSubject(lookupIndexes.geneForProtein.get(proteinId));
             }
             return null;
         }
@@ -3464,125 +4013,68 @@
             return null;
         }
 
-        // Convert PAN*_struct to gene ID for PDB lookup
-        // PAN12_struct -> pan_12
-        function structToGeneId(structId) {
-            if (structId.includes('_struct')) {
-                // Extract number from PAN123_struct -> 123
-                const match = structId.match(/PAN(\d+)_struct/);
-                if (match) {
-                    return `pan_${match[1]}`;
-                }
+        // Convert a gene/protein/structure identifier to the renamed structure file stem.
+        // Examples:
+        //   pan_1 -> PAN1_struct
+        //   pan_1_v1.0.1_identical -> PAN1_struct
+        //   PAN1 -> PAN1_struct
+        //   PAN1_struct -> PAN1_struct
+        function idToStructureId(id) {
+            const values = [];
+            const rawValue = String(id || '').trim();
+            if (rawValue) values.push(rawValue);
+
+            // Some pages pass the internal ID, while the displayed label may be the clean PAN name.
+            const subject = getSubject(rawValue);
+            if (subject && subject.label) values.push(String(subject.label).trim());
+
+            for (const value of values) {
+                let match = value.match(/^PAN(\d+)_struct$/i);
+                if (match) return `PAN${match[1]}_struct`;
+
+                match = value.match(/^PAN(\d+)$/i);
+                if (match) return `PAN${match[1]}_struct`;
+
+                // Handles both pan_1 and old-style IDs such as pan_1_v1.0.1_identical.
+                match = value.match(/^pan_(\d+)(?:_|$)/i);
+                if (match) return `PAN${match[1]}_struct`;
             }
-            return structId;
+
+            return rawValue;
         }
 
-        // Check if PDB file exists for a gene or structure ID
+        function getPDBPathFromId(id) {
+            const structureId = idToStructureId(id);
+            return `PDBs/${structureId}.pdb`;
+        }
+
+        // Build the renamed PDB path directly. Avoiding repeated HEAD lookups makes
+        // fold-out structure viewers open much faster on static hosting.
         async function checkPDBExists(id) {
-            try {
-                // Convert structure ID to gene ID if needed
-                const geneId = structToGeneId(id);
-
-                // Try to find a PDB file matching pan_X_v*.pdb pattern
-                const response = await fetch(`pdb_files/${geneId}_v1.0.1_identical_unrelaxed_rank_001_alphafold2_ptm_model_1_seed_000.pdb`, {
-                    method: 'HEAD'
-                });
-                if (response.ok) return true;
-
-                // Try other model variants
-                for (let model = 1; model <= 5; model++) {
-                    const testResponse = await fetch(`pdb_files/${geneId}_v1.0.1_identical_unrelaxed_rank_001_alphafold2_ptm_model_${model}_seed_000.pdb`, {
-                        method: 'HEAD'
-                    });
-                    if (testResponse.ok) return true;
-                }
-                return false;
-            } catch (error) {
-                return false;
-            }
+            return Boolean(idToStructureId(id));
         }
 
-        // Get PDB file path for a gene or structure ID
         async function getPDBPath(id) {
-            // Convert structure ID to gene ID if needed
-            const geneId = structToGeneId(id);
-
-            // Try different model variants
-            for (let model = 1; model <= 5; model++) {
-                const path = `pdb_files/${geneId}_v1.0.1_identical_unrelaxed_rank_001_alphafold2_ptm_model_${model}_seed_000.pdb`;
-                try {
-                    const response = await fetch(path, { method: 'HEAD' });
-                    if (response.ok) return path;
-                } catch (error) {
-                    continue;
-                }
+            const key = String(id || '');
+            if (!lookupIndexes.pdbPath.has(key)) {
+                lookupIndexes.pdbPath.set(key, getPDBPathFromId(id));
             }
-            return null;
+            return lookupIndexes.pdbPath.get(key);
         }
 
         // Find cluster members
         function findClusterMembers(clusterId) {
-            const members = [];
-            for (const geneId of panresData.categories.PanGene) {
-                const gene = getSubject(geneId);
-                if (!gene || !gene.properties['member_of']) continue;
-
-                // Check if this gene is a member of the cluster
-                const isMember = gene.properties['member_of'].some(val =>
-                    !val.is_literal && val.value === clusterId
-                );
-
-                if (isMember) {
-                    members.push(geneId);
-                }
-            }
-            return members;
+            return lookupIndexes.geneClusterMembers.get(clusterId) || [];
         }
 
         // Find protein cluster members (all proteins that are member_of a protein cluster centroid)
         function findProteinClusterMembers(proteinClusterId) {
-            const members = [];
-            // Search through all subjects to find proteins
-            for (const subjectId in panresData.subjects) {
-                const subject = panresData.subjects[subjectId];
-
-                // Check if this is a PanProtein type
-                if (!subject.types || !subject.types.includes('PanProtein')) continue;
-                if (!subject.properties['member_of']) continue;
-
-                // Check if this protein is a member of the cluster
-                const isMember = subject.properties['member_of'].some(val =>
-                    !val.is_literal && val.value === proteinClusterId
-                );
-
-                if (isMember) {
-                    members.push(subjectId);
-                }
-            }
-            return members;
+            return lookupIndexes.proteinClusterMembers.get(proteinClusterId) || [];
         }
 
         // Find structure cluster members (all structures that are member_of a structure cluster)
         function findStructureClusterMembers(structClusterId) {
-            const members = [];
-            // Search through all subjects to find structures
-            for (const subjectId in panresData.subjects) {
-                const subject = panresData.subjects[subjectId];
-
-                // Check if this is a PanStructure type
-                if (!subject.types || !subject.types.includes('PanStructure')) continue;
-                if (!subject.properties['member_of']) continue;
-
-                // Check if this structure is a member of the cluster
-                const isMember = subject.properties['member_of'].some(val =>
-                    !val.is_literal && val.value === structClusterId
-                );
-
-                if (isMember) {
-                    members.push(subjectId);
-                }
-            }
-            return members;
+            return lookupIndexes.structureClusterMembers.get(structClusterId) || [];
         }
 
         // Find all unique protein clusters associated with genes in a gene cluster
@@ -3617,48 +4109,31 @@
             return Array.from(proteinClusters);
         }
 
-        // Resolve protein cluster (Pan_XXXX) to gene with PDB structure
+        // Resolve a protein cluster to its representative structure without scanning every member.
         async function resolveProteinToGene(proteinClusterId) {
-            const proteinCluster = getSubject(proteinClusterId);
-            if (!proteinCluster) return null;
+            if (lookupIndexes.proteinClusterRepresentative.has(proteinClusterId)) {
+                return lookupIndexes.proteinClusterRepresentative.get(proteinClusterId);
+            }
 
-            // In new schema, PANCL* protein clusters have folds_to pointing to PAN*_struct
-            // PAN*_struct has member_of pointing to PANCL*_struct (structure cluster)
-            // We need to find genes that translate to proteins in this cluster
-
-            // Find all proteins that are members of this protein cluster
+            // Fallback: use the first protein member's corresponding gene. The final NGL
+            // load will report if the file is missing.
             const proteinMembers = findProteinClusterMembers(proteinClusterId);
-
-            // For each protein member, find the gene that translates to it
             for (const proteinId of proteinMembers) {
                 const gene = findGeneForProtein(proteinId);
-                if (gene) {
-                    const hasPDB = await checkPDBExists(gene.id);
-                    if (hasPDB) return gene.id;
-                }
+                if (gene) return gene.id;
             }
 
             return null;
         }
 
-        // Get centroid gene for cluster (the one with PDB structure)
+        // Get representative ID for cluster display and PDB loading.
         async function getClusterRepresentative(clusterId) {
-            // Handle protein clusters (PANCL*)
             if (clusterId.match(/^PANCL\d+$/)) {
                 return await resolveProteinToGene(clusterId);
             }
 
-            // Handle gene clusters (pan_cl*)
-            // Search through all cluster members to find one with PDB
             const members = findClusterMembers(clusterId);
-            for (const memberId of members) {
-                const hasPDB = await checkPDBExists(memberId);
-                if (hasPDB) {
-                    return memberId;
-                }
-            }
-
-            return null;
+            return members.length > 0 ? members[0] : null;
         }
 
         // Store NGL stages for multiple viewers
@@ -3667,6 +4142,62 @@
         const currentRepresentation = {};
         const currentColorScheme = {};
         const isSpinning = {};
+        let plddtColorSchemeId = null;
+
+        function getPlddtColorScheme() {
+            if (plddtColorSchemeId || !window.NGL || !NGL.ColormakerRegistry) return plddtColorSchemeId;
+
+            plddtColorSchemeId = NGL.ColormakerRegistry.addScheme(function () {
+                this.atomColor = function (atom) {
+                    const plddt = Number(atom.bfactor || 0);
+                    if (plddt >= 90) return 0x0053D6;  // very high confidence
+                    if (plddt >= 70) return 0x65CBF3;  // high confidence
+                    if (plddt >= 50) return 0xFFDB13;  // low confidence
+                    return 0xFF7D45;                  // very low confidence
+                };
+            });
+            return plddtColorSchemeId;
+        }
+
+        function buildRepresentationConfig(viewerId, repType) {
+            const repConfig = {};
+            const colorScheme = currentColorScheme[viewerId];
+
+            if (colorScheme === 'plddt') {
+                const scheme = getPlddtColorScheme();
+                if (scheme) {
+                    repConfig.color = scheme;
+                } else {
+                    repConfig.colorScheme = 'bfactor';
+                }
+            } else if (colorScheme) {
+                repConfig.colorScheme = colorScheme;
+            }
+
+            if (repType === 'surface') {
+                repConfig.opacity = 0.8;
+            }
+
+            return repConfig;
+        }
+
+        function getPlddtLegendHtml(viewerId) {
+            return `
+                <div id="plddt-legend-${viewerId}" class="pdb-plddt-legend">
+                    <div class="pdb-plddt-legend-title">Confidence (pLDDT)</div>
+                    <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#0053D6"></span><span>Very high confidence (&gt; 90)</span></div>
+                    <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#65CBF3"></span><span>High confidence (70–90)</span></div>
+                    <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#FFDB13"></span><span>Low confidence (50–70)</span></div>
+                    <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#FF7D45"></span><span>Very low confidence (&lt; 50)</span></div>
+                </div>
+            `;
+        }
+
+        function updatePlddtLegendVisibility(viewerId) {
+            const legend = document.getElementById(`plddt-legend-${viewerId}`);
+            if (!legend) return;
+            legend.classList.toggle('hidden', currentColorScheme[viewerId] !== 'plddt');
+        }
 
         // Toggle PDB viewer expansion
         async function togglePDBViewer(viewerId, clusterId) {
@@ -3708,7 +4239,7 @@
             // Get PDB file path
             const pdbPath = await getPDBPath(repGene);
             if (!pdbPath) {
-                container.innerHTML = '<div class="p-4 text-sm text-gray-600">PDB file not found</div>';
+                container.innerHTML = `<div class="p-4 text-sm text-gray-600">PDB file not found.<br><span class="text-xs">Expected: ${pdbPath || getPDBPathFromId(repGene)}</span></div>`;
                 container.classList.add('active');
                 return;
             }
@@ -3796,20 +4327,19 @@
                     </div>
                     <div class="mb-2">
                         <span class="text-xs font-medium text-gray-600">Color Scheme:</span>
-                        <button class="viz-btn active" data-color onclick="changeColorScheme('${viewerId}', '')">Default</button>
+                        <button class="viz-btn active" data-color onclick="changeColorScheme('${viewerId}', 'plddt')">Confidence</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', '')">Default</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'chainname')">Chain</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'element')">Element</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'residueindex')">Residue</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'sstruc')">Secondary Structure</button>
-                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'bfactor')">B-factor</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'hydrophobicity')">Hydrophobicity</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'atomindex')">Atom Index</button>
-                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'random')">Random</button>
                     </div>
                     <div class="mb-2">
                         <span class="text-xs font-medium text-gray-600">Background:</span>
-                        <button class="viz-btn active" data-bg onclick="changeBackground('${viewerId}', 'black')">Black</button>
-                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'white')">White</button>
+                        <button class="viz-btn active" data-bg onclick="changeBackground('${viewerId}', 'white')">White</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'black')">Black</button>
                         <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'gray')">Gray</button>
                         <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', '#1a1a2e')">Dark Blue</button>
                         <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', '#0f0f23')">Navy</button>
@@ -3817,7 +4347,7 @@
                     </div>
                     <div>
                         <span class="text-xs font-medium text-gray-600">Actions:</span>
-                        <button class="viz-btn" onclick="downloadPDB('${pdbPath}', '${repGene}')">Download PDB</button>
+                        <button class="viz-btn" onclick="downloadPDB('${pdbPath}', idToStructureId('${repGene}'))">Download PDB</button>
                         <button class="viz-btn" onclick="resetView('${viewerId}')">Reset View</button>
                         <button class="viz-btn" onclick="toggleSpin('${viewerId}')">Toggle Spin</button>
                         <span class="text-xs text-gray-500 ml-4 italic">💡 Tip: Use mouse scroll or two-finger drag to zoom</span>
@@ -3830,11 +4360,12 @@
                         <strong>${memberType}:</strong> ${members.length}
                     </div>
                 </div>
-                <div id="${viewportId}" style="width: 100%; height: 500px; background: #000000; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <div id="${viewportId}" class="pdb-viewport">
                     <div class="pdb-loading-spinner">
                         <div class="pdb-spinner"></div>
                         <span>Loading 3D structure...</span>
                     </div>
+                    ${getPlddtLegendHtml(viewerId)}
                 </div>
                 <div class="cluster-members">
                     <h4 class="font-semibold text-gray-800 mb-2">${memberType} (${members.length}):</h4>
@@ -3846,11 +4377,11 @@
 
             // Initialize representation and color tracking
             currentRepresentation[viewerId] = 'cartoon';
-            currentColorScheme[viewerId] = '';
+            currentColorScheme[viewerId] = 'plddt';
             isSpinning[viewerId] = false;
 
             // Load PDB structure
-            setTimeout(() => loadPDBStructure(viewportId, viewerId, pdbPath), 100);
+            requestAnimationFrame(() => loadPDBStructure(viewportId, viewerId, pdbPath));
         }
 
         // Load PDB structure using NGL
@@ -3865,7 +4396,7 @@
 
             // Create new NGL stage
             nglStages[viewerId] = new NGL.Stage(viewport, {
-                backgroundColor: 'black'
+                backgroundColor: 'white'
             });
 
             // Load PDB file
@@ -3878,8 +4409,9 @@
                     spinner.remove();
                 }
 
-                // Default representation: cartoon with package default colors
-                component.addRepresentation('cartoon');
+                // Default representation: cartoon coloured by confidence (pLDDT).
+                component.addRepresentation('cartoon', buildRepresentationConfig(viewerId, 'cartoon'));
+                updatePlddtLegendVisibility(viewerId);
 
                 // Auto-view
                 component.autoView();
@@ -3890,7 +4422,7 @@
                 });
             }).catch(function (error) {
                 console.error('Error loading PDB:', error);
-                viewport.innerHTML = '<div class="flex items-center justify-center h-full text-white">Failed to load PDB structure</div>';
+                viewport.innerHTML = `<div class="flex items-center justify-center h-full text-gray-700 p-4 text-center">Failed to load PDB structure:<br><code>${pdbPath}</code></div>`;
             });
         }
 
@@ -3911,20 +4443,10 @@
             // Remove all representations
             nglComponents[viewerId].removeAllRepresentations();
 
-            // Build representation config
-            const repConfig = {};
-
-            // Apply current color scheme if set
-            if (currentColorScheme[viewerId]) {
-                repConfig.colorScheme = currentColorScheme[viewerId];
-            }
-
-            // Add type-specific settings
-            if (repType === 'surface') {
-                repConfig.opacity = 0.8;
-            }
+            const repConfig = buildRepresentationConfig(viewerId, repType);
 
             nglComponents[viewerId].addRepresentation(repType, repConfig);
+            updatePlddtLegendVisibility(viewerId);
             nglComponents[viewerId].autoView();
 
             currentRepresentation[viewerId] = repType;
@@ -3966,19 +4488,11 @@
             // Remove all representations
             nglComponents[viewerId].removeAllRepresentations();
 
-            // Build representation config
-            const repConfig = {};
-            if (colorScheme) {
-                repConfig.colorScheme = colorScheme;
-            }
-
-            // Add type-specific settings
             const repType = currentRepresentation[viewerId];
-            if (repType === 'surface') {
-                repConfig.opacity = 0.8;
-            }
+            const repConfig = buildRepresentationConfig(viewerId, repType);
 
             nglComponents[viewerId].addRepresentation(repType, repConfig);
+            updatePlddtLegendVisibility(viewerId);
             nglComponents[viewerId].autoView();
         }
 
@@ -4049,13 +4563,14 @@
             // Get PDB file path for this structure
             const pdbPath = await getPDBPath(structId);
             if (!pdbPath) {
-                container.innerHTML = '<div class="p-4 text-sm text-gray-600">PDB file not found</div>';
+                container.innerHTML = `<div class="p-4 text-sm text-gray-600">PDB file not found.<br><span class="text-xs">Expected: ${pdbPath || getPDBPathFromId(structId)}</span></div>`;
                 container.classList.add('active');
                 return;
             }
 
-            // Build viewer HTML
+            // Build the same full viewer controls used by the PanGene embedded structure viewer.
             const viewportId = `viewport-${viewerId}`;
+            const structureDownloadName = idToStructureId(structId);
 
             container.innerHTML = `
                 <div class="viz-controls">
@@ -4067,67 +4582,52 @@
                         <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'licorice')">Licorice</button>
                         <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'spacefill')">Spacefill</button>
                         <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'surface')">Surface</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'ribbon')">Ribbon</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'rope')">Rope</button>
+                        <button class="viz-btn" data-rep onclick="changeRepresentation('${viewerId}', 'tube')">Tube</button>
                     </div>
                     <div class="mb-2">
                         <span class="text-xs font-medium text-gray-600">Color Scheme:</span>
-                        <button class="viz-btn active" data-color onclick="changeColorScheme('${viewerId}', '')">Default</button>
+                        <button class="viz-btn active" data-color onclick="changeColorScheme('${viewerId}', 'plddt')">Confidence</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', '')">Default</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'chainname')">Chain</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'element')">Element</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'residueindex')">Residue</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'sstruc')">Secondary Structure</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'hydrophobicity')">Hydrophobicity</button>
+                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'atomindex')">Atom Index</button>
                     </div>
                     <div class="mb-2">
                         <span class="text-xs font-medium text-gray-600">Background:</span>
-                        <button class="viz-btn active" data-bg onclick="changeBackground('${viewerId}', 'black')">Black</button>
-                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'white')">White</button>
+                        <button class="viz-btn active" data-bg onclick="changeBackground('${viewerId}', 'white')">White</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'black')">Black</button>
                         <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', 'gray')">Gray</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', '#1a1a2e')">Dark Blue</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', '#0f0f23')">Navy</button>
+                        <button class="viz-btn" data-bg onclick="changeBackground('${viewerId}', '#2d2d2d')">Charcoal</button>
                     </div>
                     <div>
                         <span class="text-xs font-medium text-gray-600">Actions:</span>
-                        <button class="viz-btn" onclick="downloadPDB('${pdbPath}', '${structId}')">Download PDB</button>
+                        <button class="viz-btn" onclick="downloadPDB('${pdbPath}', '${structureDownloadName}')">Download PDB</button>
                         <button class="viz-btn" onclick="resetView('${viewerId}')">Reset View</button>
                         <button class="viz-btn" onclick="toggleSpin('${viewerId}')">Toggle Spin</button>
+                        <span class="text-xs text-gray-500 ml-4 italic">💡 Tip: Use mouse scroll or two-finger drag to zoom</span>
                     </div>
                 </div>
-                <div id="${viewportId}" style="width: 100%; height: 500px; position: relative; background: black;">
+                <div id="${viewportId}" class="pdb-viewport">
                     <div class="pdb-loading-spinner">
                         <div class="pdb-spinner"></div>
-                        <div style="color: white; margin-top: 10px;">Loading structure...</div>
+                        <span>Loading 3D structure...</span>
                     </div>
+                    ${getPlddtLegendHtml(viewerId)}
                 </div>
             `;
 
-            const viewport = document.getElementById(viewportId);
+            currentRepresentation[viewerId] = 'cartoon';
+            currentColorScheme[viewerId] = 'plddt';
+            isSpinning[viewerId] = false;
 
-            // Create new NGL stage
-            nglStages[viewerId] = new NGL.Stage(viewport, {
-                backgroundColor: 'black'
-            });
-
-            // Load PDB file
-            nglStages[viewerId].loadFile(pdbPath, { ext: 'pdb' }).then(function (component) {
-                nglComponents[viewerId] = component;
-
-                // Remove loading spinner
-                const spinner = viewport.querySelector('.pdb-loading-spinner');
-                if (spinner) {
-                    spinner.remove();
-                }
-
-                // Default representation: cartoon
-                component.addRepresentation('cartoon');
-
-                // Auto-view
-                component.autoView();
-
-                // Handle window resize
-                window.addEventListener('resize', function () {
-                    if (nglStages[viewerId]) nglStages[viewerId].handleResize();
-                });
-            }).catch(function (error) {
-                console.error('Error loading PDB:', error);
-                viewport.innerHTML = '<div class="flex items-center justify-center h-full text-white">Failed to load PDB structure</div>';
-            });
+            requestAnimationFrame(() => loadPDBStructure(viewportId, viewerId, pdbPath));
         }
 
         // URL hash routing for shareable links
@@ -4138,6 +4638,11 @@
 
             if (!hash || hash === 'home') {
                 showHome(false);
+                return;
+            }
+
+            if (hash === 'how-to-use') {
+                showHowToUse(false);
                 return;
             }
 
