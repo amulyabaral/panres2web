@@ -1514,6 +1514,27 @@
             return subject ? subject.label : id;
         }
 
+        function makeSubjectLink(id, label = null, extraClass = '') {
+            const display = escapeHtml(label || getSubjectLabelOrId(id));
+            return `<a href="#" onclick="showDetails('${id}'); return false;" class="text-primary hover:underline ${extraClass}">${display}</a>`;
+        }
+
+        function formatLinkedValues(ids, limit = 1) {
+            const uniqueIds = Array.from(new Set(ids || [])).sort((a, b) => naturalCompare(getSubjectLabelOrId(a), getSubjectLabelOrId(b)));
+            if (uniqueIds.length === 0) return '<span class="text-gray-400">—</span>';
+
+            const visible = uniqueIds.slice(0, limit).map(id => makeSubjectLink(id));
+            const hidden = uniqueIds.slice(limit).map(id => makeSubjectLink(id));
+            if (hidden.length === 0) return visible.join(', ');
+
+            return `${visible.join(', ')} <details class="inline-block align-baseline">
+                <summary class="inline cursor-pointer text-primary hover:underline">+${hidden.length}</summary>
+                <div class="absolute z-20 mt-1 max-w-xs bg-white border border-gray-200 rounded shadow-lg p-2 text-xs space-y-1">
+                    ${hidden.map(link => `<div>${link}</div>`).join('')}
+                </div>
+            </details>`;
+        }
+
         function addOptionsFromSet(selectId, placeholder, optionSet) {
             const select = document.getElementById(selectId);
             if (!select) return;
@@ -2058,9 +2079,9 @@
                         <td class="p-3 text-gray-700">${phenotypes.slice(0, 2).join(', ')}${phenotypes.length > 2 ? ` +${phenotypes.length - 2}` : ''}</td>
                         <td class="p-3 text-gray-700">${mechanisms.slice(0, 2).join(', ')}${mechanisms.length > 2 ? ` +${mechanisms.length - 2}` : ''}</td>
                         <td class="p-3 text-gray-700">${homologLabel}</td>
-                        <td class="p-3 text-gray-700">${geneClusters.slice(0, 1).join(', ')}${geneClusters.length > 1 ? ` +${geneClusters.length - 1}` : ''}</td>
-                        <td class="p-3 text-gray-700">${proteinClusters.slice(0, 1).join(', ')}${proteinClusters.length > 1 ? ` +${proteinClusters.length - 1}` : ''}</td>
-                        <td class="p-3 text-gray-700">${structureClusters.slice(0, 1).join(', ')}${structureClusters.length > 1 ? ` +${structureClusters.length - 1}` : ''}</td>
+                        <td class="p-3 text-gray-700 relative">${formatLinkedValues(getGeneClusterIds(gene), 1)}</td>
+                        <td class="p-3 text-gray-700 relative">${formatLinkedValues(getProteinClusterIdsForGene(gene), 1)}</td>
+                        <td class="p-3 text-gray-700 relative">${formatLinkedValues(getStructureClusterIdsForGene(gene), 1)}</td>
                     </tr>
                 `;
             });
@@ -4181,22 +4202,31 @@
             return repConfig;
         }
 
-        function getPlddtLegendHtml(viewerId) {
+        function getStructureLegendsHtml(viewerId) {
             return `
-                <div id="plddt-legend-${viewerId}" class="pdb-plddt-legend">
+                <div id="legend-${viewerId}-plddt" class="pdb-plddt-legend hidden">
                     <div class="pdb-plddt-legend-title">Confidence (pLDDT)</div>
                     <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#0053D6"></span><span>Very high confidence (&gt; 90)</span></div>
                     <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#65CBF3"></span><span>High confidence (70–90)</span></div>
                     <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#FFDB13"></span><span>Low confidence (50–70)</span></div>
                     <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#FF7D45"></span><span>Very low confidence (&lt; 50)</span></div>
                 </div>
+                <div id="legend-${viewerId}-sstruc" class="pdb-plddt-legend hidden">
+                    <div class="pdb-plddt-legend-title">Secondary structure</div>
+                    <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#FF0080"></span><span>Helix</span></div>
+                    <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#FFD700"></span><span>Sheet</span></div>
+                    <div class="pdb-plddt-legend-row"><span class="pdb-plddt-swatch" style="background:#FFFFFF"></span><span>Coil / loop</span></div>
+                </div>
             `;
         }
 
-        function updatePlddtLegendVisibility(viewerId) {
-            const legend = document.getElementById(`plddt-legend-${viewerId}`);
-            if (!legend) return;
-            legend.classList.toggle('hidden', currentColorScheme[viewerId] !== 'plddt');
+        function updateStructureLegendVisibility(viewerId) {
+            const plddtLegend = document.getElementById(`legend-${viewerId}-plddt`);
+            const sstrucLegend = document.getElementById(`legend-${viewerId}-sstruc`);
+            const scheme = currentColorScheme[viewerId] || '';
+
+            if (plddtLegend) plddtLegend.classList.toggle('hidden', scheme !== 'plddt');
+            if (sstrucLegend) sstrucLegend.classList.toggle('hidden', scheme !== 'sstruc');
         }
 
         // Toggle PDB viewer expansion
@@ -4328,9 +4358,7 @@
                     <div class="mb-2">
                         <span class="text-xs font-medium text-gray-600">Color Scheme:</span>
                         <button class="viz-btn active" data-color onclick="changeColorScheme('${viewerId}', 'plddt')">Confidence</button>
-                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', '')">Default</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'chainname')">Chain</button>
-                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'element')">Element</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'residueindex')">Residue</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'sstruc')">Secondary Structure</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'hydrophobicity')">Hydrophobicity</button>
@@ -4365,7 +4393,7 @@
                         <div class="pdb-spinner"></div>
                         <span>Loading 3D structure...</span>
                     </div>
-                    ${getPlddtLegendHtml(viewerId)}
+                    ${getStructureLegendsHtml(viewerId)}
                 </div>
                 <div class="cluster-members">
                     <h4 class="font-semibold text-gray-800 mb-2">${memberType} (${members.length}):</h4>
@@ -4411,7 +4439,7 @@
 
                 // Default representation: cartoon coloured by confidence (pLDDT).
                 component.addRepresentation('cartoon', buildRepresentationConfig(viewerId, 'cartoon'));
-                updatePlddtLegendVisibility(viewerId);
+                updateStructureLegendVisibility(viewerId);
 
                 // Auto-view
                 component.autoView();
@@ -4446,7 +4474,7 @@
             const repConfig = buildRepresentationConfig(viewerId, repType);
 
             nglComponents[viewerId].addRepresentation(repType, repConfig);
-            updatePlddtLegendVisibility(viewerId);
+            updateStructureLegendVisibility(viewerId);
             nglComponents[viewerId].autoView();
 
             currentRepresentation[viewerId] = repType;
@@ -4492,7 +4520,7 @@
             const repConfig = buildRepresentationConfig(viewerId, repType);
 
             nglComponents[viewerId].addRepresentation(repType, repConfig);
-            updatePlddtLegendVisibility(viewerId);
+            updateStructureLegendVisibility(viewerId);
             nglComponents[viewerId].autoView();
         }
 
@@ -4589,9 +4617,7 @@
                     <div class="mb-2">
                         <span class="text-xs font-medium text-gray-600">Color Scheme:</span>
                         <button class="viz-btn active" data-color onclick="changeColorScheme('${viewerId}', 'plddt')">Confidence</button>
-                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', '')">Default</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'chainname')">Chain</button>
-                        <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'element')">Element</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'residueindex')">Residue</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'sstruc')">Secondary Structure</button>
                         <button class="viz-btn" data-color onclick="changeColorScheme('${viewerId}', 'hydrophobicity')">Hydrophobicity</button>
@@ -4619,7 +4645,7 @@
                         <div class="pdb-spinner"></div>
                         <span>Loading 3D structure...</span>
                     </div>
-                    ${getPlddtLegendHtml(viewerId)}
+                    ${getStructureLegendsHtml(viewerId)}
                 </div>
             `;
 
