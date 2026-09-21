@@ -883,10 +883,28 @@
                     <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-700">
                         <li><span class="font-semibold text-gray-800">PanGene</span> — a curated resistance gene entry. This is the best starting point for resistance annotations such as phenotype, resistance class, mechanism, and source database.</li>
                         <li><span class="font-semibold text-gray-800">PanProtein</span> — the protein translation of a PanGene. Protein pages connect gene entries to protein clusters and predicted structures.</li>
-                        <li><span class="font-semibold text-gray-800">PanGeneCluster</span> — a group of closely related genes clustered at 90% sequence identity and 90% coverage.</li>
-                        <li><span class="font-semibold text-gray-800">PanProteinCluster</span> — a group of related proteins clustered at 50% sequence identity and 90% coverage.</li>
+                        <li>
+                            <span class="font-semibold text-gray-800">PanGeneCluster</span>
+                            <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-300 align-middle">
+                                <span aria-hidden="true">🏷</span><code class="font-mono">pan_cl####</code>
+                            </span>
+                            — a group of closely related genes clustered at 90% sequence identity and 90% coverage.
+                        </li>
+                        <li>
+                            <span class="font-semibold text-gray-800">PanProteinCluster</span>
+                            <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-800 border border-purple-200 align-middle">
+                                <span aria-hidden="true">🏷</span><code class="font-mono">PANCL####</code>
+                            </span>
+                            — a group of related proteins clustered at 50% sequence identity and 90% coverage.
+                        </li>
                         <li><span class="font-semibold text-gray-800">PanStructure</span> — an AlphaFold prediction for a representative protein sequence.</li>
-                        <li><span class="font-semibold text-gray-800">PanStructureCluster</span> — a group of proteins with similar predicted structures. These clusters are used to provide 3D-based multiple sequence alignments and HMM profiles.</li>
+                        <li>
+                            <span class="font-semibold text-gray-800">PanStructureCluster</span>
+                            <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-teal-50 text-teal-800 border border-teal-200 align-middle">
+                                <span aria-hidden="true">🏷</span><code class="font-mono">PANCL####_struct</code>
+                            </span>
+                            — a group of proteins with similar predicted structures. These clusters are used to provide 3D-based multiple sequence alignments and HMM profiles.
+                        </li>
                     </ul>
                 </div>
 
@@ -994,7 +1012,7 @@
             <div id="advancedFilters" class="hidden mb-6 bg-white p-6 rounded-lg shadow-md border border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">🔍 Filter & Group Genes</h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
                     <!-- Database Filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Source Database</label>
@@ -1071,40 +1089,17 @@
                         </details>
                     </div>
 
-                    <!-- E. coli homolog filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">E. coli core homolog</label>
                         <select id="filterHomolog" onchange="applyFilters()"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm bg-white">
                             <option value="">All</option>
                             <option value="yes">Only homologs</option>
                             <option value="no" selected>Exclude homologs</option>
                         </select>
                     </div>
 
-                    <!-- Gene cluster filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Gene Cluster</label>
-                        <input type="text" id="filterGeneCluster" onkeyup="applyFilters()"
-                               placeholder="e.g. pan_cl123"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
-                    </div>
 
-                    <!-- Protein cluster filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Protein Cluster</label>
-                        <input type="text" id="filterProteinCluster" onkeyup="applyFilters()"
-                               placeholder="e.g. PANCL123"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
-                    </div>
-
-                    <!-- Structure cluster filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Structure Cluster</label>
-                        <input type="text" id="filterStructureCluster" onkeyup="applyFilters()"
-                               placeholder="e.g. PANCL123_struct"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm">
-                    </div>
                 </div>
 
 
@@ -1225,6 +1220,14 @@
             class: [],
             mechanism: [],
             homolog: 'no',
+            geneNameText: '',
+            geneAliasText: '',
+            translatesToText: '',
+            foldsToText: '',
+            databaseText: '',
+            classText: '',
+            phenotypeText: '',
+            mechanismText: '',
             geneCluster: '',
             proteinCluster: '',
             structureCluster: ''
@@ -1241,6 +1244,10 @@
         // FASTA headers are expected to begin with the PanProtein ID, e.g. >PAN1.
         const PROTEIN_FASTA_PATH = 'panres2_proteins.faa';
         const proteinSequences = new Map();
+
+        // Curated list of structure-cluster IDs whose HMM/MSA resources were removed.
+        const DISCARDED_HMMS_PATH = 'discarded_hmms.txt';
+        const discardedHmmIds = new Set();
 
         // Navigation history stack
         let navigationHistory = [];
@@ -1396,10 +1403,11 @@
             startLoadingMessages();
 
             try {
-                const [jsonResponse, proteinResponse, displayResponse] = await Promise.all([
+                const [jsonResponse, proteinResponse, displayResponse, discardedHmmResponse] = await Promise.all([
                     fetch('panres2.json', { cache: 'no-store' }),
                     fetch(PROTEIN_FASTA_PATH, { cache: 'no-store' }),
-                    fetch(DISPLAY_NAMES_PATH, { cache: 'no-store' }).catch(() => null)
+                    fetch(DISPLAY_NAMES_PATH, { cache: 'no-store' }).catch(() => null),
+                    fetch(DISCARDED_HMMS_PATH, { cache: 'no-store' }).catch(() => null)
                 ]);
 
                 if (!jsonResponse.ok) {
@@ -1424,6 +1432,18 @@
                     if (displayResponse) {
                         console.warn(`Could not load ${DISPLAY_NAMES_PATH}: HTTP ${displayResponse.status}`);
                     }
+                }
+
+                discardedHmmIds.clear();
+                if (discardedHmmResponse && discardedHmmResponse.ok) {
+                    const discardedHmmText = await discardedHmmResponse.text();
+                    discardedHmmText
+                        .split(/\r?\n/)
+                        .map(line => line.trim())
+                        .filter(Boolean)
+                        .forEach(id => discardedHmmIds.add(id));
+                } else if (discardedHmmResponse) {
+                    console.warn(`Could not load ${DISCARDED_HMMS_PATH}: HTTP ${discardedHmmResponse.status}`);
                 }
 
                 buildLookupIndexes();
@@ -1651,6 +1671,14 @@
                         class: [],
                         mechanism: [],
                         homolog: '',
+                        geneNameText: '',
+                        geneAliasText: '',
+                        translatesToText: '',
+                        foldsToText: '',
+                        databaseText: '',
+                        classText: '',
+                        phenotypeText: '',
+                        mechanismText: '',
                         geneCluster: '',
                         proteinCluster: '',
                         structureCluster: '',
@@ -1664,15 +1692,6 @@
                     setCheckedValues('filterMechanismOptions', activeFilters.mechanism || []);
                     if (document.getElementById('filterHomolog')) {
                         document.getElementById('filterHomolog').value = activeFilters.homolog || 'no';
-                    }
-                    if (document.getElementById('filterGeneCluster')) {
-                        document.getElementById('filterGeneCluster').value = activeFilters.geneCluster || '';
-                    }
-                    if (document.getElementById('filterProteinCluster')) {
-                        document.getElementById('filterProteinCluster').value = activeFilters.proteinCluster || '';
-                    }
-                    if (document.getElementById('filterStructureCluster')) {
-                        document.getElementById('filterStructureCluster').value = activeFilters.structureCluster || '';
                     }
                     if (document.getElementById('groupBy')) {
                         document.getElementById('groupBy').value = previousView.groupBy || '';
@@ -1811,6 +1830,54 @@
             return subject.properties[propertyName].some(val => val.is_literal && String(val.value).toLowerCase() === 'true');
         }
 
+        function isDiscarded(subject) {
+            return Boolean(
+                subject &&
+                subject.properties &&
+                subject.properties['is_discarded'] &&
+                subject.properties['is_discarded'].length > 0
+            );
+        }
+
+        function getDiscardedEntityInfo(subject) {
+            if (!isDiscarded(subject)) return null;
+
+            const types = subject.types || [];
+
+            if (types.includes('PanStructureCluster') || /^PANCL\d+_struct$/.test(subject.id || '')) {
+                return {
+                    title: 'Discarded Pan Structure Cluster',
+                    message: 'This structure cluster was excluded from the current PanRes structural resource because it did not meet the confidence criteria.'
+                };
+            }
+
+            if (types.includes('PanStructure') || /^PAN\d+_struct$/.test(subject.id || '')) {
+                return {
+                    title: 'Discarded Pan Structure',
+                    message: 'This AlphaFold2 prediction did not meet the PanRes confidence criteria and is therefore excluded from the current structural resource.'
+                };
+            }
+
+            if (types.includes('PanGene') || (panresData.categories.PanGene || []).includes(subject.id)) {
+                return {
+                    title: 'Discarded Pan Gene',
+                    message: 'This gene was discarded from the current version of PanRes. The entry remains accessible to document its previous inclusion.'
+                };
+            }
+
+            return {
+                title: 'Discarded PanRes Entry',
+                message: 'This entry was discarded from the current version of PanRes. It remains accessible to document its previous inclusion.'
+            };
+        }
+
+        function getActiveFoldsToRefs(subject) {
+            return getPropertyRefs(subject, 'folds_to').filter(id => {
+                const structure = getSubject(id);
+                return structure && !isDiscarded(structure);
+            });
+        }
+
         function getGeneProtein(gene) {
             const proteinId = getPropertyRefs(gene, 'translates_to')[0];
             return proteinId ? getSubject(proteinId) : null;
@@ -1828,16 +1895,25 @@
 
         function getStructureClusterIdsForGene(gene) {
             const structureClusters = new Set();
+
             getProteinClusterIdsForGene(gene).forEach(proteinClusterId => {
                 const proteinCluster = getSubject(proteinClusterId);
-                getPropertyRefs(proteinCluster, 'folds_to').forEach(structureId => {
+
+                getActiveFoldsToRefs(proteinCluster).forEach(structureId => {
                     const structure = getSubject(structureId);
+                    if (!structure) return;
+
                     getPropertyRefs(structure, 'member_of')
                         .filter(id => /^PANCL\d+_struct$/.test(id))
+                        .filter(id => {
+                            const cluster = getSubject(id);
+                            return cluster && !isDiscarded(cluster);
+                        })
                         .forEach(id => structureClusters.add(id));
                 });
             });
-            return Array.from(structureClusters);
+
+            return Array.from(structureClusters).sort(naturalCompare);
         }
 
         function isGeneEcoliHomolog(gene) {
@@ -1880,6 +1956,36 @@
             select.innerHTML = `<option value="">${placeholder}</option>`;
             Array.from(optionSet).map(JSON.parse).sort((a, b) => naturalCompare(a.label, b.label)).forEach(item => {
                 select.innerHTML += `<option value="${item.id}">${item.label}</option>`;
+            });
+        }
+
+        function getColumnFilterValue(inputId) {
+            return (document.getElementById(inputId)?.value || '').trim().toLowerCase();
+        }
+
+        function setColumnFilterValue(inputId, value = '') {
+            const input = document.getElementById(inputId);
+            if (input) input.value = value || '';
+        }
+
+        function includesText(values, query) {
+            if (!query) return true;
+            return (values || []).some(value =>
+                String(value || '').toLowerCase().includes(query)
+            );
+        }
+
+        function applyColumnFilter(input) {
+            const inputId = input.id;
+            const cursorPosition = input.selectionStart;
+            applyFilters();
+
+            requestAnimationFrame(() => {
+                const restoredInput = document.getElementById(inputId);
+                if (!restoredInput) return;
+                restoredInput.focus();
+                const pos = Math.min(cursorPosition ?? restoredInput.value.length, restoredInput.value.length);
+                restoredInput.setSelectionRange(pos, pos);
             });
         }
 
@@ -2002,9 +2108,18 @@
             activeFilters.class = getCheckedValues('filterClassOptions');
             activeFilters.mechanism = getCheckedValues('filterMechanismOptions');
             activeFilters.homolog = document.getElementById('filterHomolog')?.value || '';
-            activeFilters.geneCluster = (document.getElementById('filterGeneCluster')?.value || '').trim().toLowerCase();
-            activeFilters.proteinCluster = (document.getElementById('filterProteinCluster')?.value || '').trim().toLowerCase();
-            activeFilters.structureCluster = (document.getElementById('filterStructureCluster')?.value || '').trim().toLowerCase();
+
+            activeFilters.geneNameText = getColumnFilterValue('columnFilterGeneName');
+            activeFilters.geneAliasText = getColumnFilterValue('columnFilterGeneAlias');
+            activeFilters.translatesToText = getColumnFilterValue('columnFilterTranslatesTo');
+            activeFilters.foldsToText = getColumnFilterValue('columnFilterFoldsTo');
+            activeFilters.databaseText = getColumnFilterValue('columnFilterDatabase');
+            activeFilters.classText = getColumnFilterValue('columnFilterClass');
+            activeFilters.phenotypeText = getColumnFilterValue('columnFilterPhenotype');
+            activeFilters.mechanismText = getColumnFilterValue('columnFilterMechanism');
+            activeFilters.geneCluster = getColumnFilterValue('columnFilterGeneCluster');
+            activeFilters.proteinCluster = getColumnFilterValue('columnFilterProteinCluster');
+            activeFilters.structureCluster = getColumnFilterValue('columnFilterStructureCluster');
 
             filteredItems = currentItems.filter(gene => {
                 // Database filter
@@ -2056,11 +2171,57 @@
                     if (activeFilters.homolog === 'no' && isHomolog) return false;
                 }
 
-                // Cluster filters
-                if (activeFilters.geneCluster && !getGeneClusterIds(gene).some(id => id.toLowerCase().includes(activeFilters.geneCluster) || getSubjectLabelOrId(id).toLowerCase().includes(activeFilters.geneCluster))) return false;
-                if (activeFilters.proteinCluster && !getProteinClusterIdsForGene(gene).some(id => id.toLowerCase().includes(activeFilters.proteinCluster) || getSubjectLabelOrId(id).toLowerCase().includes(activeFilters.proteinCluster))) return false;
-                if (activeFilters.structureCluster && !getStructureClusterIdsForGene(gene).some(id => id.toLowerCase().includes(activeFilters.structureCluster) || getSubjectLabelOrId(id).toLowerCase().includes(activeFilters.structureCluster))) return false;
+                // Column-specific free-text filters
+                if (activeFilters.geneNameText &&
+                    !String(gene.label || gene.id || '').toLowerCase().includes(activeFilters.geneNameText)) return false;
 
+                if (activeFilters.geneAliasText &&
+                    !String(getPanGeneAlias(gene.id) || '').toLowerCase().includes(activeFilters.geneAliasText)) return false;
+
+                if (activeFilters.translatesToText &&
+                    !includesText(
+                        getPropertyRefs(gene, 'translates_to').flatMap(id => [id, getSubjectLabelOrId(id)]),
+                        activeFilters.translatesToText
+                    )) return false;
+
+                if (activeFilters.foldsToText &&
+                    !includesText(
+                        getGeneFoldsToRefs(gene).flatMap(id => [id, getSubjectLabelOrId(id)]),
+                        activeFilters.foldsToText
+                    )) return false;
+
+                if (activeFilters.databaseText &&
+                    !includesText(getDatabaseLabelsForGene(gene), activeFilters.databaseText)) return false;
+
+                if (activeFilters.classText &&
+                    !includesText(getUniqueLabelsFromRefs(gene.properties['has_resistance_class']), activeFilters.classText)) return false;
+
+                if (activeFilters.phenotypeText &&
+                    !includesText(
+                        getUniqueLabelsFromRefs(gene.properties['has_predicted_phenotype']).filter(x => x !== '+'),
+                        activeFilters.phenotypeText
+                    )) return false;
+
+                if (activeFilters.mechanismText &&
+                    !includesText(getUniqueLabelsFromRefs(gene.properties['has_mechanism_of_resistance']), activeFilters.mechanismText)) return false;
+
+                if (activeFilters.geneCluster &&
+                    !includesText(
+                        getGeneClusterIds(gene).flatMap(id => [id, getSubjectLabelOrId(id)]),
+                        activeFilters.geneCluster
+                    )) return false;
+
+                if (activeFilters.proteinCluster &&
+                    !includesText(
+                        getProteinClusterIdsForGene(gene).flatMap(id => [id, getSubjectLabelOrId(id)]),
+                        activeFilters.proteinCluster
+                    )) return false;
+
+                if (activeFilters.structureCluster &&
+                    !includesText(
+                        getStructureClusterIdsForGene(gene).flatMap(id => [id, getSubjectLabelOrId(id)]),
+                        activeFilters.structureCluster
+                    )) return false;
 
                 return true;
             });
@@ -2089,15 +2250,17 @@
             if (activeFilters.homolog) {
                 filterPills.push({type: 'homolog', label: activeFilters.homolog === 'yes' ? 'E. coli core homolog: yes' : 'E. coli core homolog: no'});
             }
-            if (activeFilters.geneCluster) {
-                filterPills.push({type: 'geneCluster', label: 'Gene cluster contains: ' + activeFilters.geneCluster});
-            }
-            if (activeFilters.proteinCluster) {
-                filterPills.push({type: 'proteinCluster', label: 'Protein cluster contains: ' + activeFilters.proteinCluster});
-            }
-            if (activeFilters.structureCluster) {
-                filterPills.push({type: 'structureCluster', label: 'Structure cluster contains: ' + activeFilters.structureCluster});
-            }
+            if (activeFilters.geneNameText) filterPills.push({type: 'geneNameText', label: 'Gene contains: ' + activeFilters.geneNameText});
+            if (activeFilters.geneAliasText) filterPills.push({type: 'geneAliasText', label: 'Alias contains: ' + activeFilters.geneAliasText});
+            if (activeFilters.translatesToText) filterPills.push({type: 'translatesToText', label: 'Protein contains: ' + activeFilters.translatesToText});
+            if (activeFilters.foldsToText) filterPills.push({type: 'foldsToText', label: 'Structure contains: ' + activeFilters.foldsToText});
+            if (activeFilters.databaseText) filterPills.push({type: 'databaseText', label: 'Database contains: ' + activeFilters.databaseText});
+            if (activeFilters.classText) filterPills.push({type: 'classText', label: 'Class contains: ' + activeFilters.classText});
+            if (activeFilters.phenotypeText) filterPills.push({type: 'phenotypeText', label: 'Phenotype contains: ' + activeFilters.phenotypeText});
+            if (activeFilters.mechanismText) filterPills.push({type: 'mechanismText', label: 'Mechanism contains: ' + activeFilters.mechanismText});
+            if (activeFilters.geneCluster) filterPills.push({type: 'geneCluster', label: 'Gene cluster contains: ' + activeFilters.geneCluster});
+            if (activeFilters.proteinCluster) filterPills.push({type: 'proteinCluster', label: 'Protein cluster contains: ' + activeFilters.proteinCluster});
+            if (activeFilters.structureCluster) filterPills.push({type: 'structureCluster', label: 'Structure cluster contains: ' + activeFilters.structureCluster});
             if (filterPills.length > 0) {
                 container.classList.remove('hidden');
                 container.innerHTML = filterPills.map(pill => `
@@ -2117,9 +2280,20 @@
             if (type === 'class') setAllCheckboxes('filterClassOptions', false);
             if (type === 'mechanism') setAllCheckboxes('filterMechanismOptions', false);
             if (type === 'homolog') document.getElementById('filterHomolog').value = '';
-            if (type === 'geneCluster') document.getElementById('filterGeneCluster').value = '';
-            if (type === 'proteinCluster') document.getElementById('filterProteinCluster').value = '';
-            if (type === 'structureCluster') document.getElementById('filterStructureCluster').value = '';
+            const columnInputMap = {
+                geneNameText: 'columnFilterGeneName',
+                geneAliasText: 'columnFilterGeneAlias',
+                translatesToText: 'columnFilterTranslatesTo',
+                foldsToText: 'columnFilterFoldsTo',
+                databaseText: 'columnFilterDatabase',
+                classText: 'columnFilterClass',
+                phenotypeText: 'columnFilterPhenotype',
+                mechanismText: 'columnFilterMechanism',
+                geneCluster: 'columnFilterGeneCluster',
+                proteinCluster: 'columnFilterProteinCluster',
+                structureCluster: 'columnFilterStructureCluster'
+            };
+            if (columnInputMap[type]) setColumnFilterValue(columnInputMap[type], '');
             applyFilters();
         }
 
@@ -2129,11 +2303,38 @@
             setAllCheckboxes('filterClassOptions', false);
             setAllCheckboxes('filterMechanismOptions', false);
             document.getElementById('filterHomolog').value = 'no';
-            document.getElementById('filterGeneCluster').value = '';
-            document.getElementById('filterProteinCluster').value = '';
-            document.getElementById('filterStructureCluster').value = '';
+            [
+                'columnFilterGeneName',
+                'columnFilterGeneAlias',
+                'columnFilterTranslatesTo',
+                'columnFilterFoldsTo',
+                'columnFilterDatabase',
+                'columnFilterClass',
+                'columnFilterPhenotype',
+                'columnFilterMechanism',
+                'columnFilterGeneCluster',
+                'columnFilterProteinCluster',
+                'columnFilterStructureCluster'
+            ].forEach(id => setColumnFilterValue(id, ''));
             document.getElementById('groupBy').value = '';
-            activeFilters = {database: [], phenotype: [], class: [], mechanism: [], homolog: 'no', geneCluster: '', proteinCluster: '', structureCluster: ''};
+            activeFilters = {
+                database: [],
+                phenotype: [],
+                class: [],
+                mechanism: [],
+                homolog: 'no',
+                geneNameText: '',
+                geneAliasText: '',
+                translatesToText: '',
+                foldsToText: '',
+                databaseText: '',
+                classText: '',
+                phenotypeText: '',
+                mechanismText: '',
+                geneCluster: '',
+                proteinCluster: '',
+                structureCluster: ''
+            };
             selectedGeneIds.clear();
             currentPage = 1;
             applyFilters();
@@ -2308,39 +2509,54 @@
             let html = `
                 <div class="overflow-x-auto">
                     <table class="gene-table w-full text-sm">
-                        <thead class="bg-gray-100 border-b-2 border-gray-300">
+                        <thead class="bg-gray-100 border-b-2 border-gray-300 leading-tight">
                             <tr>
-                                <th class="text-left p-3 font-semibold w-10">
+                                <th class="text-left px-3 py-2 font-semibold w-10">
                                     <input type="checkbox" id="selectVisibleRows" onchange="toggleSelectVisibleRows(this.checked)" title="Select all rows on this page">
                                 </th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('label')">
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('label')">
                                     Gene Name ${sortIndicator('label')}
                                 </th>
-                                <th class="text-left p-3 font-semibold">
+                                <th class="text-left px-3 py-2 font-semibold">
                                     Gene Alias
                                 </th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('translatesTo')">
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('translatesTo')">
                                     Translates To ${sortIndicator('translatesTo')}
                                 </th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('foldsTo')">
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('foldsTo')">
                                     Folds To ${sortIndicator('foldsTo')}
                                 </th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('database')">
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('database')">
                                     Database ${sortIndicator('database')}
                                 </th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('class')">
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('class')">
                                     Resistance Class ${sortIndicator('class')}
                                 </th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('phenotype')">
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('phenotype')">
                                     Phenotype ${sortIndicator('phenotype')}
                                 </th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('mechanism')">
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('mechanism')">
                                     Mechanism ${sortIndicator('mechanism')}
                                 </th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('geneCluster')">Gene Cluster ${sortIndicator('geneCluster')}</th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('proteinCluster')">Protein Cluster ${sortIndicator('proteinCluster')}</th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('structureCluster')">Structure Cluster ${sortIndicator('structureCluster')}</th>
-                                <th class="text-left p-3 font-semibold" onclick="sortTable('homolog')">E. coli homolog ${sortIndicator('homolog')}</th>
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('geneCluster')">Gene Cluster ${sortIndicator('geneCluster')}</th>
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('proteinCluster')">Protein Cluster ${sortIndicator('proteinCluster')}</th>
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('structureCluster')">Structure Cluster ${sortIndicator('structureCluster')}</th>
+                                <th class="text-left px-3 py-2 font-semibold" onclick="sortTable('homolog')">E. coli homolog ${sortIndicator('homolog')}</th>
+                            </tr>
+                            <tr class="bg-white border-b border-gray-200">
+                                <th class="px-2 py-1"></th>
+                                <th class="px-2 py-1"><input id="columnFilterGeneName" type="text" value="${escapeHtml(activeFilters.geneNameText || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterGeneAlias" type="text" value="${escapeHtml(activeFilters.geneAliasText || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterTranslatesTo" type="text" value="${escapeHtml(activeFilters.translatesToText || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterFoldsTo" type="text" value="${escapeHtml(activeFilters.foldsToText || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterDatabase" type="text" value="${escapeHtml(activeFilters.databaseText || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterClass" type="text" value="${escapeHtml(activeFilters.classText || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterPhenotype" type="text" value="${escapeHtml(activeFilters.phenotypeText || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterMechanism" type="text" value="${escapeHtml(activeFilters.mechanismText || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterGeneCluster" type="text" value="${escapeHtml(activeFilters.geneCluster || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterProteinCluster" type="text" value="${escapeHtml(activeFilters.proteinCluster || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"><input id="columnFilterStructureCluster" type="text" value="${escapeHtml(activeFilters.structureCluster || '')}" oninput="applyColumnFilter(this)" onclick="event.stopPropagation()" placeholder="Filter..." class="w-full min-w-24 px-2 py-0.5 border border-gray-300 rounded text-xs font-normal"></th>
+                                <th class="px-2 py-1"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2496,11 +2712,8 @@
                     if (clusterRef.is_literal || !/^PANCL\d+$/.test(clusterRef.value)) return;
 
                     const proteinCluster = getSubject(clusterRef.value);
-                    if (!proteinCluster || !proteinCluster.properties || !proteinCluster.properties['folds_to']) return;
-
-                    proteinCluster.properties['folds_to'].forEach(structRef => {
-                        if (!structRef.is_literal) structureIds.add(structRef.value);
-                    });
+                    getActiveFoldsToRefs(proteinCluster)
+                        .forEach(structureId => structureIds.add(structureId));
                 });
             });
 
@@ -3213,6 +3426,14 @@
                 return;
             }
 
+            const discardedInfo = getDiscardedEntityInfo(subject);
+            const isStructureClusterPage =
+                (subject.types && subject.types.includes('PanStructureCluster')) ||
+                /^PANCL\d+_struct$/.test(id);
+            const hasHMM = isStructureClusterPage
+                ? !discardedHmmIds.has(id)
+                : false;
+
             // Save current state to navigation history before showing details
             const currentView = document.getElementById('listView').classList.contains('hidden') ? 'home' : 'list';
             if (currentView === 'list') {
@@ -3304,6 +3525,33 @@
                         </div>
                     </div>
             `;
+
+            if (discardedInfo) {
+                html += `
+                    <div class="mb-4 bg-amber-50 border border-amber-300 rounded-lg p-4">
+                        <div class="text-sm font-semibold text-amber-900 mb-1">
+                            ${escapeHtml(discardedInfo.title)}
+                        </div>
+                        <div class="text-sm text-amber-800">
+                            ${escapeHtml(discardedInfo.message)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Discarded structure clusters are singleton clusters removed from the
+            // active structural resource. Their detail page should contain only
+            // the header and discard notice, with no summary, charts, or members.
+            if (discardedInfo && isStructureClusterPage) {
+                html += `</div>`;
+                document.getElementById('detailsContent').innerHTML = html;
+
+                document.getElementById('homeView').classList.add('hidden');
+                document.getElementById('howToUseView').classList.add('hidden');
+                document.getElementById('listView').classList.add('hidden');
+                document.getElementById('detailsView').classList.remove('hidden');
+                return;
+            }
 
             // For drug combinations, show component drugs
             if (isDrugCombination && subject.properties['rdfs:subClassOf']) {
@@ -3493,9 +3741,18 @@
                                 `;
 
                                 if (proteinCluster && proteinCluster.properties['folds_to']) {
-                                    for (const structRef of proteinCluster.properties['folds_to']) {
-                                        if (structRef.is_literal) continue;
+                                    const activeStructureIds = getActiveFoldsToRefs(proteinCluster);
 
+                                    if (activeStructureIds.length === 0 && getPropertyRefs(proteinCluster, 'folds_to').length > 0) {
+                                        html += `
+                                            <div class="text-xs text-amber-700 ml-4 mb-1">
+                                                ↳ The AlphaFold2 prediction did not meet the PanRes confidence criteria and is therefore not shown.
+                                            </div>
+                                        `;
+                                    }
+
+                                    for (const structureId of activeStructureIds) {
+                                        const structRef = { value: structureId, is_literal: false };
                                         const structSubject = getSubject(structRef.value);
                                         const structLabel = structSubject ? structSubject.label : structRef.value;
                                         const viewerId = `gene-hierarchy-viewer-${id}-${structRef.value}`;
@@ -3523,7 +3780,8 @@
                                                 if (structClusterRef.is_literal || !/^PANCL\d+_struct$/.test(structClusterRef.value)) continue;
 
                                                 const structCluster = getSubject(structClusterRef.value);
-                                                const structClusterLabel = structCluster ? structCluster.label : structClusterRef.value;
+                                                if (!structCluster || isDiscarded(structCluster)) continue;
+                                                const structClusterLabel = structCluster.label;
 
                                                 html += `
                                                     <div class="text-xs text-gray-600 ml-6 mt-1">
@@ -3636,9 +3894,18 @@
                         `;
 
                         if (proteinCluster && proteinCluster.properties['folds_to']) {
-                            for (const structRef of proteinCluster.properties['folds_to']) {
-                                if (structRef.is_literal) continue;
+                            const activeStructureIds = getActiveFoldsToRefs(proteinCluster);
 
+                            if (activeStructureIds.length === 0 && getPropertyRefs(proteinCluster, 'folds_to').length > 0) {
+                                html += `
+                                    <div class="text-xs text-amber-700 ml-2 mt-1">
+                                        ↳ The AlphaFold2 prediction did not meet the PanRes confidence criteria and is therefore not shown.
+                                    </div>
+                                `;
+                            }
+
+                            for (const structureId of activeStructureIds) {
+                                const structRef = { value: structureId, is_literal: false };
                                 const structSubject = getSubject(structRef.value);
                                 const structLabel = structSubject ? structSubject.label : structRef.value;
                                 const viewerId = `protein-hierarchy-viewer-${id}-${structRef.value}`;
@@ -3665,7 +3932,8 @@
                                     for (const structClusterRef of structSubject.properties['member_of']) {
                                         if (!structClusterRef.is_literal && /^PANCL\d+_struct$/.test(structClusterRef.value)) {
                                             const structCluster = getSubject(structClusterRef.value);
-                                            const structClusterLabel = structCluster ? structCluster.label : structClusterRef.value;
+                                            if (!structCluster || isDiscarded(structCluster)) continue;
+                                            const structClusterLabel = structCluster.label;
                                             html += `
                                                 <div class="text-xs text-gray-600 ml-4 mt-1">
                                                     ↳ Member of
@@ -3941,9 +4209,11 @@
                             <div class="text-base font-semibold text-gray-800 mb-2">Folds To</div>
                 `;
 
-                if (subject.properties['folds_to']) {
-                    for (const val of subject.properties['folds_to']) {
-                        if (val.is_literal) continue;
+                const activeProteinClusterStructureIds = getActiveFoldsToRefs(subject);
+
+                if (activeProteinClusterStructureIds.length > 0) {
+                    for (const structureId of activeProteinClusterStructureIds) {
+                        const val = { value: structureId, is_literal: false };
 
                         const structSubject = getSubject(val.value);
                         const displayName = structSubject ? structSubject.label : val.value;
@@ -3968,7 +4238,8 @@
                             for (const structClusterRef of structSubject.properties['member_of']) {
                                 if (!structClusterRef.is_literal && /^PANCL\d+_struct$/.test(structClusterRef.value)) {
                                     const structCluster = getSubject(structClusterRef.value);
-                                    const structClusterName = structCluster ? structCluster.label : structClusterRef.value;
+                                    if (!structCluster || isDiscarded(structCluster)) continue;
+                                    const structClusterName = structCluster.label;
                                     html += `
                                         <div class="text-xs text-gray-600 mt-1 ml-2">
                                             ↳ Member of
@@ -3984,6 +4255,12 @@
 
                         html += `</div>`;
                     }
+                } else if (getPropertyRefs(subject, 'folds_to').length > 0) {
+                    html += `
+                        <div class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-3">
+                            The AlphaFold2 prediction did not meet the PanRes confidence criteria and is therefore not shown.
+                        </div>
+                    `;
                 } else {
                     html += `<div class="text-sm text-gray-400">No predicted structure linked</div>`;
                 }
@@ -4094,22 +4371,26 @@
                         <div class="bg-teal-50 p-3 rounded-lg border border-teal-200">
                             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                                 <div>
-                                    <h3 class="text-base font-semibold text-gray-800">HMM Profile Summary</h3>
-                                    <div class="text-xs text-gray-600 mt-1">
-                                        <span class="font-semibold">HMM ID:</span>
-                                        <code class="font-mono">${escapeHtml(id)}</code>
+                                    <h3 class="text-base font-semibold text-gray-800">${hasHMM ? 'HMM Profile Summary' : 'Cluster Summary'}</h3>
+                                    ${hasHMM ? `
+                                        <div class="text-xs text-gray-600 mt-1">
+                                            <span class="font-semibold">HMM ID:</span>
+                                            <code class="font-mono">${escapeHtml(id)}</code>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                ${hasHMM ? `
+                                    <div class="flex flex-wrap gap-2">
+                                        <button onclick="viewMSA('${id}')" class="sequence-btn">View MSA</button>
+                                        <button onclick="downloadHMM('${id}')" class="sequence-btn">Download HMM</button>
                                     </div>
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                                    <button onclick="viewMSA('${id}')" class="sequence-btn">View MSA</button>
-                                    <button onclick="downloadHMM('${id}')" class="sequence-btn">Download HMM</button>
-                                </div>
+                                ` : ''}
                             </div>
 
                             <div class="hmm-summary-grid">
                                 <div class="hmm-summary-stat">
                                     <div class="hmm-summary-stat-value">${summary.proteinIds.length}</div>
-                                    <div class="hmm-summary-stat-label">Proteins in HMM</div>
+                                    <div class="hmm-summary-stat-label">${hasHMM ? 'Proteins in HMM' : 'Proteins represented'}</div>
                                 </div>
                                 <div class="hmm-summary-stat">
                                     <div class="hmm-summary-stat-value">${summary.proteinClusterIds.length}</div>
@@ -4209,7 +4490,7 @@
 
             // Other properties section
             // Skip certain properties that we've already shown or don't want to display
-            const skipProps = ['rdfs:label', 'rdf:type', 'rdfs:subClassOf', 'is_drug_combination'];
+            const skipProps = ['rdfs:label', 'rdf:type', 'rdfs:subClassOf', 'is_drug_combination', 'is_discarded'];
             const isGeneCluster = subject.types && subject.types.includes('PanGeneCluster');
             const alreadyShown = isGene ? ['has_resistance_class', 'has_predicted_phenotype', 'has_mechanism_of_resistance', 'is_from_database', 'same_as', 'member_of', 'translates_to', 'has_length', 'accession'] : (isGeneCluster ? ['member_of', 'has_members'] : (isProteinCluster ? ['member_of', 'folds_to', 'has_members'] : (isStructureCluster ? ['member_of', 'has_members'] : ['member_of'])));
 
@@ -4369,8 +4650,19 @@
 
                                         // Show folds_to structure and structure cluster info
                                         if (proteinCluster && proteinCluster.properties['folds_to']) {
-                                            for (const structRef of proteinCluster.properties['folds_to']) {
-                                                if (!structRef.is_literal) {
+                                            const activeStructureIds = getActiveFoldsToRefs(proteinCluster);
+
+                                            if (activeStructureIds.length === 0 && getPropertyRefs(proteinCluster, 'folds_to').length > 0) {
+                                                html += `
+                                                    <div class="text-xs text-amber-700 ml-4 mb-1">
+                                                        ↳ The AlphaFold2 prediction did not meet the PanRes confidence criteria and is therefore not shown.
+                                                    </div>
+                                                `;
+                                            }
+
+                                            for (const structureId of activeStructureIds) {
+                                                const structRef = { value: structureId, is_literal: false };
+                                                {
                                                     const structSubject = getSubject(structRef.value);
                                                     const structName = structSubject ? structSubject.label : structRef.value;
 
@@ -4560,9 +4852,6 @@
             setAllCheckboxes('filterMechanismOptions', false);
 
             document.getElementById('filterHomolog').value = '';
-            document.getElementById('filterGeneCluster').value = '';
-            document.getElementById('filterProteinCluster').value = '';
-            document.getElementById('filterStructureCluster').value = '';
             document.getElementById('groupBy').value = '';
 
             let geneClusterFilter = '';
@@ -4571,13 +4860,10 @@
 
             if (/^pan_cl\d+$/.test(entityId)) {
                 geneClusterFilter = entityId;
-                document.getElementById('filterGeneCluster').value = entityId;
             } else if (/^PANCL\d+_struct$/.test(entityId)) {
                 structureClusterFilter = entityId;
-                document.getElementById('filterStructureCluster').value = entityId;
             } else if (/^PANCL\d+$/.test(entityId)) {
                 proteinClusterFilter = entityId;
-                document.getElementById('filterProteinCluster').value = entityId;
             }
 
             activeFilters = {
@@ -4586,6 +4872,14 @@
                 class: [],
                 mechanism: [],
                 homolog: '',
+                geneNameText: '',
+                geneAliasText: '',
+                translatesToText: '',
+                foldsToText: '',
+                databaseText: '',
+                classText: '',
+                phenotypeText: '',
+                mechanismText: '',
                 geneCluster: geneClusterFilter.toLowerCase(),
                 proteinCluster: proteinClusterFilter.toLowerCase(),
                 structureCluster: structureClusterFilter.toLowerCase()

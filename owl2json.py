@@ -350,12 +350,10 @@ def convert_owl_to_json(owl_file, json_file):
     print(f"File size: {len(json.dumps(data)) / 1024 / 1024:.2f} MB")
 
 if __name__ == '__main__':
-    # Download the latest OWL file from GitHub
     print("=== PanRes OWL to JSON Converter ===\n")
 
-    if download_owl_file(GITHUB_RAW_URL, OWL_FILE):
-        print()
-        convert_owl_to_json(OWL_FILE, JSON_OUTPUT)
-    else:
-        print("\nFailed to download OWL file. Exiting.")
+    if not os.path.exists(OWL_FILE):
+        print(f"OWL file not found: {OWL_FILE}")
         sys.exit(1)
+
+    convert_owl_to_json(OWL_FILE, JSON_OUTPUT)
