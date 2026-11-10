@@ -742,7 +742,7 @@
                     <div>
                         <div class="mb-3">
                             <h2 class="text-4xl font-semibold text-gray-800 leading-tight">PanRes</h2>
-                            <div class="text-sm font-semibold text-pink-600 tracking-wide mt-1">Version 2.0</div>
+                            <div class="text-sm font-semibold text-pink-600 tracking-wide mt-1">Version 2.2.0</div>
                         </div>
                         <p class="text-gray-600 text-sm">
                             PanRes (Pan Resistance) is a curated collection of genes conferring resistance to antibiotics,
@@ -1240,9 +1240,9 @@
         const panGeneDisplayNames = new Map();
         const panGeneIdSet = new Set();
 
-        // Protein sequences are loaded from panres2_proteins.faa.
+        // Protein sequences are loaded from panres_proteins.faa.
         // FASTA headers are expected to begin with the PanProtein ID, e.g. >PAN1.
-        const PROTEIN_FASTA_PATH = 'panres2_proteins.faa';
+        const PROTEIN_FASTA_PATH = 'panres_proteins.faa';
         const proteinSequences = new Map();
 
         // Curated list of structure-cluster IDs whose HMM/MSA resources were removed.
@@ -3627,23 +3627,31 @@
                             <div class="text-sm text-gray-800">
                     `;
 
-                    const dbNames = [];
+                    const namesByDatabase = new Map();
                     for (const val of subject.properties['same_as']) {
-                        if (!val.is_literal) {
-                            const originalGene = getSubject(val.value);
-                            if (originalGene && originalGene.properties['is_from_database']) {
-                                const databases = originalGene.properties['is_from_database']
-                                    .map(db => {
-                                        const dbSubject = getSubject(db.value);
-                                        return dbSubject ? dbSubject.label : db.value;
-                                    })
-                                    .join(', ');
+                        if (val.is_literal) continue;
+                        const originalGene = getSubject(val.value);
+                        if (!originalGene || !originalGene.properties['is_from_database']) continue;
 
-                                dbNames.push(`<span class="inline-block"><span class="font-medium text-gray-700">${databases}:</span> <a href="#" onclick="showDetails('${val.value}'); return false;" class="text-primary hover:underline">${originalGene.label}</a></span>`);
+                        for (const db of originalGene.properties['is_from_database']) {
+                            if (db.is_literal) continue;
+                            if (!namesByDatabase.has(db.value)) {
+                                const dbSubject = getSubject(db.value);
+                                namesByDatabase.set(db.value, {
+                                    label: dbSubject ? dbSubject.label : db.value,
+                                    genes: new Map()
+                                });
                             }
+                            namesByDatabase.get(db.value).genes.set(val.value, originalGene);
                         }
                     }
 
+                    const dbNames = Array.from(namesByDatabase.values(), database => {
+                        const names = Array.from(database.genes, ([geneId, gene]) =>
+                            `<a href="#" onclick="showDetails('${geneId}'); return false;" class="text-primary hover:underline">${escapeHtml(gene.label)}</a>`
+                        );
+                        return `<span class="inline-block"><span class="font-medium text-gray-700">${escapeHtml(database.label)}:</span> ${names.join(', ')}</span>`;
+                    });
                     html += dbNames.join(' • ');
 
                     html += `

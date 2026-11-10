@@ -14,11 +14,11 @@ import os
 
 # Configuration
 GITHUB_RAW_URL = 'https://raw.githubusercontent.com/rambiolab/PanResOntology/refs/heads/master/ontology/panres_v2.owl'
-OWL_FILE = 'panres_v2.owl'
+OWL_FILE = 'panres_ontology.owl'
 JSON_OUTPUT = 'panres2.json'
 BASE_IRI = "http://genepi.dk/PanResOntology.owl#"
-GENES_FASTA = 'panres2_genes.fa'
-PROTEINS_FASTA = 'panres_final_protein.faa'
+GENES_FASTA = 'panres_genes.fa'
+PROTEINS_FASTA = 'panres_proteins.faa'
 
 # Namespace prefixes
 NAMESPACES = {

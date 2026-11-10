@@ -402,7 +402,7 @@ pan_9437	TTGF	MegaRes
 pan_10419		
 pan_6772	vanH-D	ARGANNOT
 pan_9470	ARR	MegaRes
-pan_121	blaIMI-4_1_NG_049167	ResFinder
+pan_121	blaIMI-4	ResFinder
 pan_3031	blaADC-57	AMRFinderPlus
 pan_5193	NCCN	MegaRes
 pan_4441	blaACT-4	ResFinder
@@ -429,7 +429,7 @@ pan_8315	VMEA	MegaRes
 pan_8424	erm(54)	AMRFinderPlus
 pan_12051		
 pan_4600	blaCTX-M-143	AMRFinderPlus
-pan_1596	nimE_Nitroimidazole_Gene	ARGANNOT
+pan_1596	nimE	ARGANNOT
 pan_11076		
 pan_4792	blaOXA-694	AMRFinderPlus
 pan_11233		
@@ -467,7 +467,7 @@ pan_3953	blaKPC-50	AMRFinderPlus
 pan_7904		
 pan_13090	FLOR	MegaRes
 pan_7692		
-pan_5325	AmpC1_Ecoli	ARGANNOT
+pan_5325	AmpC1	ARGANNOT
 pan_10866		
 pan_8008		
 pan_12812		
@@ -537,7 +537,7 @@ pan_12852
 pan_12408	blaHBL-1	AMRFinderPlus
 pan_1345	blaSGM-1	ResFinder
 pan_9235		
-pan_5782	Ecol_acrA	CARD
+pan_5782	acrA	CARD
 pan_5869	qnrB97	AMRFinderPlus
 pan_6290	tet(O)	AMRFinderPlus
 pan_10334		
@@ -579,7 +579,7 @@ pan_494	blaCTX-M-105	ResFinder
 pan_9221		
 pan_13199	blaIMI-23	AMRFinderPlus
 pan_13049	YDEP	MegaRes
-pan_1925	cat(pC194)_1_NC_002013	ResFinder
+pan_1925	cat(pC194)	ResFinder
 pan_8471		
 pan_7119	aac(6)-Il	AMRFinderPlus
 pan_2593	blaOXA-530	ResFinder
@@ -634,7 +634,7 @@ pan_4221	blaOXA-652	AMRFinderPlus
 pan_3538	blaPDC-383	AMRFinderPlus
 pan_9464	COPA	MegaRes
 pan_2606	tet	ResFinder
-pan_3169	chrB_rRNA_meth	AMRFinderPlus
+pan_3169	chrB	AMRFinderPlus
 pan_8153		
 pan_8556		
 pan_9835		
@@ -786,7 +786,7 @@ pan_11465	mcr-1.29	AMRFinderPlus
 pan_12534		
 pan_6187	CUSF	MegaRes
 pan_3478	blaPDC-378	AMRFinderPlus
-pan_663	blaCARB-34_1_NG_048738	ResFinder
+pan_663	blaCARB-34	ResFinder
 pan_2512	blaOXA-381	ResFinder
 pan_1574	blaOXA-60	ResFinder
 pan_1664	blaCTX-M-190	ResFinder
@@ -861,7 +861,7 @@ pan_1327	blaCTX-M-5	ResFinder
 pan_9372		
 pan_2843	blaCTX-M-242	AMRFinderPlus
 pan_3822	blaPDC-319	AMRFinderPlus
-pan_5751	aac(6)_Strep	AMRFinderPlus
+pan_5751	aac(6)	AMRFinderPlus
 pan_7014	AIOR	MegaRes
 pan_6016	aadA5	ARGANNOT
 pan_220	blaSHV-156	ResFinder
@@ -972,7 +972,7 @@ pan_9110	mcr-1.32	AMRFinderPlus
 pan_8019		
 pan_4031	kamB	ARGANNOT
 pan_692	aph(3)-Ia	ResFinder
-pan_4355	cfxA_fam	AMRFinderPlus
+pan_4355	cfxA2	AMRFinderPlus
 pan_12304	GADW	MegaRes
 pan_13091	FABK	MegaRes
 pan_12675	TETM	MegaRes
@@ -1229,7 +1229,7 @@ pan_12627	qnrB1	ARGANNOT
 pan_3159	blaADC-32	AMRFinderPlus
 pan_2622	blaPDC-9	AMRFinderPlus
 pan_753	blaOXY-2-2	ResFinder
-pan_512	blaCARB-31_1_NG_048735	ResFinder
+pan_512	blaCARB-31	ResFinder
 pan_6665	CORC	MegaRes
 pan_13858		
 pan_1189	mcr-1.5	ResFinder
@@ -1425,7 +1425,7 @@ pan_2761	blaPFM-2	AMRFinderPlus
 pan_13358		
 pan_3719	blaPDC-299	AMRFinderPlus
 pan_6777	blaLAT-3	AMRFinderPlus
-pan_3726	Cfr(D)_1_NG_067192	ResFinder
+pan_3726	Cfr(D)	ResFinder
 pan_7786		
 pan_8542		
 pan_13971		
@@ -1688,7 +1688,7 @@ pan_2576	catA7	ARGANNOT
 pan_10656	VMEA	MegaRes
 pan_1716	tet(E)	ResFinder
 pan_8955		
-pan_1770	blaOXA-234_1_NG_050607	ResFinder
+pan_1770	blaOXA-234	ResFinder
 pan_980	blaNDM-21	ResFinder
 pan_8145		
 pan_8425	mcr-3.38	AMRFinderPlus
@@ -1775,7 +1775,7 @@ pan_4039	lnu(F)	ResFinder
 pan_1495	blaOXA-505	ResFinder
 pan_466	blaIMP-16	ResFinder
 pan_786	blaCMY-83	ResFinder
-pan_4180	blaCARB-20_1_NG_054946	ResFinder
+pan_4180	blaCARB-20	ResFinder
 pan_10271		
 pan_13841		
 pan_4809	blaPDC-282	AMRFinderPlus
@@ -2062,7 +2062,7 @@ pan_5708	tet(M)	AMRFinderPlus
 pan_13230	blaOXA-1032	AMRFinderPlus
 pan_10247		
 pan_7987		
-pan_566	aac(6)-IIc_1_NC_012555	ResFinder
+pan_566	aac(6)-Iic	ResFinder
 pan_4280	blaADC-130	AMRFinderPlus
 pan_1152	blaOXA-110	ResFinder
 pan_5744	oqxB14	AMRFinderPlus
@@ -2255,7 +2255,7 @@ pan_1775	blaPDC-50	ARGANNOT
 pan_11256		
 pan_4673	blaPDC-340	AMRFinderPlus
 pan_12626	vanA-G	ARGANNOT
-pan_6606	blaOXA-252_1_NG_050608	ResFinder
+pan_6606	blaOXA-252	ResFinder
 pan_10465		
 pan_9593		
 pan_847	rmtC	ResFinder
@@ -2302,7 +2302,7 @@ pan_11777	MDFA	MegaRes
 pan_13306		
 pan_11888	BMR	MegaRes
 pan_183	blaSHV-13	ResFinder
-pan_2121	blaOXA-307_1_NG_050611	ResFinder
+pan_2121	blaOXA-307	ResFinder
 pan_8203		
 pan_13390		
 pan_10667	blaOXY-1-9	AMRFinderPlus
@@ -2520,7 +2520,7 @@ pan_4784	blaOXA-726	AMRFinderPlus
 pan_6493	aac(3)-Ib	AMRFinderPlus
 pan_8173		
 pan_2065	blaOXA-354	ResFinder
-pan_1922	blaCARB-50_1_NG_052478	ResFinder
+pan_1922	blaCARB-50	ResFinder
 pan_5149	HUPE	MegaRes
 pan_5070	aadA1	ARGANNOT
 pan_7946		
@@ -2584,7 +2584,7 @@ pan_13079	CRDR	MegaRes
 pan_13515		
 pan_6619	MMCO	MegaRes
 pan_8497	BLAEC	MegaRes
-pan_834	nimJ_1_NZ_JH815495	ResFinder
+pan_834	nimJ	ResFinder
 pan_1724	mecD	ResFinder
 pan_5141	aacA34	AMRFinderPlus
 pan_3990	blaACT-30	AMRFinderPlus
@@ -2837,7 +2837,7 @@ pan_4935	Saur_LmrS	CARD
 pan_4418	lsa(E)	ResFinder
 pan_3657	blaLEN-13	ARGANNOT
 pan_8379		
-pan_514	blaCARB-43_1_NG_048746	ResFinder
+pan_514	blaCARB-43	ResFinder
 pan_9773		
 pan_7402		
 pan_9645		
@@ -3117,7 +3117,7 @@ pan_12885
 pan_654	blaIMP-51	ResFinder
 pan_3070	blaOKP-C-1	AMRFinderPlus
 pan_5059	blaIND-1	ARGANNOT
-pan_2249	blaOXA-293_1_NG_050610	ResFinder
+pan_2249	blaOXA-293	ResFinder
 pan_5861	ZNUA	MegaRes
 pan_7373		
 pan_13926		
@@ -3475,7 +3475,7 @@ pan_12826
 pan_3914	blaPAO	ResFinder
 pan_4460	blaMIR-19	AMRFinderPlus
 pan_6852	MERR	MegaRes
-pan_518	tetB(P)_1_NC_010937	ResFinder
+pan_518	tetB(P)	ResFinder
 pan_5444	aacA-ACI5	AMRFinderPlus
 pan_8509		
 pan_4583	blaPDC-405	AMRFinderPlus
@@ -3561,7 +3561,7 @@ pan_11709
 pan_13932		
 pan_6141	vanS-G	AMRFinderPlus
 pan_13665		
-pan_6480	Cfr(E)_1_NG_070225	ResFinder
+pan_6480	Cfr€	ResFinder
 pan_8436		
 pan_10223		
 pan_5136	oqxB22	AMRFinderPlus
@@ -4478,7 +4478,7 @@ pan_13392
 pan_13631		
 pan_3565	blaPDC-406	AMRFinderPlus
 pan_5528	aadA10	ARGANNOT
-pan_2806	blaCARB-23_1_NG_048726	ResFinder
+pan_2806	blaCARB-23	ResFinder
 pan_731	blaPER-4	ResFinder
 pan_3515	blaOXA-876	AMRFinderPlus
 pan_1765	blaOXA-182	ARGANNOT
@@ -4676,7 +4676,7 @@ pan_13808
 pan_9890	OXA	MegaRes
 pan_9746		
 pan_11560		
-pan_1467	mecB_1_NC_011996	ResFinder
+pan_1467	mecB	ResFinder
 pan_3170	cphA1	ResFinder
 pan_11633		
 pan_8283	blaOXA-1097	AMRFinderPlus
@@ -5133,7 +5133,7 @@ pan_9980
 pan_11145		
 pan_10641	blaPEN-A22	AMRFinderPlus
 pan_1529	aadA8b	ResFinder
-pan_2527	blaOXA-287_1_NG_050609	ResFinder
+pan_2527	blaOXA-287	ResFinder
 pan_738	blaOXA-115	ResFinder
 pan_9341		
 pan_5761	vatD	CARD
@@ -5339,7 +5339,7 @@ pan_3111	blaB-24	AMRFinderPlus
 pan_12953		
 pan_5086	blaOXA-959	AMRFinderPlus
 pan_8275	blaVEB-31	AMRFinderPlus
-pan_1180	blaFRI-4_1_NG_055267	ResFinder
+pan_1180	blaFRI-4	ResFinder
 pan_3210	blaPDC-316	AMRFinderPlus
 pan_2057	blaOXA-362	ResFinder
 pan_4640	blaOXA-697	AMRFinderPlus
@@ -5674,7 +5674,7 @@ pan_5471	MERH	MegaRes
 pan_3554	blaPDC-451	AMRFinderPlus
 pan_1607	blaGES-1	ResFinder
 pan_2766	blaYEM-1	AMRFinderPlus
-pan_3661	erm(X)_4_NC_005206	ResFinder
+pan_3661	erm(X)	ResFinder
 pan_9894	OMPR	MegaRes
 pan_10445		
 pan_7861		
@@ -5783,7 +5783,7 @@ pan_13937
 pan_5677	aadA2	ARGANNOT
 pan_8800		
 pan_2935	blaSHV-223	AMRFinderPlus
-pan_4361	blaCARB-21_1_NG_048724	ResFinder
+pan_4361	blaCARB-21	ResFinder
 pan_8675		
 pan_3652	vanXYc3	ARGANNOT
 pan_6429	blaOXA-194	ARGANNOT
@@ -5883,7 +5883,7 @@ pan_13711
 pan_11673		
 pan_2528	blaDHA-21	ResFinder
 pan_540	cfiA10	ResFinder
-pan_3951	mcr-1.27_1_NG_068218	ResFinder
+pan_3951	mcr-1.27	ResFinder
 pan_2479	blaCTX-M-142	ResFinder
 pan_3960	blaPDC-369	AMRFinderPlus
 pan_5516	ramA	CARD
@@ -6530,7 +6530,7 @@ pan_7616
 pan_7461		
 pan_3704	ant(2)-Ia	ResFinder
 pan_13427		
-pan_4604	mecA_8_NC_007168	ResFinder
+pan_4604	mecA	ResFinder
 pan_12525		
 pan_11009		
 pan_13195	blaOXA-992	AMRFinderPlus
@@ -6899,7 +6899,7 @@ pan_9792
 pan_11999		
 pan_4459	blaFIA-1	AMRFinderPlus
 pan_13799		
-pan_1391	blaCARB-27_1_NG_048730	ResFinder
+pan_1391	blaCARB-27	ResFinder
 pan_9579		
 pan_2812	qnr-AS	ARGANNOT
 pan_4411	blaADC-131	AMRFinderPlus
@@ -7236,7 +7236,7 @@ pan_9179	pcoC	MetalRes
 pan_1731	apmA	ARGANNOT
 pan_3609	blaANA-1	AMRFinderPlus
 pan_5570	aac(6)-IIc	AMRFinderPlus
-pan_6238	mcr-1.26_1_NG_068217	ResFinder
+pan_6238	mcr-1.26	ResFinder
 pan_6170	cfiA6	ResFinder
 pan_6	blaVEB-1	ResFinder
 pan_1785	blaSHV-200	ResFinder
@@ -7612,7 +7612,7 @@ pan_1807	blaKPC-18	ResFinder
 pan_8753		
 pan_4204	tet(M)	ResFinder
 pan_3656	cepA	ResFinder
-pan_1425	blaCARB-42_1_NG_048745	ResFinder
+pan_1425	blaCARB-42	ResFinder
 pan_2384	mcr-3.20	ResFinder
 pan_790	blaCMY-33	ResFinder
 pan_703	blaMOX-2	ResFinder
@@ -8269,7 +8269,7 @@ pan_4888	qnrB22	ARGANNOT
 pan_7527		
 pan_5719	aadA7	ARGANNOT
 pan_4707	blaACT-22	AMRFinderPlus
-pan_2689	blaCMY-59_1_NG_048854	ResFinder
+pan_2689	blaCMY-59	ResFinder
 pan_5588	oqxB17	AMRFinderPlus
 pan_5217	MERR	MegaRes
 pan_3871	blaPDC-245	AMRFinderPlus
@@ -8368,7 +8368,7 @@ pan_13205	blaOXA-1078	AMRFinderPlus
 pan_3708	blaGOB-30	AMRFinderPlus
 pan_757	blaOXA-65	ResFinder
 pan_977	blaCTX-M-95	ResFinder
-pan_1835	blaKPC-40_1_NG_064726:101-988	ResFinder
+pan_1835	blaKPC-40	ResFinder
 pan_10066		
 pan_9359		
 pan_4346	aph(3)-IIb	ResFinder
@@ -8433,7 +8433,7 @@ pan_313	vga(B)	ResFinder
 pan_1448	blaTEM-229	ResFinder
 pan_3594	blaOXA-672	AMRFinderPlus
 pan_3321	qnrB17	ARGANNOT
-pan_3335	Gar_1_NG_070891	ResFinder
+pan_3335	Gar	ResFinder
 pan_7200	catB3	ARGANNOT
 pan_7385		
 pan_5508	Cper_mprF	CARD
@@ -8444,7 +8444,7 @@ pan_8475
 pan_11761		
 pan_2514	blaOXA-326	ResFinder
 pan_546	tet(30)	ResFinder
-pan_660	blaCARB-32_1_NG_048736	ResFinder
+pan_660	blaCARB-32	ResFinder
 pan_3237	blaPDC-354	AMRFinderPlus
 pan_7572		
 pan_8236		
@@ -8973,7 +8973,7 @@ pan_13615
 pan_13440	ARST	MegaRes
 pan_4082	tcmA	ARGANNOT
 pan_7161	blaOXA-1000	AMRFinderPlus
-pan_7266	tet(O/32/O)_3_NZ_AUJS01000017	ResFinder
+pan_7266	tet(O/32/O)	ResFinder
 pan_4872	blaMIR-12	AMRFinderPlus
 pan_7959		
 pan_13247	blaIMP-97	AMRFinderPlus
@@ -9069,7 +9069,7 @@ pan_12661	merT	MetalRes
 pan_3353	blaPDC-411	AMRFinderPlus
 pan_1139	blaCMY-94	ResFinder
 pan_1935	blaOXA-199	ResFinder
-pan_427	blaCARB-30_1_NG_048734	ResFinder
+pan_427	blaCARB-30	ResFinder
 pan_3191	blaPDC-175	AMRFinderPlus
 pan_11939		
 pan_9605		
@@ -9285,7 +9285,7 @@ pan_13314
 pan_6654	CUSB	MegaRes
 pan_9966	ACT	MegaRes
 pan_6957	qnrB10	ResFinder
-pan_1747	blaCARB-46_1_NG_048749	ResFinder
+pan_1747	blaCARB-46	ResFinder
 pan_10206		
 pan_7430		
 pan_13426		
@@ -9495,7 +9495,7 @@ pan_9541
 pan_13818		
 pan_10891		
 pan_2670	blaPDC-278	AMRFinderPlus
-pan_1890	mph(K)_1_NC_000964	ResFinder
+pan_1890	mph(K)	ResFinder
 pan_3802	blaADC-178	AMRFinderPlus
 pan_5805	Ecol_mdfA	CARD
 pan_8741		
@@ -9569,7 +9569,7 @@ pan_2757	blaOXA-114j	AMRFinderPlus
 pan_1223	blaTEM-194	ResFinder
 pan_9016		
 pan_1961	blaADC-19	ARGANNOT
-pan_6196	aac(3)-VIa_2_NC_009838	ResFinder
+pan_6196	aac(3)-Via	ResFinder
 pan_5371	apmA	ARGANNOT
 pan_1919	blaSRT-2	ResFinder
 pan_6183	CTPC	MegaRes
@@ -9594,7 +9594,7 @@ pan_11277
 pan_6385	oqxB30	AMRFinderPlus
 pan_9217		
 pan_924	blaB-13	ResFinder
-pan_1901	aac(6)-Iaa_1_NC_003197	ResFinder
+pan_1901	aac(6)-Iaa	ResFinder
 pan_7540		
 pan_8810		
 pan_1812	blaLRA-8	ARGANNOT
@@ -10562,12 +10562,12 @@ pan_12055
 pan_10873		
 pan_6010	aadA2	ARGANNOT
 pan_7216	vgb(A)	ARGANNOT
-pan_2260	tva(A)_1_ENA_SOX29786	ResFinder
+pan_2260	tva(A)	ResFinder
 pan_13950		
 pan_2161	blaCTX-M-202	ResFinder
 pan_6740	blaPDC-3	AMRFinderPlus
 pan_9138	blaOXY-1-19	AMRFinderPlus
-pan_5519	tet(44)_1_NZ_ABDU01000081	ResFinder
+pan_5519	tet(44)	ResFinder
 pan_6853	YCNJ	MegaRes
 pan_4906	blaADC-243	AMRFinderPlus
 pan_4426	blaADC-121	AMRFinderPlus
@@ -10579,7 +10579,7 @@ pan_1378	blaCMY-48	ResFinder
 pan_4374	tet(O/W/32/O)	ResFinder
 pan_7677		
 pan_40	blaOXA-76	ResFinder
-pan_5640	kmr_1_ENA_ACB88605	ResFinder
+pan_5640	kmr_1	ResFinder
 pan_6137	vanX-B	ARGANNOT
 pan_1362	qnrB21	ResFinder
 pan_4943	aac(6)_Strep	AMRFinderPlus
@@ -10620,7 +10620,7 @@ pan_9	tet(W)	ResFinder
 pan_5087	tet(O)	AMRFinderPlus
 pan_10	blaSHV-12	ResFinder
 pan_308	dfrB6	ResFinder
-pan_4203	mecA_2_NC_002951	ResFinder
+pan_4203	mecA	ResFinder
 pan_3947	blaPDC-447	AMRFinderPlus
 pan_6123	tet(M)	AMRFinderPlus
 pan_7717	HEFA	MegaRes
@@ -10954,7 +10954,7 @@ pan_9177	blaOXY-6-9	AMRFinderPlus
 pan_7279	sul2	ResFinder
 pan_6661	CNRC	MegaRes
 pan_10538	blaOXA-1038	AMRFinderPlus
-pan_5340	tet(C)_1_NC_003123	ResFinder
+pan_5340	tet©	ResFinder
 pan_6105	ant(3)-Ia	AMRFinderPlus
 pan_866	blaVEB-7	ResFinder
 pan_4954	SITD	MegaRes
@@ -11005,7 +11005,7 @@ pan_7023	DSBA	MegaRes
 pan_10455		
 pan_826	blaSRT-1	ResFinder
 pan_193	blaCMY-117	ResFinder
-pan_1190	blaOXA-102_1_NZ_LWGP01000001	ResFinder
+pan_1190	blaOXA-102	ResFinder
 pan_5811	tet(D)	AMRFinderPlus
 pan_5450	catA1	ARGANNOT
 pan_10400		
@@ -11226,7 +11226,7 @@ pan_8157
 pan_6115	mecB	AMRFinderPlus
 pan_7472		
 pan_8527		
-pan_5302	mecA_1_NC_002745	ResFinder
+pan_5302	mecA	ResFinder
 pan_5244	aadA21	ARGANNOT
 pan_2792	blaADC-172	AMRFinderPlus
 pan_2145	blaACT-38	ARGANNOT
@@ -12982,7 +12982,7 @@ pan_5064	blaZ	ResFinder
 pan_5066	blaLEN-11	ARGANNOT
 pan_5069	blaZ	ResFinder
 pan_5071	VanC1XY	ResFinder
-pan_5072	blaZ_70_NZ_CUEK01000047	ResFinder
+pan_5072	blaZ	ResFinder
 pan_5073	VanC3XY	ResFinder
 pan_5078	blaZ	ResFinder
 pan_5082	aac(6)-Ib-AKT	AMRFinderPlus
@@ -12993,7 +12993,7 @@ pan_5094	qnrB44	ResFinder
 pan_5095	tet(Z)	AMRFinderPlus
 pan_5097	adeH	CARD
 pan_5100	blaZ	ResFinder
-pan_5104	blaZ_47_NZ_JYGF01000020	ResFinder
+pan_5104	blaZ	ResFinder
 pan_5105	aac(6)-Ib-G	AMRFinderPlus
 pan_5109	blaZ	ResFinder
 pan_5111	dfrA7	AMRFinderPlus
@@ -13127,7 +13127,7 @@ pan_5787	aac(6)-Iz	ARGANNOT
 pan_5804	aac(3)-I	AMRFinderPlus
 pan_5810	ant(4)-Ia	AMRFinderPlus
 pan_5815	vanS-D	ARGANNOT
-pan_582	erm(U)_1_NG_047843	ResFinder
+pan_582	erm(U)	ResFinder
 pan_5830	tet(L)	ResFinder
 pan_5837	tet(O/W)	ResFinder
 pan_5840	qnrB45	ResFinder
@@ -13167,7 +13167,7 @@ pan_5940	VanC2XY	ResFinder
 pan_5941	VanC2XY	ResFinder
 pan_5944	VanHMX	ResFinder
 pan_5945	VanHDX	ResFinder
-pan_5963	tet(O/32/O)_6_NG_048124	ResFinder
+pan_5963	tet(O/32/O)	ResFinder
 pan_5964	ZUPT	MegaRes
 pan_5966	YFEA	MegaRes
 pan_5978	MREA	MegaRes
@@ -13196,25 +13196,25 @@ pan_6153	aac(6)-Ib-G	AMRFinderPlus
 pan_6157	blaCMY-2b	ResFinder
 pan_6159	CRDS	MegaRes
 pan_6163	blaZ	ResFinder
-pan_6165	blaZ_58_NZ_JUUA01000057	ResFinder
+pan_6165	blaZ	ResFinder
 pan_6166	blaZ	ResFinder
 pan_6169	CEUE	MegaRes
 pan_6189	blaZ	ResFinder
 pan_618	ant(4)-IIb	ResFinder
 pan_6194	ACN	MegaRes
-pan_6207	aadA2_1_NC_010870	ResFinder
+pan_6207	aadA2	ResFinder
 pan_6208	blaZ	ResFinder
 pan_6209	blaZ	ResFinder
 pan_6210	blaZ	ResFinder
 pan_6211	blaZ	ResFinder
-pan_6212	blaZ_136_NZ_ALWE01000009	ResFinder
+pan_6212	blaZ	ResFinder
 pan_6213	blaZ	ResFinder
-pan_6214	blaZ_55_NZ_JVLY01000044	ResFinder
+pan_6214	blaZ	ResFinder
 pan_6215	blaZ	ResFinder
 pan_6216	blaZ	ResFinder
 pan_6221	blaZ	ResFinder
-pan_6222	blaZ_40_NZ_AZBT01000050	ResFinder
-pan_6223	blaZ_54_NZ_JVRB01000003	ResFinder
+pan_6222	blaZ	ResFinder
+pan_6223	blaZ	ResFinder
 pan_6224	blaZ	ResFinder
 pan_6226	aacA-STR-13	AMRFinderPlus
 pan_6229	aac(6)-If	AMRFinderPlus
@@ -13296,21 +13296,21 @@ pan_6507	ZRAS	MegaRes
 pan_6509	erm(41)	ARGANNOT
 pan_6516	aac(6)-Ip	AMRFinderPlus
 pan_6524	aac(6)-Ib-AGKT	AMRFinderPlus
-pan_6530	blaZ_51_NZ_JVWO01000108	ResFinder
+pan_6530	blaZ	ResFinder
 pan_6531	blaZ	ResFinder
 pan_6532	blaZ	ResFinder
 pan_6533	blaZ	ResFinder
-pan_6534	blaZ_52_NZ_JVWM01000127	ResFinder
+pan_6534	blaZ	ResFinder
 pan_6537	blaZ	ResFinder
 pan_6539	blaZ	ResFinder
-pan_6540	blaZ_122_NZ_AJGE01000057	ResFinder
+pan_6540	blaZ	ResFinder
 pan_6541	blaZ	ResFinder
 pan_6542	blaZ	ResFinder
 pan_6543	blaZ	ResFinder
 pan_6544	blaZ	ResFinder
 pan_6545	blaZ	ResFinder
 pan_6546	blaZ	ResFinder
-pan_6547	blaZ_43_NZ_CAVU010000015	ResFinder
+pan_6547	blaZ	ResFinder
 pan_6550	dfrA17	ARGANNOT
 pan_6552		
 pan_6562		
@@ -13329,16 +13329,16 @@ pan_6653	CZCR	MegaRes
 pan_6671	CORC	MegaRes
 pan_6672	CORS	MegaRes
 pan_6673	CORR	MegaRes
-pan_6675	blaZ_38_NZ_JEMM01000040	ResFinder
+pan_6675	blaZ	ResFinder
 pan_6676	blaZ	ResFinder
 pan_6677	blaZ	ResFinder
 pan_6678	blaZ	ResFinder
 pan_6679	blaZ	ResFinder
-pan_6680	blaZ_119_NZ_CANQ01000029	ResFinder
+pan_6680	blaZ	ResFinder
 pan_6681	blaZ	ResFinder
-pan_6682	blaZ_120_NZ_ALWG01000005	ResFinder
+pan_6682	blaZ	ResFinder
 pan_6685	blaZ	ResFinder
-pan_6688	blaZ_87_NZ_LRNC01000042	ResFinder
+pan_6688	blaZ	ResFinder
 pan_6689	blaZ	ResFinder
 pan_6690	blaZ	ResFinder
 pan_6691	blaZ	ResFinder
@@ -13363,12 +13363,12 @@ pan_6784	aac(6)_Strep	AMRFinderPlus
 pan_6804	mph(D)	ResFinder
 pan_6813	AIOS	MegaRes
 pan_6814	ALU1P	MegaRes
-pan_6818	blaZ_114_NC_013379	ResFinder
+pan_6818	blaZ	ResFinder
 pan_6819	blaZ	ResFinder
-pan_6820	blaZ_44_NZ_JWJJ01000015	ResFinder
+pan_6820	blaZ	ResFinder
 pan_6821	blaZ	ResFinder
 pan_6822	blaZ	ResFinder
-pan_6823	blaZ_62_NZ_JVOH01000023	ResFinder
+pan_6823	blaZ	ResFinder
 pan_6824	blaZ	ResFinder
 pan_6825	blaZ	ResFinder
 pan_6826	blaZ	ResFinder
@@ -13376,9 +13376,9 @@ pan_6827	nimE	ResFinder
 pan_6830	blaZ	ResFinder
 pan_6831	blaZ	ResFinder
 pan_6832	nimE	ResFinder
-pan_6833	blaZ_124_NC_013944	ResFinder
+pan_6833	blaZ	ResFinder
 pan_6834		
-pan_6840	blaZ_72_NZ_CUHG01000035	ResFinder
+pan_6840	blaZ	ResFinder
 pan_6842	blaA	ResFinder
 pan_6843	VanX_bc	ResFinder
 pan_6845	VanHDX	ResFinder
@@ -13386,7 +13386,7 @@ pan_6846	erm(A)	ResFinder
 pan_6851	blaZ	ResFinder
 pan_6860	blaZ	ResFinder
 pan_6862	blaZ	ResFinder
-pan_6868	blaZ_56_NZ_JUMU01000089	ResFinder
+pan_6868	blaZ	ResFinder
 pan_6888	sul4	ResFinder
 pan_6889	erm(V)	ResFinder
 pan_688	fosC2	ResFinder
@@ -13394,15 +13394,15 @@ pan_689	blaSHV-104	ResFinder
 pan_6903	blaZ	ResFinder
 pan_6904	blaZ	ResFinder
 pan_6905	blaZ	ResFinder
-pan_6907	blaZ_85_NZ_FHDT01000016	ResFinder
+pan_6907	blaZ	ResFinder
 pan_6908	PBRD	MegaRes
 pan_6909		
 pan_690	qnrC	ResFinder
-pan_6911	blaZ_67_NZ_CTTL01000039	ResFinder
+pan_6911	blaZ	ResFinder
 pan_6912	blaZ	ResFinder
-pan_6913	blaZ_134_NZ_AJGE01000047	ResFinder
-pan_6914	blaZ_69_NZ_CUHB01000033	ResFinder
-pan_6915	blaZ_68_NZ_CUHK01000055	ResFinder
+pan_6913	blaZ	ResFinder
+pan_6914	blaZ	ResFinder
+pan_6915	blaZ	ResFinder
 pan_6916	blaZ	ResFinder
 pan_6917	blaZ	ResFinder
 pan_6918	blaZ	ResFinder
@@ -13418,18 +13418,18 @@ pan_6953	MYMT	MegaRes
 pan_6959	SODA	MegaRes
 pan_6966	NIXA	MegaRes
 pan_6968	NIKC	MegaRes
-pan_6971	blaZ_123_NC_013653	ResFinder
+pan_6971	blaZ	ResFinder
 pan_6972	blaZ	ResFinder
 pan_6973	blaZ	ResFinder
 pan_6974	blaZ	ResFinder
-pan_6975	blaZ_71_NZ_CUGR01000082	ResFinder
-pan_6977	blaZ_116_NC_013348	ResFinder
+pan_6975	blaZ	ResFinder
+pan_6977	blaZ	ResFinder
 pan_6978	blaZ	ResFinder
 pan_6981	aac(6)-29a	ResFinder
 pan_6987	blaZ	ResFinder
 pan_6995	CZCCM	MegaRes
 pan_6998	blaZ	ResFinder
-pan_6999	blaZ_53_NZ_JUXQ01000001	ResFinder
+pan_6999	blaZ	ResFinder
 pan_7006	CTPG	MegaRes
 pan_7009	tet(O/W)	ResFinder
 pan_7012	tet(O/W)	ResFinder
@@ -13437,16 +13437,16 @@ pan_7019	aadA2b	ResFinder
 pan_7022	VanC2XY	ResFinder
 pan_7027	VanHAX_PT	ResFinder
 pan_7035	dldHA2X	ResFinder
-pan_7039	blaZ_60_NZ_JVML01000111	ResFinder
+pan_7039	blaZ	ResFinder
 pan_7040	blaZ	ResFinder
-pan_7041	blaZ_118_NC_004461	ResFinder
-pan_7042	blaZ_61_NZ_JVAT01000021	ResFinder
+pan_7041	blaZ	ResFinder
+pan_7042	blaZ	ResFinder
 pan_7043	blaZ	ResFinder
 pan_7044	blaZ	ResFinder
 pan_7045	blaZ	ResFinder
 pan_7046	blaZ	ResFinder
 pan_7055	blaZ	ResFinder
-pan_7056	blaZ_126_NC_013374	ResFinder
+pan_7056	blaZ	ResFinder
 pan_7057	blaZ	ResFinder
 pan_7059	blaZ	ResFinder
 pan_7060	aac(6)-29b	ResFinder
@@ -13454,10 +13454,10 @@ pan_7064	blaZ	ResFinder
 pan_7065	blaZ	ResFinder
 pan_7066	blaZ	ResFinder
 pan_7067	blaZ	ResFinder
-pan_7068	blaZ_59_NZ_JVBT01000063	ResFinder
-pan_7069	blaZ_63_NZ_JUMX01000103	ResFinder
+pan_7068	blaZ	ResFinder
+pan_7069	blaZ	ResFinder
 pan_7070	blaZ	ResFinder
-pan_7071	blaZ_57_NZ_JURP01000126	ResFinder
+pan_7071	blaZ	ResFinder
 pan_7073	vanS-B	ARGANNOT
 pan_7077	blaSHV-53	ARGANNOT
 pan_7078	qnrB45	ARGANNOT
